@@ -774,7 +774,11 @@
       appState.monthlyBudget = val >= 0 ? val : 10000;
       appState.setupDone = true;
       saveState();
-      document.getElementById("setupModal").classList.remove("open");
+      const setupModalEl = document.getElementById("setupModal");
+if (setupModalEl) {
+  setupModalEl.classList.remove("open", "active", "show");
+  setupModalEl.style.display = "none";
+}
       renderApp();
     }
 
