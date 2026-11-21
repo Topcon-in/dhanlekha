@@ -521,7 +521,7 @@
       <div class="brand">
         <div class="brand-badge">₹</div>
         <div>
-          <h1>DhanLekha Offline</h1>
+          <h1>DhanLekha</h1>
         </div>
       </div>
       <div class="top-actions">
@@ -625,7 +625,7 @@
   <div class="modal-backdrop" id="setupModal">
     <div class="modal">
       <button type="button" class="modal-close-btn" id="closeSetupModal" aria-label="Close popup">&times;</button>
-      <h3>👋 Welcome to DhanLekha Offline — Important Data Safety Notice</h3>
+      <h3>👋 Welcome to DhanLekha — Important Data Safety Notice</h3>
       <p>This app helps you track your <strong>monthly fixed payment/budget</strong>, daily earnings (with source), and daily expenses <strong>100% offline</strong> directly on your device.</p>
       <div class="warning-box">
         <strong>⚠️ Important Backup Warning:</strong><br />
@@ -937,7 +937,7 @@
 
     function exportBackupFile() {
       const payload = {
-        app: "DhanLekha Offline",
+        app: "DhanLekha",
         version: "1.0",
         exportedAt: new Date().toISOString(),
         data: appState
@@ -985,15 +985,15 @@
       const bodyEl = document.getElementById("infoModalBody");
 
       if (type === "about") {
-        titleEl.textContent = "About Us — DhanLekha Offline";
+        titleEl.textContent = "About Us — DhanLekha";
         bodyEl.innerHTML = `
-          <p><strong>DhanLekha Offline</strong> is a fast, distraction-free, and 100% offline-first personal finance and daily budget tracker built for individuals, students, and families.</p>
+          <p><strong>DhanLekha</strong> is a fast, distraction-free, and 100% offline-first personal finance and daily budget tracker built for individuals, students, and families.</p>
           <p>Our goal is to help everyday users record multiple daily income sources and expenses effortlessly, consolidating every transaction into clean Daily, Monthly, and Yearly summaries without complex accounting jargon or mandatory account sign-ups.</p>
         `;
       } else if (type === "privacy") {
         titleEl.textContent = "Privacy Policy (100% Local Data Guarantee)";
         bodyEl.innerHTML = `
-          <p><strong>1. Zero Server Data Collection:</strong> DhanLekha Offline does not collect, transmit, or store any of your financial records, income sources, expense notes, or personal details on any external server or cloud database.</p>
+          <p><strong>1. Zero Server Data Collection:</strong> DhanLekha does not collect, transmit, or store any of your financial records, income sources, expense notes, or personal details on any external server or cloud database.</p>
           <p><strong>2. Local Device Storage Only:</strong> All entries and budget configurations remain exclusively inside your device's local browser storage (<code>localStorage</code>).</p>
           <p><strong>3. Full User Ownership:</strong> You retain complete control over your records. You can export a full JSON backup file or delete entries at any time.</p>
         `;
@@ -1001,7 +1001,7 @@
         titleEl.textContent = "Terms of Use & Data Safety Guide";
         bodyEl.innerHTML = `
           <ul>
-            <li>DhanLekha Offline is provided as a personal budgeting and record-keeping utility.</li>
+            <li>DhanLekha is provided as a personal budgeting and record-keeping utility.</li>
             <li>Because all data is stored locally on your device, <strong>you are responsible for maintaining regular backups</strong> using the <em>Save Backup File</em> option before resetting your device, switching phones, or clearing browser storage.</li>
             <li>Use the <em>Export PDF / Print</em> button anytime to generate clean monthly or yearly statements for personal records.</li>
             <li>Before resetting your phone or clearing browser data, click <strong>Save Backup File</strong> to download your backup file and keep it in a safe place. Once resetting or clearing is done, return to DhanLekha and click <strong>Restore Backup</strong> to select that downloaded file your previous data will appear again.</li>
@@ -1010,7 +1010,7 @@
       } else {
         titleEl.textContent = "Contact & Support";
         bodyEl.innerHTML = `
-          <p>Have suggestions, feedback, or feature ideas to make DhanLekha Offline even more useful?</p>
+          <p>Have suggestions, feedback, or feature ideas to make DhanLekha even more useful?</p>
           <p><strong>Support Email:</strong> support@dhanlekha.app</p>
           <p><strong>Edition:</strong> Version 1.0 • Offline-First Release</p>
         `;
