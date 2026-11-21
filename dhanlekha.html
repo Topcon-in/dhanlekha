@@ -1238,54 +1238,6 @@ if (openTermsFromSetupBtn) {
     });
   }
 
-  if (window.jspdf && window.jspdf.jsPDF) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("DhanLekha Summary Report", 14, 20);
-    doc.setFontSize(12);
-    let y = 34;
-    textLines.forEach((line) => {
-      doc.text(line, 14, y);
-      y += 10;
-    });
-
-    const pdfBlob = doc.output("blob");
-    const pdfFile = new File([pdfBlob], "DhanLekha-Report.pdf", {
-      type: "application/pdf",
-    });
-
-    // 1. Mobile TWA/WebView mein Share/Save sheet try karega
-    if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
-      try {
-        await navigator.share({
-          files: [pdfFile],
-          title: "DhanLekha Report",
-        });
-        return;
-      } catch (err) {
-        if (err && err.name === "AbortError") return;
-      }
-    }
-
-    // 2. Naye tab / external viewer mein PDF kholne ki koshish
-    const blobUrl = URL.createObjectURL(pdfBlob);
-    const opened = window.open(blobUrl, "_blank");
-    if (!opened) {
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = "DhanLekha-Report.pdf";
-      a.target = "_blank";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
-  } else {
-    window.print();
-  }
-};
-})();
     window.shareDhanLekhaApp = async function (btnEl) {
   const url =
     (btnEl && btnEl.getAttribute("data-share-url")) ||
