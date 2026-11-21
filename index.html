@@ -1369,7 +1369,7 @@ if (openTermsFromSetupBtn) {
     const yTop = 126;
     const yBot = pageH - (yTop + 56);
 
-    ops.push(${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg);
+    ops.push`(${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg)`;
     ops.push(${x} ${yBot} ${boxW} 56 re f);
 
     ops.push(${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg);
