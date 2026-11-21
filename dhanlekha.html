@@ -529,7 +529,7 @@
         <button class="btn-warning" onclick="exportBackupFile()">💾 Save Backup File</button>
         <button class="btn-secondary" onclick="document.getElementById('importFileInput').click()">📂 Restore Backup</button>
         <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBackupFile(event)" />
-        <button class="btn-primary" onclick="window.print()">📄 Export PDF / Print</button>
+        <button class="btn-primary" type="button" onclick="openPdfPreview()">📄 Export PDF / Print</button>
       </div>
     </div>
   </header>
@@ -1062,6 +1062,75 @@ if (openTermsFromSetupBtn) {
     }
   });
 }
+    (function () {
+  const modalHtml = `
+    <div id="pdfPreviewModal" class="pdf-modal-backdrop" onclick="if(event.target===this)closePdfPreview()">
+      <div class="pdf-modal-box" id="pdfPrintArea">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <strong style="font-size:16px;">DhanLekha — PDF Preview</strong>
+          <button type="button" onclick="closePdfPreview()" style="background:#e2e8f0;color:#0f172a;padding:6px 10px;border-radius:8px;">✕</button>
+        </div>
+        <div id="pdfPreviewContent" class="pdf-preview-sheet"></div>
+        <div class="pdf-modal-actions" data-html2canvas-ignore="true">
+          <button type="button" class="btn-primary" onclick="downloadDirectPdf()">⬇️ Download PDF</button>
+          <button type="button" class="btn-secondary" style="color:#0f172a;background:#e2e8f0;" onclick="window.print()">🖨️ Print</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", modalHtml);
+
+  window.openPdfPreview = function () {
+    const budget = document.getElementById("cardBudget")?.textContent?.trim() || "₹0";
+    const income = document.getElementById("cardIncome")?.textContent?.trim() || "₹0";
+    const expense = document.getElementById("cardExpense")?.textContent?.trim() || "₹0";
+    const balance = document.getElementById("cardBalance")?.textContent?.trim() || "₹0";
+
+    document.getElementById("pdfPreviewContent").innerHTML = `
+      <p><strong>Report Date:</strong> ${new Date().toLocaleDateString("en-IN")}</p>
+      <p><strong>Monthly Budget:</strong> ${budget}</p>
+      <p><strong>Total Income:</strong> ${income}</p>
+      <p><strong>Total Expense:</strong> ${expense}</p>
+      <p><strong>Net Balance:</strong> ${balance}</p>
+    `;
+    document.getElementById("pdfPreviewModal").classList.add("active");
+  };
+
+  window.closePdfPreview = function () {
+    document.getElementById("pdfPreviewModal")?.classList.remove("active");
+  };
+
+  window.downloadDirectPdf = async function () {
+    const contentEl = document.getElementById("pdfPreviewContent");
+    const textLines = Array.from(contentEl.querySelectorAll("p")).map((p) => p.innerText);
+
+    if (!window.jspdf) {
+      await new Promise((resolve) => {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
+        s.onload = resolve;
+        s.onerror = resolve;
+        document.head.appendChild(s);
+      });
+    }
+
+    if (window.jspdf && window.jspdf.jsPDF) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("DhanLekha Summary Report", 14, 20);
+      doc.setFontSize(12);
+      let y = 34;
+      textLines.forEach((line) => {
+        doc.text(line, 14, y);
+        y += 10;
+      });
+      doc.save("DhanLekha-Report.pdf");
+    } else {
+      window.print();
+    }
+  };
+})();
   </script>
 </body>
 </html>
