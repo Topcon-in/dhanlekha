@@ -1286,6 +1286,61 @@ if (openTermsFromSetupBtn) {
   }
 };
 })();
+    window.shareDhanLekhaApp = async function (btnEl) {
+  const url =
+    (btnEl && btnEl.getAttribute("data-share-url")) ||
+    "https://dhanlekha-eypj.vercel.app/";
+  const labelEl = btnEl && btnEl.querySelector(".footer-share-label");
+
+  const showCopied = () => {
+    if (!labelEl) return;
+    const prev = labelEl.textContent;
+    labelEl.textContent = "Copied!";
+    setTimeout(() => {
+      labelEl.textContent = prev || "Share Link";
+    }, 1800);
+  };
+
+  const copyFallback = async () => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+        showCopied();
+        return;
+      }
+    } catch (_) {}
+
+    const ta = document.createElement("textarea");
+    ta.value = url;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand("copy");
+      showCopied();
+    } catch (_) {
+      prompt("Copy app link:", url);
+    }
+    ta.remove();
+  };
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "DhanLekha",
+        text: "DhanLekha app link:",
+        url: url,
+      });
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+    }
+  }
+
+  await copyFallback();
+};
   </script>
 </body>
 </html>
