@@ -778,10 +778,20 @@
       renderApp();
     }
 
-    function openBudgetModal() {
-      document.getElementById("initialBudgetInput").value = appState.monthlyBudget;
-      document.getElementById("setupModal").classList.add("open");
-    }
+   function openBudgetModal() {
+  const modal = document.getElementById("setupModal");
+  const input = document.getElementById("initialBudgetInput");
+  if (input && typeof appState !== "undefined") {
+    input.value = appState.monthlyBudget ?? "";
+  }
+  if (modal) {
+    modal.classList.remove("open");
+    modal.style.display = "";
+    void modal.offsetWidth;
+    modal.classList.add("open");
+    modal.style.display = "flex";
+  }
+}
 
     function populateYears() {
       const yearSelect = document.getElementById("yearPicker");
@@ -1078,7 +1088,7 @@ const closeSetupModalBtn = document.getElementById("closeSetupModal");
 if (closeSetupModalBtn && setupModalEl) {
   closeSetupModalBtn.addEventListener("click", () => {
     setupModalEl.classList.remove("open", "active", "show");
-    setupModalEl.style.display = "none";
+    setupModalEl.style.display = "";
   });
 }
 const termsSafetyCheck = document.getElementById("termsSafetyCheck");
