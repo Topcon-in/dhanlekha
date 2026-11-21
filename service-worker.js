@@ -1,4 +1,4 @@
-const CACHE_NAME = "dhanlekha-v5";
+const CACHE_NAME = "dhanlekha-v6";
 const ASSETS_TO_CACHE = [
   "./",
   "./dhanlekha.html",
