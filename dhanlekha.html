@@ -510,6 +510,54 @@
   transform: none;
   box-shadow: none;
 }
+    .pdf-modal-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.85);
+  z-index: 999;
+  padding: 12px;
+  overflow-y: auto;
+}
+.pdf-modal-backdrop.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pdf-modal-box {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+.pdf-modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.pdf-preview-sheet {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 10px;
+  background: #f8fafc;
+  font-size: 13px;
+}
+@media print {
+  body > *:not(#pdfPrintArea) {
+    display: none !important;
+  }
+  #pdfPrintArea {
+    display: block !important;
+    position: static !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+}
   </style>
   <link rel="manifest" href="./manifest.json" />
 <meta name="theme-color" content="#0f172a" />
