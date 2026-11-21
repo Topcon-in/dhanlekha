@@ -558,6 +558,27 @@
     color: #000000 !important;
   }
 }
+    .table-wrap,
+.entries-table-wrap,
+.history-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+@media (max-width: 600px) {
+  table th,
+  table td {
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+}
   </style>
   <link rel="manifest" href="./manifest.json" />
 <meta name="theme-color" content="#0f172a" />
