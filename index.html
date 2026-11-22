@@ -1398,7 +1398,7 @@ const headers = ["Date", "Source / Note", "Income", "Expense"];
 
     const rawAmt = r[5] || r.slice(3).find((cell) => /\d/.test(cell) && !/delete/i.test(cell)) || "";
 const numVal = Number(rawAmt.replace(/[^0-9.]/g, ""));
-const amtText = numVal > 0 ? Rs. ${numVal.toLocaleString("en-IN")} : "-";
+const amtText = numVal > 0 ? `Rs. ${numVal.toLocaleString("en-IN")}` : "-";
 
 const incomeVal = isIncome ? amtText : "-";
 const expenseVal = isExpense ? amtText : "-";
@@ -1419,7 +1419,7 @@ const vals = [
   ops.push("0.13 0.17 0.24 rg");
 }
 const font = cIdx === 2 || cIdx === 3 ? "/F2" : "/F1";
-ops.push(BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET);
+ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
           });
 
           curTop += rowH;
