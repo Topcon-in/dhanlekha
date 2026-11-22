@@ -1366,7 +1366,7 @@
       curTop += 14;
       const tableX = 36;
       const tableW = 523;
-     const colX = [36, 130, 310, 435];
+    const colX = [36, 130, 310, 435];
 const headers = ["Date", "Source / Note", "Income", "Expense"];
 
       ops.push("0.12 0.23 0.42 rg");
@@ -1396,7 +1396,7 @@ const headers = ["Date", "Source / Note", "Income", "Expense"];
           ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
           ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
 
-     const rawAmt = r.slice(3).find((cell) => /\d/.test(cell) && !/delete/i.test(cell)) || "";
+    const rawAmt = r[5] || r.slice(3).find((cell) => /\d/.test(cell) && !/delete/i.test(cell)) || "";
 const numVal = Number(rawAmt.replace(/[^0-9.]/g, ""));
 const amtText = numVal > 0 ? Rs. ${numVal.toLocaleString("en-IN")} : "-";
 
@@ -1405,13 +1405,13 @@ const expenseVal = isExpense ? amtText : "-";
 
 const vals = [
   r[0] || "-",
-  (r[3] || "-").slice(0, 28),
+  (r[3] || r[4] || "-").slice(0, 28),
   incomeVal,
   expenseVal,
 ];
 
           vals.forEach((v, cIdx) => {
-           if (cIdx === 2 && v !== "-") {
+         if (cIdx === 2 && v !== "-") {
   ops.push("0.06 0.55 0.32 rg");
 } else if (cIdx === 3 && v !== "-") {
   ops.push("0.78 0.16 0.16 rg");
