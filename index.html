@@ -1195,205 +1195,200 @@
       await copyFallback();
     };
 
-    window.downloadDhanLekhaPdf = function () {
-      const esc = (str) =>
-        String(str ?? "")
-          .replace(/\\/g, "\\\\")
-          .replace(/\(/g, "\\(")
-          .replace(/\)/g, "\\)")
-          .replace(/[^\x20-\x7E]/g, " ");
+   window.downloadDhanLekhaPdf = function () {
+  const esc = (str) =>
+    String(str ?? "")
+      .replace(/₹/g, "Rs. ")
+      .replace(/\\/g, "\\\\")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)")
+      .replace(/[^\x20-\x7E]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
 
-      const cleanText = (el, fallback = "") => {
-        const txt = (el && el.textContent ? el.textContent : fallback).trim();
-        return txt.replace(/\s+/g, " ");
-      };
+  const cleanText = (el, fallback = "") =>
+    (el && el.textContent ? el.textContent : fallback).replace(/\s+/g, " ").trim();
 
-      const summaryCards = Array.from(document.querySelectorAll(".summary-card, .stat-card, .card"));
-      const summaryPairs = [];
-      summaryCards.forEach((card) => {
-        const t = cleanText(card);
-        if (
-          t.includes("Monthly Budget") ||
-          t.includes("Total Income") ||
-          t.includes("Total Expense") ||
-          t.includes("Net Balance")
-        ) {
-          const lines = card.innerText
-            .split("\n")
-            .map((x) => x.trim())
-            .filter(Boolean);
-          if (lines.length >= 2) {
-            summaryPairs.push([lines[0], lines.slice(1).join(" ")]);
-          }
-        }
-      });
+  const isYearly =
+    currentView === "yearly" ||
+    document.getElementById("tabYearly")?.classList.contains("active");
 
-      const isYearly = currentView === "yearly";
-      const rows = [];
-      document.querySelectorAll("table tbody tr").forEach((tr) => {
-        const cols = Array.from(tr.querySelectorAll("td:not(.no-print)")).map((td) => cleanText(td));
-        if (cols.length) rows.push(cols);
-      });
+  const summaryPairs = [
+    ["Monthly Budget", cleanText(document.getElementById("cardBudget"), "Rs. 0")],
+    ["Total Income", cleanText(document.getElementById("cardIncome"), "Rs. 0")],
+    ["Total Expense", cleanText(document.getElementById("cardExpense"), "Rs. 0")],
+    ["Net Balance", cleanText(document.getElementById("cardBalance"), "Rs. 0")]
+  ];
 
-      const ops = [];
-      const pageH = 842;
-      const topY = (yFromTop) => pageH - yFromTop;
+  const rows = [];
+  document.querySelectorAll("#tableContainer table tbody tr").forEach((tr) => {
+    const cols = Array.from(tr.querySelectorAll("td:not(.no-print)")).map((td) =>
+      cleanText(td)
+    );
+    if (cols.length) rows.push(cols);
+  });
 
-      ops.push("0.06 0.13 0.25 rg");
-      ops.push("0 762 595 80 re f");
-      ops.push("1 1 1 rg");
-      ops.push("BT /F2 20 Tf 36 808 Td (DhanLekha - Financial Report) Tj ET");
-      ops.push("0.75 0.85 0.96 rg");
-      ops.push("BT /F1 10 Tf 36 786 Td (Generated: " + esc(new Date().toLocaleString()) + ") Tj ET");
+  const ops = [];
+  const pageH = 842;
+  const topY = (yFromTop) => pageH - yFromTop;
 
-      ops.push("0.09 0.15 0.24 rg");
-      ops.push("BT /F2 13 Tf 36 " + topY(112) + " Td (Summary Overview) Tj ET");
+  ops.push("0.06 0.13 0.25 rg");
+  ops.push("0 762 595 80 re f");
+  ops.push("1 1 1 rg");
+  ops.push("BT /F2 20 Tf 36 808 Td (DhanLekha - Financial Report) Tj ET");
+  ops.push("0.75 0.85 0.96 rg");
+  ops.push("BT /F1 10 Tf 36 786 Td (Generated: " + esc(new Date().toLocaleString()) + ") Tj ET");
+  ops.push("0.09 0.15 0.24 rg");
+  ops.push("BT /F2 13 Tf 36 " + topY(112) + " Td (Summary Overview) Tj ET");
 
-      const defaults = [
-        ["Monthly Budget", "Rs. 0", [0.94, 0.96, 1.0], [0.15, 0.39, 0.85]],
-        ["Total Income", "Rs. 0", [0.92, 0.99, 0.95], [0.06, 0.55, 0.32]],
-        ["Total Expense", "Rs. 0", [1.0, 0.94, 0.94], [0.78, 0.16, 0.16]],
-        ["Net Balance", "Rs. 0", [0.96, 0.95, 1.0], [0.39, 0.25, 0.78]]
-      ];
-      const cardMap = Object.fromEntries(summaryPairs);
-      const boxW = 124;
-      const boxGap = 9;
+  const defaults = [
+    ["Monthly Budget", "Rs. 0", [0.94, 0.96, 1.0], [0.15, 0.39, 0.85]],
+    ["Total Income", "Rs. 0", [0.92, 0.99, 0.95], [0.06, 0.55, 0.32]],
+    ["Total Expense", "Rs. 0", [1.0, 0.94, 0.94], [0.78, 0.16, 0.16]],
+    ["Net Balance", "Rs. 0", [0.96, 0.95, 1.0], [0.39, 0.25, 0.78]]
+  ];
 
-      defaults.forEach(([label, fallbackVal, fillRgb, accentRgb], idx) => {
-        const x = 36 + idx * (boxW + boxGap);
-        const yTop = 126;
-        const yBot = pageH - (yTop + 56);
-        ops.push(`${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg`);
-        ops.push(`${x} ${yBot} ${boxW} 56 re f`);
-        ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
-        ops.push(`${x} ${yBot + 52} ${boxW} 4 re f`);
-        ops.push("0.30 0.36 0.46 rg");
-        ops.push(`BT /F1 9 Tf ${x + 8} ${yBot + 34} Td (${esc(label)}) Tj ET`);
-        const valText = cardMap[label] || fallbackVal;
-        ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
-        ops.push(`BT /F2 12 Tf ${x + 8} ${yBot + 14} Td (${esc(valText)}) Tj ET`);
-      });
+  const cardMap = Object.fromEntries(summaryPairs);
+  const boxW = 124;
+  const boxGap = 9;
 
-      let curTop = 212;
-      const sectionTitle = isYearly ? "Yearly Monthly Summary" : "Transactions Statement";
-      ops.push("0.09 0.15 0.24 rg");
-      ops.push(`BT /F2 13 Tf 36 ${topY(curTop)} Td (${esc(sectionTitle)}) Tj ET`);
-      curTop += 14;
+  defaults.forEach(([label, fallbackVal, fillRgb, accentRgb], idx) => {
+    const x = 36 + idx * (boxW + boxGap);
+    const yTop = 126;
+    const yBot = pageH - (yTop + 56);
+    ops.push(`${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg`);
+    ops.push(`${x} ${yBot} ${boxW} 56 re f`);
+    ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
+    ops.push(`${x} ${yBot + 52} ${boxW} 4 re f`);
+    ops.push("0.30 0.36 0.46 rg");
+    ops.push(`BT /F1 9 Tf ${x + 8} ${yBot + 34} Td (${esc(label)}) Tj ET`);
+    const valText = cardMap[label] || fallbackVal;
+    ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
+    ops.push(`BT /F2 12 Tf ${x + 8} ${yBot + 14} Td (${esc(valText)}) Tj ET`);
+  });
 
-      const tableX = 36;
-      const tableW = 523;
-      const colX = isYearly ? [36, 175, 295, 415] : [36, 130, 310, 435];
-      const headers = isYearly
-        ? ["Month", "Income", "Expense", "Net Balance"]
-        : ["Date", "Source / Note", "Income", "Expense"];
+  let curTop = 212;
+  const sectionTitle = isYearly ? "Yearly Monthly Summary" : "Transactions Statement";
+  ops.push("0.09 0.15 0.24 rg");
+  ops.push(`BT /F2 13 Tf 36 ${topY(curTop)} Td (${esc(sectionTitle)}) Tj ET`);
+  curTop += 14;
 
-      ops.push("0.12 0.23 0.42 rg");
-      ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
-      ops.push("1 1 1 rg");
-      headers.forEach((h, i) => {
-        ops.push(`BT /F2 9.5 Tf ${colX[i] + 6} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
-      });
-      curTop += 22;
+  const tableX = 36;
+  const tableW = 523;
+  const colX = isYearly ? [36, 175, 295, 415] : [36, 130, 310, 435];
+  const headers = isYearly
+    ? ["Month", "Total Income", "Total Expense", "Net Balance"]
+    : ["Date", "Source / Note", "Income", "Expense"];
 
-      if (!rows.length) {
-        ops.push("0.98 0.99 1.0 rg");
-        ops.push(`${tableX} ${pageH - (curTop + 24)} ${tableW} 24 re f`);
-        ops.push("0.35 0.40 0.48 rg");
-        ops.push(`BT /F1 10 Tf ${tableX + 10} ${pageH - (curTop + 16)} Td (No transaction records found.) Tj ET`);
+  ops.push("0.12 0.23 0.42 rg");
+  ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
+  ops.push("1 1 1 rg");
+  headers.forEach((h, i) => {
+    ops.push(`BT /F2 9.5 Tf ${colX[i] + 6} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
+  });
+  curTop += 22;
+
+  if (!rows.length) {
+    ops.push("0.98 0.99 1.0 rg");
+    ops.push(`${tableX} ${pageH - (curTop + 24)} ${tableW} 24 re f`);
+    ops.push("0.35 0.40 0.48 rg");
+    ops.push(`BT /F1 10 Tf ${tableX + 10} ${pageH - (curTop + 16)} Td (No transaction records found.) Tj ET`);
+  } else {
+    rows.forEach((r, rIdx) => {
+      const rowH = 20;
+      if (curTop + rowH > 795) return;
+      const yBottom = pageH - (curTop + rowH);
+      ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
+      ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
+
+      let vals;
+      if (isYearly) {
+        // Yearly table columns: [0:Month, 1:Entries, 2:Budget, 3:Income, 4:Expense, 5:Net]
+        vals = [
+          (r[0] || "-").slice(0, 22),
+          r[3] || "Rs. 0",
+          r[4] || "Rs. 0",
+          r[5] || "Rs. 0"
+        ];
       } else {
-        rows.forEach((r, rIdx) => {
-          const rowH = 20;
-          if (curTop + rowH > 795) return;
-          const yBottom = pageH - (curTop + rowH);
-          ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
-          ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
-
-          let vals;
-          if (isYearly) {
-            vals = [
-              (r[0] || "-").slice(0, 22),
-              r[3] || "Rs. 0",
-              r[4] || "Rs. 0",
-              r[5] || "Rs. 0"
-            ];
-          } else {
-            const isIncome = (r[2] || "").toLowerCase().includes("income");
-            const isExpense = (r[2] || "").toLowerCase().includes("expense");
-            const rawAmt = r[5] || r.slice(3).find((cell) => /\d/.test(cell) && !/delete/i.test(cell)) || "";
-            const numVal = Number(rawAmt.replace(/[^0-9.]/g, ""));
-            const amtText = numVal > 0 ? `Rs. ${numVal.toLocaleString("en-IN")}` : "-";
-            const incomeVal = isIncome ? amtText : "-";
-            const expenseVal = isExpense ? amtText : "-";
-            vals = [
-              r[0] || "-",
-              (r[3] || r[4] || "-").slice(0, 28),
-              incomeVal,
-              expenseVal
-            ];
-          }
-
-          vals.forEach((v, cIdx) => {
-            if (cIdx === 2 && v !== "-") {
-              ops.push("0.06 0.55 0.32 rg");
-            } else if (cIdx === 3 && v !== "-") {
-              ops.push("0.78 0.16 0.16 rg");
-            } else {
-              ops.push("0.13 0.17 0.24 rg");
-            }
-            const font = cIdx === 2 || cIdx === 3 ? "/F2" : "/F1";
-            ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
-          });
-          curTop += rowH;
-        });
+        // Daily/Monthly columns: [0:Date, 1:Time, 2:Type, 3:Source, 4:Note, 5:Amount]
+        const isIncome = (r[2] || "").toLowerCase().includes("income");
+        const isExpense = (r[2] || "").toLowerCase().includes("expense");
+        const rawAmt = r[5] || "";
+        const numVal = Number(rawAmt.replace(/[^0-9.]/g, ""));
+        const amtText = numVal > 0 ? `Rs. ${numVal.toLocaleString("en-IN")}` : "-";
+        vals = [
+          r[0] || "-",
+          (r[3] || r[4] || "-").slice(0, 28),
+          isIncome ? amtText : "-",
+          isExpense ? amtText : "-"
+        ];
       }
 
-      ops.push("0.45 0.50 0.58 rg");
-      ops.push("BT /F1 8.5 Tf 36 28 Td (DhanLekha Report - Generated directly as PDF) Tj ET");
-
-      const streamContent = ops.join("\n");
-      const byteLen = new TextEncoder().encode(streamContent).length;
-      const pdfParts = [
-        "%PDF-1.4\n",
-        "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
-        "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
-        "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n",
-        "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
-        "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
-        `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`
-      ];
-
-      let offset = 0;
-      const offsets = [0];
-      pdfParts.forEach((part) => {
-        offsets.push(offset);
-        offset += new TextEncoder().encode(part).length;
+      vals.forEach((v, cIdx) => {
+        if (isYearly) {
+          if (cIdx === 1) ops.push("0.06 0.55 0.32 rg");
+          else if (cIdx === 2) ops.push("0.78 0.16 0.16 rg");
+          else if (cIdx === 3) ops.push("0.15 0.39 0.85 rg");
+          else ops.push("0.13 0.17 0.24 rg");
+        } else {
+          if (cIdx === 2 && v !== "-") ops.push("0.06 0.55 0.32 rg");
+          else if (cIdx === 3 && v !== "-") ops.push("0.78 0.16 0.16 rg");
+          else ops.push("0.13 0.17 0.24 rg");
+        }
+        const font = cIdx >= 1 && isYearly ? "/F2" : cIdx === 2 || cIdx === 3 ? "/F2" : "/F1";
+        ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
       });
+      curTop += rowH;
+    });
+  }
 
-      const xrefStart = offset;
-      let xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
-      for (let i = 1; i < offsets.length; i++) {
-        xref += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
-      }
+  ops.push("0.45 0.50 0.58 rg");
+  ops.push("BT /F1 8.5 Tf 36 28 Td (DhanLekha Report - Generated directly as PDF) Tj ET");
 
-      const trailer = `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
-      const pdfBlob = new Blob([...pdfParts, xref, trailer], { type: "application/pdf" });
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = "DhanLekha-Report.pdf";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
-    };
+  const streamContent = ops.join("\n");
+  const byteLen = new TextEncoder().encode(streamContent).length;
+  const pdfParts = [
+    "%PDF-1.4\n",
+    "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+    "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
+    "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n",
+    "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+    "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
+    `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`
+  ];
+
+  let offset = 0;
+  const offsets = [0];
+  pdfParts.forEach((part) => {
+    offsets.push(offset);
+    offset += new TextEncoder().encode(part).length;
+  });
+
+  const xrefStart = offset;
+  let xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
+  for (let i = 1; i < offsets.length; i++) {
+    xref += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+  }
+
+  const trailer = `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+  const pdfBlob = new Blob([...pdfParts, xref, trailer], { type: "application/pdf" });
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = isYearly ? "DhanLekha-Yearly-Report.pdf" : "DhanLekha-Report.pdf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+};
   </script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-      });
-    }
-  </script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+    });
+  }
+</script>
 </body>
 </html>
