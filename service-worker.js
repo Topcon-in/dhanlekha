@@ -1,6 +1,7 @@
-const CACHE_NAME = "dhanlekha-v6";
+const CACHE_NAME = "dhanlekha-v7";
 const ASSETS_TO_CACHE = [
   "./",
+  "./index.html",
   "./dhanlekha.html",
   "./manifest.json",
   "./icon-192.png",
@@ -17,19 +18,28 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+      )
     ).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).then((res) => {
-        const copy = res.clone();
+      if (cached) return cached;
+
+      return fetch(event.request).then((response) => {
+        if (!response || response.status !== 200 || response.type !== "basic") {
+          return response;
+        }
+
+        const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-        return res;
+        return response;
       });
     })
   );
