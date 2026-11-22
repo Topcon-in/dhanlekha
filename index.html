@@ -534,12 +534,14 @@
   </style>
 </head>
 <body>
-  <div id="dhanlekhaSplash" aria-hidden="true">
+ <div id="dhanlekhaSplash" aria-hidden="true">
+  <div class="dl-splash-ring"></div>
   <div class="dl-splash-mark">
     <span class="dl-glyph dl-rupee">₹</span>
     <span class="dl-glyph dl-letter-d">D</span>
   </div>
   <div class="dl-splash-title">DhanLekha</div>
+  <div class="dl-splash-sub">Smart Money Tracker</div>
 </div>
   <header>
     <div class="nav-wrap">
@@ -1409,29 +1411,40 @@ window.downloadDhanLekhaPdf = function () {
     });
   }
 </script>
-  <style>
+ <style>
   #dhanlekhaSplash {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: var(--bg, #0f172a);
+    background: radial-gradient(circle at 50% 42%, rgba(16, 185, 129, 0.14), rgba(56, 189, 248, 0.05) 45%, var(--bg, #0f172a) 78%);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 10px;
     opacity: 1;
-    transition: opacity 0.35s ease, visibility 0.35s ease;
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.55s ease;
     pointer-events: none;
   }
   #dhanlekhaSplash.dl-splash-hide {
     opacity: 0;
     visibility: hidden;
   }
+  .dl-splash-ring {
+    position: absolute;
+    width: 104px;
+    height: 104px;
+    border-radius: 28px;
+    border: 1.5px solid rgba(16, 185, 129, 0.45);
+    transform: translateY(-16px) scale(0.75);
+    opacity: 0;
+    animation: dlRingPulse 1.65s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
+  }
   .dl-splash-mark {
-    width: 76px;
-    height: 76px;
-    border-radius: 20px;
+    position: relative;
+    width: 82px;
+    height: 82px;
+    border-radius: 22px;
     background: linear-gradient(135deg, var(--primary, #10b981), var(--accent, #38bdf8));
     display: flex;
     align-items: center;
@@ -1439,44 +1452,63 @@ window.downloadDhanLekhaPdf = function () {
     gap: 2px;
     color: #06281e;
     font-weight: 800;
-    box-shadow: 0 14px 34px rgba(16, 185, 129, 0.25);
-    animation: dlMarkPop 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    box-shadow: 0 18px 42px rgba(16, 185, 129, 0.28);
+    transform: scale(0.84);
+    animation: dlMarkSettle 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
   .dl-glyph {
-    font-size: 32px;
+    font-size: 34px;
     line-height: 1;
     opacity: 0;
   }
   .dl-rupee {
-    transform: translateX(-18px) scale(0.75);
-    animation: dlRupeeIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.08s forwards;
+    transform: translateX(-28px) translateY(6px) rotate(-18deg) scale(0.65);
+    animation: dlRupeeArrive 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.12s forwards;
   }
   .dl-letter-d {
-    transform: translateX(18px) scale(0.75);
-    animation: dlLetterIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.16s forwards;
+    transform: translateX(28px) translateY(-6px) rotate(18deg) scale(0.65);
+    animation: dlLetterArrive 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.24s forwards;
   }
   .dl-splash-title {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
+    margin-top: 6px;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
     color: var(--text, #f8fafc);
     opacity: 0;
-    transform: translateY(8px);
-    animation: dlTitleIn 0.75s ease 0.32s forwards;
+    transform: translateY(10px);
+    animation: dlTitleReveal 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
   }
-  @keyframes dlMarkPop {
-    0% { transform: scale(0.86); }
-    65% { transform: scale(1.04); }
+  .dl-splash-sub {
+    font-size: 11.5px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--muted, #94a3b8);
+    opacity: 0;
+    transform: translateY(8px);
+    animation: dlSubReveal 0.85s ease 0.62s forwards;
+  }
+  @keyframes dlRingPulse {
+    0% { opacity: 0; transform: translateY(-16px) scale(0.75); }
+    45% { opacity: 0.7; }
+    100% { opacity: 0; transform: translateY(-16px) scale(1.28); }
+  }
+  @keyframes dlMarkSettle {
+    0% { transform: scale(0.84); }
+    55% { transform: scale(1.05); }
     100% { transform: scale(1); }
   }
-  @keyframes dlRupeeIn {
-    to { opacity: 1; transform: translateX(0) scale(1); }
+  @keyframes dlRupeeArrive {
+    to { opacity: 1; transform: translateX(0) translateY(0) rotate(0deg) scale(1); }
   }
-  @keyframes dlLetterIn {
-    to { opacity: 1; transform: translateX(0) scale(1); }
+  @keyframes dlLetterArrive {
+    to { opacity: 1; transform: translateX(0) translateY(0) rotate(0deg) scale(1); }
   }
-  @keyframes dlTitleIn {
-    to { opacity: 0.92; transform: translateY(0); }
+  @keyframes dlTitleReveal {
+    to { opacity: 0.96; transform: translateY(0); }
+  }
+  @keyframes dlSubReveal {
+    to { opacity: 0.85; transform: translateY(0); }
   }
   @media (prefers-reduced-motion: reduce) {
     #dhanlekhaSplash { display: none; }
@@ -1491,8 +1523,8 @@ window.downloadDhanLekhaPdf = function () {
         splash.classList.add("dl-splash-hide");
         setTimeout(function () {
           splash.remove();
-        }, 380);
-      }, 1150);
+        }, 580);
+      }, 1750);
     });
   })();
 </script>
