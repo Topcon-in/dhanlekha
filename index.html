@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DhanLekha — Monthly & Yearly Personal Money Tracker</title>
+  <link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0f172a">
   <style>
     :root {
       --bg: #0f172a;
@@ -1468,6 +1470,12 @@ ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`
 
       setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
     };
+  </script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>
