@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DhanLekha — Monthly & Yearly Personal Money Tracker</title>
-  <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#0f172a" />
   <style>
     :root {
       --bg: #0f172a;
@@ -21,14 +21,12 @@
       --accent: #38bdf8;
       --radius: 14px;
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -37,14 +35,12 @@
       display: flex;
       flex-direction: column;
     }
-
     header {
       background: rgba(30, 41, 59, 0.95);
       border-bottom: 1px solid var(--border);
       padding: 14px 16px;
       position: relative;
     }
-
     .nav-wrap {
       max-width: 1020px;
       margin: 0 auto;
@@ -52,13 +48,11 @@
       flex-direction: column;
       gap: 12px;
     }
-
     .brand {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
     .brand-badge {
       width: 36px;
       height: 36px;
@@ -71,26 +65,16 @@
       font-size: 18px;
       flex-shrink: 0;
     }
-
     .brand h1 {
       font-size: 18px;
       font-weight: 700;
     }
-
-    .brand span {
-      display: block;
-      font-size: 11px;
-      color: var(--primary);
-      font-weight: 600;
-    }
-
     .top-actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
       width: 100%;
     }
-
     button {
       cursor: pointer;
       border: none;
@@ -103,49 +87,46 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .btn-primary {
       background: var(--primary);
       color: #052e16;
     }
-    .btn-primary:hover { background: var(--primary-dark); color: #fff; }
-
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      color: #fff;
+    }
     .btn-secondary {
       background: var(--surface-2);
       color: var(--text);
       border: 1px solid var(--border);
     }
-    .btn-secondary:hover { border-color: var(--accent); }
-
+    .btn-secondary:hover {
+      border-color: var(--accent);
+    }
     .btn-warning {
       background: rgba(245, 158, 11, 0.16);
       color: #fbbf24;
       border: 1px solid rgba(245, 158, 11, 0.4);
     }
-
     @media (min-width: 640px) {
       header {
         padding: 14px 20px;
       }
-
       .nav-wrap {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
       }
-
       .top-actions {
         display: flex;
         flex-wrap: wrap;
         width: auto;
       }
-
       button {
         padding: 9px 14px;
         font-size: 13px;
       }
     }
-
     .btn-danger {
       background: rgba(239, 68, 68, 0.15);
       color: #fca5a5;
@@ -153,7 +134,6 @@
       padding: 5px 9px;
       font-size: 12px;
     }
-
     main {
       max-width: 1020px;
       width: 100%;
@@ -161,7 +141,6 @@
       padding: 0 16px;
       flex: 1;
     }
-
     .offline-banner {
       background: rgba(16, 185, 129, 0.12);
       border: 1px solid rgba(16, 185, 129, 0.35);
@@ -176,21 +155,18 @@
       gap: 8px;
       margin-bottom: 18px;
     }
-
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 14px;
       margin-bottom: 20px;
     }
-
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 16px;
     }
-
     .card-label {
       font-size: 12px;
       color: var(--muted);
@@ -199,17 +175,14 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .card-value {
       font-size: 24px;
       font-weight: 800;
     }
-
     .val-green { color: var(--primary); }
     .val-red { color: #f87171; }
     .val-blue { color: var(--accent); }
     .val-amber { color: #fbbf24; }
-
     .form-box {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -217,7 +190,6 @@
       padding: 18px;
       margin-bottom: 22px;
     }
-
     .form-box h2 {
       font-size: 16px;
       margin-bottom: 14px;
@@ -227,21 +199,18 @@
       flex-wrap: wrap;
       gap: 6px;
     }
-
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
       gap: 12px;
       align-items: end;
     }
-
     label {
       display: block;
       font-size: 12px;
       color: var(--muted);
       margin-bottom: 5px;
     }
-
     input, select {
       width: 100%;
       background: var(--bg);
@@ -252,11 +221,9 @@
       font-size: 14px;
       outline: none;
     }
-
     input:focus, select:focus {
       border-color: var(--primary);
     }
-
     .tabs-bar {
       display: flex;
       flex-wrap: wrap;
@@ -265,7 +232,6 @@
       gap: 12px;
       margin-bottom: 14px;
     }
-
     .tabs {
       display: flex;
       gap: 8px;
@@ -274,29 +240,23 @@
       border-radius: 12px;
       border: 1px solid var(--border);
     }
-
     .tab-btn {
       background: transparent;
       color: var(--muted);
       padding: 8px 14px;
       border-radius: 8px;
     }
-
     .tab-btn.active {
       background: var(--primary);
       color: #052e16;
     }
-
     .filter-controls {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       align-items: center;
     }
-
-    .table-wrap,
-    .entries-table-wrap,
-    .history-table-wrap {
+    .table-wrap {
       width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -304,20 +264,17 @@
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       min-width: 620px;
     }
-
     th, td {
       text-align: left;
       padding: 12px 14px;
       border-bottom: 1px solid var(--border);
       font-size: 13.5px;
     }
-
     th {
       background: rgba(15, 23, 42, 0.55);
       color: var(--muted);
@@ -325,9 +282,9 @@
       font-size: 12px;
       text-transform: uppercase;
     }
-
-    tr:last-child td { border-bottom: none; }
-
+    tr:last-child td {
+      border-bottom: none;
+    }
     .badge {
       display: inline-block;
       padding: 3px 9px;
@@ -335,24 +292,20 @@
       font-size: 11.5px;
       font-weight: 700;
     }
-
     .badge-in {
       background: rgba(16, 185, 129, 0.18);
       color: #34d399;
     }
-
     .badge-out {
       background: rgba(239, 68, 68, 0.18);
       color: #f87171;
     }
-
     .empty-state {
       text-align: center;
       padding: 32px 16px;
       color: var(--muted);
       font-size: 14px;
     }
-
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -363,9 +316,9 @@
       padding: 16px;
       z-index: 50;
     }
-
-    .modal-backdrop.open { display: flex; }
-
+    .modal-backdrop.open {
+      display: flex;
+    }
     .modal {
       position: relative;
       padding: 22px;
@@ -378,23 +331,19 @@
       max-height: 88vh;
       overflow-y: auto;
     }
-
     .modal h3 {
       font-size: 18px;
       margin-bottom: 10px;
     }
-
     .modal p, .modal li {
       font-size: 14px;
       color: #cbd5e1;
       margin-bottom: 10px;
     }
-
     .modal ul {
       padding-left: 18px;
       margin-bottom: 14px;
     }
-
     .warning-box {
       background: rgba(245, 158, 11, 0.14);
       border: 1px solid rgba(245, 158, 11, 0.45);
@@ -404,21 +353,18 @@
       font-size: 13.5px;
       margin: 12px 0;
     }
-
     .modal-actions {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
       margin-top: 16px;
     }
-
     footer {
       border-top: 1px solid var(--border);
       background: var(--surface);
       padding: 16px 20px;
       margin-top: 32px;
     }
-
     .footer-wrap {
       max-width: 1020px;
       margin: 0 auto;
@@ -430,21 +376,19 @@
       font-size: 13px;
       color: var(--muted);
     }
-
     .footer-links {
       display: flex;
       flex-wrap: wrap;
       gap: 14px;
     }
-
     .footer-links a {
       color: var(--accent);
       text-decoration: none;
       cursor: pointer;
     }
-
-    .footer-links a:hover { text-decoration: underline; }
-
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
     .modal-close-btn {
       position: absolute;
       top: 4px;
@@ -458,7 +402,6 @@
       color: inherit;
       z-index: 10;
     }
-
     .setup-check-row {
       display: flex;
       align-items: center;
@@ -468,18 +411,12 @@
       font-size: 13px;
       line-height: 1.4;
     }
-
     .setup-check-row input[type="checkbox"] {
       width: 16px;
       height: 16px;
       flex-shrink: 0;
       cursor: pointer;
     }
-
-    .setup-check-text {
-      white-space: nowrap;
-    }
-
     .terms-inline-link {
       background: transparent;
       border: none;
@@ -489,11 +426,9 @@
       text-decoration: underline;
       cursor: pointer;
     }
-
     .terms-inline-link:hover {
       color: #93c5fd;
     }
-
     #startTrackingBtn:disabled,
     #startTrackingBtn:disabled:hover,
     #startTrackingBtn:disabled:active {
@@ -504,7 +439,6 @@
       transform: none;
       box-shadow: none;
     }
-
     .pdf-modal-backdrop {
       display: none;
       position: fixed;
@@ -514,13 +448,11 @@
       padding: 12px;
       overflow-y: auto;
     }
-
     .pdf-modal-backdrop.active {
       display: flex;
       align-items: center;
       justify-content: center;
     }
-
     .pdf-modal-box {
       width: 100%;
       max-width: 520px;
@@ -530,14 +462,12 @@
       padding: 16px;
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
-
     .pdf-modal-actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       margin-top: 14px;
     }
-
     .pdf-preview-sheet {
       border: 1px solid #cbd5e1;
       border-radius: 8px;
@@ -546,7 +476,6 @@
       background: #f8fafc;
       font-size: 13px;
     }
-
     .footer-share-btn {
       display: inline-flex;
       align-items: center;
@@ -564,32 +493,34 @@
       cursor: pointer;
       vertical-align: middle;
     }
-
     .footer-share-btn:active {
       background: rgba(30, 41, 59, 0.95);
       color: #ffffff;
     }
-
     @media (max-width: 600px) {
-      table th,
-      table td {
+      table th, table td {
         padding: 8px 6px !important;
         font-size: 12px !important;
         white-space: nowrap;
       }
     }
-
     @media print {
       header, .form-box, .tabs-bar, .offline-banner, footer, .no-print {
         display: none !important;
       }
-      body { background: #fff; color: #000; }
+      body {
+        background: #fff;
+        color: #000;
+      }
       .card, .table-wrap {
         background: #fff;
         color: #000;
         border: 1px solid #ccc;
       }
-      th, td { color: #000; border-bottom: 1px solid #ddd; }
+      th, td {
+        color: #000;
+        border-bottom: 1px solid #ddd;
+      }
       body > *:not(#pdfPrintArea) {
         display: none !important;
       }
@@ -601,11 +532,8 @@
       }
     }
   </style>
-  <link rel="manifest" href="./manifest.json" />
-  <meta name="theme-color" content="#0f172a" />
 </head>
 <body>
-
   <header>
     <div class="nav-wrap">
       <div class="brand">
@@ -615,11 +543,11 @@
         </div>
       </div>
       <div class="top-actions">
-        <button class="btn-secondary" onclick="openBudgetModal()">⚙️ Set Monthly Budget</button>
-        <button class="btn-warning" onclick="exportBackupFile()">💾 Save Backup File</button>
-        <button class="btn-secondary" onclick="document.getElementById('importFileInput').click()">📂 Restore Backup</button>
+        <button type="button" class="btn-secondary" onclick="openBudgetModal()">⚙️ Set Monthly Budget</button>
+        <button type="button" class="btn-warning" onclick="exportBackupFile()">💾 Save Backup File</button>
+        <button type="button" class="btn-secondary" onclick="document.getElementById('importFileInput').click()">📂 Restore Backup</button>
         <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBackupFile(event)" />
-        <button class="btn-primary" type="button" onclick="downloadDhanLekhaPdf()">Download PDF</button>
+        <button type="button" class="btn-primary" onclick="downloadDhanLekhaPdf()">Download PDF</button>
       </div>
     </div>
   </header>
@@ -683,11 +611,10 @@
 
     <div class="tabs-bar">
       <div class="tabs">
-        <button class="tab-btn active" id="tabToday" onclick="switchView('today')">Today</button>
-        <button class="tab-btn" id="tabMonthly" onclick="switchView('monthly')">Monthly View</button>
-        <button class="tab-btn" id="tabYearly" onclick="switchView('yearly')">Yearly View</button>
+        <button type="button" class="tab-btn active" id="tabToday" onclick="switchView('today')">Today</button>
+        <button type="button" class="tab-btn" id="tabMonthly" onclick="switchView('monthly')">Monthly View</button>
+        <button type="button" class="tab-btn" id="tabYearly" onclick="switchView('yearly')">Yearly View</button>
       </div>
-
       <div class="filter-controls">
         <div id="monthFilterWrap">
           <input type="month" id="monthPicker" onchange="renderApp()" />
@@ -709,12 +636,7 @@
         <a onclick="openInfoModal('privacy')">Privacy Policy</a>
         <a onclick="openInfoModal('terms')">Terms &amp; Safety Guide</a>
         <a onclick="openInfoModal('contact')">Contact &amp; Support</a>
-        <button
-          type="button"
-          class="footer-share-btn"
-          data-share-url="https://dhanlekha-eypj.vercel.app/"
-          onclick="shareDhanLekhaApp(this)"
-        >
+        <button type="button" class="footer-share-btn" data-share-url="https://dhanlekha-eypj.vercel.app/" onclick="shareDhanLekhaApp(this)">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="18" cy="5" r="3"></circle>
             <circle cx="6" cy="12" r="3"></circle>
@@ -742,9 +664,7 @@
       <div class="setup-check-row">
         <input type="checkbox" id="termsSafetyCheck" />
         <span class="setup-check-text">
-          Please check
-          <button type="button" class="terms-inline-link" id="openTermsFromSetup">Terms &amp; Safety Guide</button>
-          first before proceeding.
+          Please check <button type="button" class="terms-inline-link" id="openTermsFromSetup">Terms &amp; Safety Guide</button> first before proceeding.
         </span>
       </div>
       <div class="modal-actions">
@@ -758,30 +678,30 @@
       <h3 id="infoModalTitle">Information</h3>
       <div id="infoModalBody"></div>
       <div class="modal-actions">
-        <button class="btn-primary" onclick="closeInfoModal()">Close</button>
+        <button type="button" class="btn-primary" onclick="closeInfoModal()">Close</button>
       </div>
     </div>
   </div>
 
   <script>
     const STORAGE_KEY = "dhanlekha_offline_v1";
-
-    let appState = {
-      setupDone: false,
-      monthlyBudget: 10000,
-      entries: []
-    };
-
+    let appState = { setupDone: false, monthlyBudget: 10000, entries: [] };
     let currentView = "today";
+
+    function toSafeNumber(val, fallback = 0) {
+      const n = Number(val);
+      return Number.isFinite(n) ? n : fallback;
+    }
 
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
+          const budget = toSafeNumber(parsed.monthlyBudget, 10000);
           appState = {
             setupDone: Boolean(parsed.setupDone),
-            monthlyBudget: Number(parsed.monthlyBudget) || 10000,
+            monthlyBudget: budget >= 0 ? budget : 10000,
             entries: Array.isArray(parsed.entries) ? parsed.entries : []
           };
         }
@@ -791,7 +711,11 @@
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (e) {
+        console.error("Storage write error:", e);
+      }
     }
 
     function getTodayISO() {
@@ -801,34 +725,37 @@
     }
 
     function formatINR(num) {
-      return "₹" + Number(num || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+      return "₹" + toSafeNumber(num, 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
     }
 
     function escapeHTML(str) {
-      return String(str || "")
+      return String(str ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
     function initApp() {
       loadState();
       const today = getTodayISO();
-      document.getElementById("entryDate").value = today;
-      document.getElementById("monthPicker").value = today.slice(0, 7);
+      const entryDateEl = document.getElementById("entryDate");
+      const monthPickerEl = document.getElementById("monthPicker");
+      if (entryDateEl) entryDateEl.value = today;
+      if (monthPickerEl) monthPickerEl.value = today.slice(0, 7);
       populateYears();
-
       if (!appState.setupDone) {
-        document.getElementById("initialBudgetInput").value = appState.monthlyBudget;
+        const initBudgetEl = document.getElementById("initialBudgetInput");
+        if (initBudgetEl) initBudgetEl.value = appState.monthlyBudget;
         openBudgetModal();
       }
-
       renderApp();
     }
 
     function completeFirstSetup() {
-      const val = Number(document.getElementById("initialBudgetInput").value);
+      const inputEl = document.getElementById("initialBudgetInput");
+      const val = toSafeNumber(inputEl ? inputEl.value : 10000, 10000);
       appState.monthlyBudget = val >= 0 ? val : 10000;
       appState.setupDone = true;
       saveState();
@@ -844,7 +771,7 @@
       const modal = document.getElementById("setupModal");
       const input = document.getElementById("initialBudgetInput");
       if (input && typeof appState !== "undefined") {
-        input.value = appState.monthlyBudget ?? "";
+        input.value = appState.monthlyBudget ?? 10000;
       }
       if (modal) {
         modal.classList.remove("open");
@@ -857,15 +784,17 @@
 
     function populateYears() {
       const yearSelect = document.getElementById("yearPicker");
+      if (!yearSelect) return;
       const currentYear = new Date().getFullYear();
       const years = new Set([currentYear, currentYear - 1, currentYear + 1]);
-      appState.entries.forEach(item => {
+      appState.entries.forEach((item) => {
         if (item.date && item.date.length >= 4) {
-          years.add(Number(item.date.slice(0, 4)));
+          const parsedYear = Number(item.date.slice(0, 4));
+          if (Number.isInteger(parsedYear)) years.add(parsedYear);
         }
       });
       const sorted = Array.from(years).sort((a, b) => b - a);
-      yearSelect.innerHTML = sorted.map(y => `<option value="${y}">${y}</option>`).join("");
+      yearSelect.innerHTML = sorted.map((y) => `<option value="${y}">${y}</option>`).join("");
       yearSelect.value = String(currentYear);
     }
 
@@ -876,8 +805,7 @@
       const source = document.getElementById("entrySource").value.trim();
       const date = document.getElementById("entryDate").value;
       const note = document.getElementById("entryNote").value.trim();
-
-      if (!amount || amount <= 0 || !source || !date) return;
+      if (!Number.isFinite(amount) || amount <= 0 || !source || !date) return;
 
       const currentTime = new Date().toLocaleTimeString("en-IN", {
         hour: "2-digit",
@@ -887,7 +815,7 @@
 
       appState.entries.unshift({
         id: Date.now() + "_" + Math.random().toString(36).slice(2, 7),
-        type,
+        type: type === "income" ? "income" : "expense",
         amount,
         source,
         date,
@@ -905,8 +833,9 @@
 
     function deleteEntry(id) {
       if (!confirm("Are you sure you want to delete this entry?")) return;
-      appState.entries = appState.entries.filter(item => item.id !== id);
+      appState.entries = appState.entries.filter((item) => String(item.id) !== String(id));
       saveState();
+      populateYears();
       renderApp();
     }
 
@@ -915,10 +844,8 @@
       document.getElementById("tabToday").classList.toggle("active", view === "today");
       document.getElementById("tabMonthly").classList.toggle("active", view === "monthly");
       document.getElementById("tabYearly").classList.toggle("active", view === "yearly");
-
-      document.getElementById("monthFilterWrap").style.display = (view === "monthly") ? "block" : "none";
-      document.getElementById("yearFilterWrap").style.display = (view === "yearly") ? "block" : "none";
-
+      document.getElementById("monthFilterWrap").style.display = view === "monthly" ? "block" : "none";
+      document.getElementById("yearFilterWrap").style.display = view === "yearly" ? "block" : "none";
       renderApp();
     }
 
@@ -931,30 +858,29 @@
       let budgetDisplay = appState.monthlyBudget;
 
       if (currentView === "today") {
-        filtered = appState.entries.filter(e => e.date === today);
+        filtered = appState.entries.filter((e) => e.date === today);
       } else if (currentView === "monthly") {
-        filtered = appState.entries.filter(e => e.date && e.date.startsWith(selectedMonth));
+        filtered = appState.entries.filter((e) => e.date && e.date.startsWith(selectedMonth));
       } else {
-        filtered = appState.entries.filter(e => e.date && e.date.startsWith(selectedYear));
+        filtered = appState.entries.filter((e) => e.date && e.date.startsWith(selectedYear));
         budgetDisplay = appState.monthlyBudget * 12;
       }
 
       let totalIncome = 0;
       let totalExpense = 0;
-      filtered.forEach(item => {
-        if (item.type === "income") totalIncome += item.amount;
-        else totalExpense += item.amount;
+      filtered.forEach((item) => {
+        const amt = toSafeNumber(item.amount, 0);
+        if (item.type === "income") totalIncome += amt;
+        else totalExpense += amt;
       });
 
-      const netBudgetLeft = (budgetDisplay + totalIncome) - totalExpense;
-
+      const netBudgetLeft = budgetDisplay + totalIncome - totalExpense;
       document.getElementById("cardBudget").textContent = formatINR(budgetDisplay);
       document.getElementById("cardIncome").textContent = formatINR(totalIncome);
       document.getElementById("cardExpense").textContent = formatINR(totalExpense);
       document.getElementById("cardBalance").textContent = formatINR(netBudgetLeft);
 
       const container = document.getElementById("tableContainer");
-
       if (currentView === "yearly") {
         renderYearlyTable(container, selectedYear);
         return;
@@ -965,25 +891,29 @@
         return;
       }
 
-      const rows = filtered.map(item => `
-        <tr>
-          <td>${escapeHTML(item.date)}</td>
-          <td>${escapeHTML(item.time || "-")}</td>
-          <td>
-            <span class="badge ${item.type === "income" ? "badge-in" : "badge-out"}">
-              ${item.type === "income" ? "+ Income" : "- Expense"}
-            </span>
-          </td>
-          <td><strong>${escapeHTML(item.source)}</strong></td>
-          <td>${escapeHTML(item.note || "—")}</td>
-          <td style="font-weight:700; color:${item.type === "income" ? "#34d399" : "#f87171"};">
-            ${item.type === "income" ? "+" : "-"}${formatINR(item.amount)}
-          </td>
-          <td class="no-print">
-            <button class="btn-danger" onclick="deleteEntry('${item.id}')">Delete</button>
-          </td>
-        </tr>
-      `).join("");
+      const rows = filtered.map((item) => {
+        const isInc = item.type === "income";
+        const safeId = encodeURIComponent(String(item.id ?? ""));
+        return `
+          <tr>
+            <td>${escapeHTML(item.date)}</td>
+            <td>${escapeHTML(item.time || "-")}</td>
+            <td>
+              <span class="badge ${isInc ? "badge-in" : "badge-out"}">
+                ${isInc ? "+ Income" : "- Expense"}
+              </span>
+            </td>
+            <td><strong>${escapeHTML(item.source)}</strong></td>
+            <td>${escapeHTML(item.note || "—")}</td>
+            <td style="font-weight:700; color:${isInc ? "#34d399" : "#f87171"};">
+              ${isInc ? "+" : "-"}${formatINR(item.amount)}
+            </td>
+            <td class="no-print">
+              <button type="button" class="btn-danger" onclick="deleteEntry(decodeURIComponent('${safeId}'))">Delete</button>
+            </td>
+          </tr>
+        `;
+      }).join("");
 
       container.innerHTML = `
         <table>
@@ -1008,24 +938,21 @@
         "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
       ];
-
       const rows = monthNames.map((name, idx) => {
         const mNum = String(idx + 1).padStart(2, "0");
         const prefix = `${year}-${mNum}`;
-        const mEntries = appState.entries.filter(e => e.date && e.date.startsWith(prefix));
-
+        const mEntries = appState.entries.filter((e) => e.date && e.date.startsWith(prefix));
         let inc = 0;
         let exp = 0;
-        mEntries.forEach(e => {
-          if (e.type === "income") inc += e.amount;
-          else exp += e.amount;
+        mEntries.forEach((e) => {
+          const amt = toSafeNumber(e.amount, 0);
+          if (e.type === "income") inc += amt;
+          else exp += amt;
         });
-
-        const net = (appState.monthlyBudget + inc) - exp;
-
+        const net = appState.monthlyBudget + inc - exp;
         return `
           <tr>
-            <td><strong>${name} ${year}</strong></td>
+            <td><strong>${name} ${escapeHTML(year)}</strong></td>
             <td>${mEntries.length} entries</td>
             <td>${formatINR(appState.monthlyBudget)}</td>
             <td style="color:#34d399; font-weight:600;">${formatINR(inc)}</td>
@@ -1064,25 +991,28 @@
       const a = document.createElement("a");
       a.href = url;
       a.download = `DhanLekha_Backup_${getTodayISO()}.json`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
     }
 
     function importBackupFile(event) {
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         try {
           const parsed = JSON.parse(e.target.result);
-          const imported = parsed.data ? parsed.data : parsed;
-          if (!Array.isArray(imported.entries)) {
+          const imported = parsed && parsed.data ? parsed.data : parsed;
+          if (!imported || !Array.isArray(imported.entries)) {
             alert("Invalid DhanLekha backup file. Please select a valid .json backup.");
             return;
           }
+          const budget = toSafeNumber(imported.monthlyBudget, 10000);
           appState = {
             setupDone: true,
-            monthlyBudget: Number(imported.monthlyBudget) || 10000,
+            monthlyBudget: budget >= 0 ? budget : 10000,
             entries: imported.entries
           };
           saveState();
@@ -1100,7 +1030,6 @@
     function openInfoModal(type) {
       const titleEl = document.getElementById("infoModalTitle");
       const bodyEl = document.getElementById("infoModalBody");
-
       if (type === "about") {
         titleEl.textContent = "About Us — DhanLekha";
         bodyEl.innerHTML = `
@@ -1120,8 +1049,8 @@
           <ul>
             <li>DhanLekha is provided as a personal budgeting and record-keeping utility.</li>
             <li>Because all data is stored locally on your device, <strong>you are responsible for maintaining regular backups</strong> using the <em>Save Backup File</em> option before resetting your device, switching phones, or clearing browser storage.</li>
-            <li>Use the <em>Export PDF / Print</em> button anytime to generate clean monthly or yearly statements for personal records.</li>
-            <li>Before resetting your phone or clearing browser data, click <strong>Save Backup File</strong> to download your backup file and keep it in a safe place. Once resetting or clearing is done, return to DhanLekha and click <strong>Restore Backup</strong> to select that downloaded file your previous data will appear again.</li>
+            <li>Use the <em>Download PDF</em> button anytime to generate clean statements for personal records.</li>
+            <li>Before resetting your phone or clearing browser data, click <strong>Save Backup File</strong> to download your backup file and keep it in a safe place. Once resetting or clearing is done, return to DhanLekha and click <strong>Restore Backup</strong> to select that downloaded file so your previous data appears again.</li>
           </ul>
         `;
       } else {
@@ -1132,7 +1061,6 @@
           <p><strong>Edition:</strong> Version 1.0 • Offline-First Release</p>
         `;
       }
-
       document.getElementById("infoModal").classList.add("open");
     }
 
@@ -1144,7 +1072,6 @@
 
     const setupModalEl = document.getElementById("setupModal");
     const closeSetupModalBtn = document.getElementById("closeSetupModal");
-
     if (closeSetupModalBtn && setupModalEl) {
       closeSetupModalBtn.addEventListener("click", () => {
         setupModalEl.classList.remove("open", "active", "show");
@@ -1154,15 +1081,12 @@
 
     const termsSafetyCheck = document.getElementById("termsSafetyCheck");
     const startTrackingBtn = document.getElementById("startTrackingBtn");
-
     if (termsSafetyCheck && startTrackingBtn) {
       const syncStartBtnState = () => {
         startTrackingBtn.disabled = !termsSafetyCheck.checked;
       };
-
       syncStartBtnState();
       termsSafetyCheck.addEventListener("change", syncStartBtnState);
-
       startTrackingBtn.addEventListener("click", (event) => {
         if (!termsSafetyCheck.checked) {
           event.preventDefault();
@@ -1172,7 +1096,6 @@
     }
 
     const openTermsFromSetupBtn = document.getElementById("openTermsFromSetup");
-
     if (openTermsFromSetupBtn) {
       openTermsFromSetupBtn.addEventListener("click", (event) => {
         event.preventDefault();
@@ -1206,13 +1129,12 @@
         const income = document.getElementById("cardIncome")?.textContent?.trim() || "₹0";
         const expense = document.getElementById("cardExpense")?.textContent?.trim() || "₹0";
         const balance = document.getElementById("cardBalance")?.textContent?.trim() || "₹0";
-
         document.getElementById("pdfPreviewContent").innerHTML = `
           <p><strong>Report Date:</strong> ${new Date().toLocaleDateString("en-IN")}</p>
-          <p><strong>Monthly Budget:</strong> ${budget}</p>
-          <p><strong>Total Income:</strong> ${income}</p>
-          <p><strong>Total Expense:</strong> ${expense}</p>
-          <p><strong>Net Balance:</strong> ${balance}</p>
+          <p><strong>Budget:</strong> ${escapeHTML(budget)}</p>
+          <p><strong>Total Income:</strong> ${escapeHTML(income)}</p>
+          <p><strong>Total Expense:</strong> ${escapeHTML(expense)}</p>
+          <p><strong>Net Balance:</strong> ${escapeHTML(balance)}</p>
         `;
         document.getElementById("pdfPreviewModal").classList.add("active");
       };
@@ -1223,11 +1145,8 @@
     })();
 
     window.shareDhanLekhaApp = async function (btnEl) {
-      const url =
-        (btnEl && btnEl.getAttribute("data-share-url")) ||
-        "https://dhanlekha-eypj.vercel.app/";
+      const url = (btnEl && btnEl.getAttribute("data-share-url")) || "https://dhanlekha-eypj.vercel.app/";
       const labelEl = btnEl && btnEl.querySelector(".footer-share-label");
-
       const showCopied = () => {
         if (!labelEl) return;
         const prev = labelEl.textContent;
@@ -1245,7 +1164,6 @@
             return;
           }
         } catch (_) {}
-
         const ta = document.createElement("textarea");
         ta.value = url;
         ta.setAttribute("readonly", "");
@@ -1267,14 +1185,13 @@
           await navigator.share({
             title: "DhanLekha",
             text: "DhanLekha app link:",
-            url: url,
+            url: url
           });
           return;
         } catch (err) {
           if (err && err.name === "AbortError") return;
         }
       }
-
       await copyFallback();
     };
 
@@ -1311,6 +1228,7 @@
         }
       });
 
+      const isYearly = currentView === "yearly";
       const rows = [];
       document.querySelectorAll("table tbody tr").forEach((tr) => {
         const cols = Array.from(tr.querySelectorAll("td:not(.no-print)")).map((td) => cleanText(td));
@@ -1323,7 +1241,6 @@
 
       ops.push("0.06 0.13 0.25 rg");
       ops.push("0 762 595 80 re f");
-
       ops.push("1 1 1 rg");
       ops.push("BT /F2 20 Tf 36 808 Td (DhanLekha - Financial Report) Tj ET");
       ops.push("0.75 0.85 0.96 rg");
@@ -1336,9 +1253,8 @@
         ["Monthly Budget", "Rs. 0", [0.94, 0.96, 1.0], [0.15, 0.39, 0.85]],
         ["Total Income", "Rs. 0", [0.92, 0.99, 0.95], [0.06, 0.55, 0.32]],
         ["Total Expense", "Rs. 0", [1.0, 0.94, 0.94], [0.78, 0.16, 0.16]],
-        ["Net Balance", "Rs. 0", [0.96, 0.95, 1.0], [0.39, 0.25, 0.78]],
+        ["Net Balance", "Rs. 0", [0.96, 0.95, 1.0], [0.39, 0.25, 0.78]]
       ];
-
       const cardMap = Object.fromEntries(summaryPairs);
       const boxW = 124;
       const boxGap = 9;
@@ -1347,38 +1263,36 @@
         const x = 36 + idx * (boxW + boxGap);
         const yTop = 126;
         const yBot = pageH - (yTop + 56);
-
         ops.push(`${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg`);
         ops.push(`${x} ${yBot} ${boxW} 56 re f`);
         ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
         ops.push(`${x} ${yBot + 52} ${boxW} 4 re f`);
-
         ops.push("0.30 0.36 0.46 rg");
         ops.push(`BT /F1 9 Tf ${x + 8} ${yBot + 34} Td (${esc(label)}) Tj ET`);
-
         const valText = cardMap[label] || fallbackVal;
         ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
         ops.push(`BT /F2 12 Tf ${x + 8} ${yBot + 14} Td (${esc(valText)}) Tj ET`);
       });
 
       let curTop = 212;
+      const sectionTitle = isYearly ? "Yearly Monthly Summary" : "Transactions Statement";
       ops.push("0.09 0.15 0.24 rg");
-      ops.push(`BT /F2 13 Tf 36 ${topY(curTop)} Td (Transactions Statement) Tj ET`);
-
+      ops.push(`BT /F2 13 Tf 36 ${topY(curTop)} Td (${esc(sectionTitle)}) Tj ET`);
       curTop += 14;
+
       const tableX = 36;
       const tableW = 523;
-    const colX = [36, 130, 310, 435];
-const headers = ["Date", "Source / Note", "Income", "Expense"];
+      const colX = isYearly ? [36, 175, 295, 415] : [36, 130, 310, 435];
+      const headers = isYearly
+        ? ["Month", "Income", "Expense", "Net Balance"]
+        : ["Date", "Source / Note", "Income", "Expense"];
 
       ops.push("0.12 0.23 0.42 rg");
       ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
-
       ops.push("1 1 1 rg");
       headers.forEach((h, i) => {
         ops.push(`BT /F2 9.5 Tf ${colX[i] + 6} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
       });
-
       curTop += 22;
 
       if (!rows.length) {
@@ -1386,44 +1300,49 @@ const headers = ["Date", "Source / Note", "Income", "Expense"];
         ops.push(`${tableX} ${pageH - (curTop + 24)} ${tableW} 24 re f`);
         ops.push("0.35 0.40 0.48 rg");
         ops.push(`BT /F1 10 Tf ${tableX + 10} ${pageH - (curTop + 16)} Td (No transaction records found.) Tj ET`);
-        curTop += 24;
       } else {
-        rows.slice(0, 28).forEach((r, rIdx) => {
-          if (curTop > 785) return;
+        rows.forEach((r, rIdx) => {
           const rowH = 20;
+          if (curTop + rowH > 795) return;
           const yBottom = pageH - (curTop + rowH);
-          const isIncome = (r[2] || "").toLowerCase().includes("income");
-          const isExpense = (r[2] || "").toLowerCase().includes("expense");
-
           ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
           ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
 
-    const rawAmt = r[5] || r.slice(3).find((cell) => /\d/.test(cell) && !/delete/i.test(cell)) || "";
-const numVal = Number(rawAmt.replace(/[^0-9.]/g, ""));
-const amtText = numVal > 0 ? `Rs. ${numVal.toLocaleString("en-IN")}` : "-";
-
-const incomeVal = isIncome ? amtText : "-";
-const expenseVal = isExpense ? amtText : "-";
-
-const vals = [
-  r[0] || "-",
-  (r[3] || r[4] || "-").slice(0, 28),
-  incomeVal,
-  expenseVal,
-];
+          let vals;
+          if (isYearly) {
+            vals = [
+              (r[0] || "-").slice(0, 22),
+              r[3] || "Rs. 0",
+              r[4] || "Rs. 0",
+              r[5] || "Rs. 0"
+            ];
+          } else {
+            const isIncome = (r[2] || "").toLowerCase().includes("income");
+            const isExpense = (r[2] || "").toLowerCase().includes("expense");
+            const rawAmt = r[5] || r.slice(3).find((cell) => /\d/.test(cell) && !/delete/i.test(cell)) || "";
+            const numVal = Number(rawAmt.replace(/[^0-9.]/g, ""));
+            const amtText = numVal > 0 ? `Rs. ${numVal.toLocaleString("en-IN")}` : "-";
+            const incomeVal = isIncome ? amtText : "-";
+            const expenseVal = isExpense ? amtText : "-";
+            vals = [
+              r[0] || "-",
+              (r[3] || r[4] || "-").slice(0, 28),
+              incomeVal,
+              expenseVal
+            ];
+          }
 
           vals.forEach((v, cIdx) => {
-         if (cIdx === 2 && v !== "-") {
-  ops.push("0.06 0.55 0.32 rg");
-} else if (cIdx === 3 && v !== "-") {
-  ops.push("0.78 0.16 0.16 rg");
-} else {
-  ops.push("0.13 0.17 0.24 rg");
-}
-const font = cIdx === 2 || cIdx === 3 ? "/F2" : "/F1";
-ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
+            if (cIdx === 2 && v !== "-") {
+              ops.push("0.06 0.55 0.32 rg");
+            } else if (cIdx === 3 && v !== "-") {
+              ops.push("0.78 0.16 0.16 rg");
+            } else {
+              ops.push("0.13 0.17 0.24 rg");
+            }
+            const font = cIdx === 2 || cIdx === 3 ? "/F2" : "/F1";
+            ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
           });
-
           curTop += rowH;
         });
       }
@@ -1433,7 +1352,6 @@ ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`
 
       const streamContent = ops.join("\n");
       const byteLen = new TextEncoder().encode(streamContent).length;
-
       const pdfParts = [
         "%PDF-1.4\n",
         "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
@@ -1441,7 +1359,7 @@ ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`
         "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n",
         "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
         "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
-        `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`,
+        `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`
       ];
 
       let offset = 0;
@@ -1460,24 +1378,22 @@ ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`
       const trailer = `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
       const pdfBlob = new Blob([...pdfParts, xref, trailer], { type: "application/pdf" });
       const blobUrl = URL.createObjectURL(pdfBlob);
-
       const a = document.createElement("a");
       a.href = blobUrl;
       a.download = "DhanLekha-Report.pdf";
       document.body.appendChild(a);
       a.click();
       a.remove();
-
       setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
     };
   </script>
 
- <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-    });
-  }
-</script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
