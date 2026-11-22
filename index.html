@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DhanLekha — Monthly & Yearly Personal Money Tracker</title>
- <title>DhanLekha — Monthly & Yearly Personal Money Tracker</title>
   <style>
     :root {
       --bg: #0f172a;
@@ -144,6 +143,7 @@
         font-size: 13px;
       }
     }
+
     .btn-danger {
       background: rgba(239, 68, 68, 0.15);
       color: #fca5a5;
@@ -151,6 +151,7 @@
       padding: 5px 9px;
       font-size: 12px;
     }
+
     main {
       max-width: 1020px;
       width: 100%;
@@ -291,11 +292,15 @@
       align-items: center;
     }
 
-    .table-wrap {
+    .table-wrap,
+    .entries-table-wrap,
+    .history-table-wrap {
+      width: 100%;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
@@ -360,12 +365,14 @@
     .modal-backdrop.open { display: flex; }
 
     .modal {
+      position: relative;
+      padding: 22px;
+      padding-top: 34px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
       max-width: 560px;
       width: 100%;
-      padding: 22px;
       max-height: 88vh;
       overflow-y: auto;
     }
@@ -436,6 +443,140 @@
 
     .footer-links a:hover { text-decoration: underline; }
 
+    .modal-close-btn {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      line-height: 1;
+      padding: 2px 6px;
+      cursor: pointer;
+      color: inherit;
+      z-index: 10;
+    }
+
+    .setup-check-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      margin-bottom: 14px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .setup-check-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .setup-check-text {
+      white-space: nowrap;
+    }
+
+    .terms-inline-link {
+      background: transparent;
+      border: none;
+      padding: 0;
+      font: inherit;
+      color: #60a5fa;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .terms-inline-link:hover {
+      color: #93c5fd;
+    }
+
+    #startTrackingBtn:disabled,
+    #startTrackingBtn:disabled:hover,
+    #startTrackingBtn:disabled:active {
+      opacity: 0.3;
+      filter: grayscale(65%);
+      cursor: not-allowed;
+      pointer-events: none;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .pdf-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.85);
+      z-index: 999;
+      padding: 12px;
+      overflow-y: auto;
+    }
+
+    .pdf-modal-backdrop.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pdf-modal-box {
+      width: 100%;
+      max-width: 520px;
+      background: #ffffff;
+      color: #0f172a;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .pdf-modal-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .pdf-preview-sheet {
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      background: #f8fafc;
+      font-size: 13px;
+    }
+
+    .footer-share-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.75);
+      color: #cbd5e1;
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 500;
+      width: auto;
+      max-width: fit-content;
+      cursor: pointer;
+      vertical-align: middle;
+    }
+
+    .footer-share-btn:active {
+      background: rgba(30, 41, 59, 0.95);
+      color: #ffffff;
+    }
+
+    @media (max-width: 600px) {
+      table th,
+      table td {
+        padding: 8px 6px !important;
+        font-size: 12px !important;
+        white-space: nowrap;
+      }
+    }
+
     @media print {
       header, .form-box, .tabs-bar, .offline-banner, footer, .no-print {
         display: none !important;
@@ -447,163 +588,19 @@
         border: 1px solid #ccc;
       }
       th, td { color: #000; border-bottom: 1px solid #ddd; }
+      body > *:not(#pdfPrintArea) {
+        display: none !important;
+      }
+      #pdfPrintArea {
+        display: block !important;
+        position: static !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
     }
-.modal {
-  position: relative;
-  padding-top: 34px;
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 4px;
-  right: 6px;
-  background: transparent;
-  border: none;
-  font-size: 22px;
-  line-height: 1;
-  padding: 2px 6px;
-  cursor: pointer;
-  color: inherit;
-  z-index: 10;
-}
-.setup-check-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 14px;
-  margin-bottom: 14px;
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.setup-check-row input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.setup-check-text {
-  white-space: nowrap;
-}
-
-.terms-inline-link {
-  background: transparent;
-  border: none;
-  padding: 0;
-  font: inherit;
-  color: #60a5fa;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.terms-inline-link:hover {
-  color: #93c5fd;
-}
-#startTrackingBtn:disabled,
-#startTrackingBtn:disabled:hover,
-#startTrackingBtn:disabled:active {
-  opacity: 0.3;
-  filter: grayscale(65%);
-  cursor: not-allowed;
-  pointer-events: none;
-  transform: none;
-  box-shadow: none;
-}
-    .pdf-modal-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(2, 6, 23, 0.85);
-  z-index: 999;
-  padding: 12px;
-  overflow-y: auto;
-}
-.pdf-modal-backdrop.active {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.pdf-modal-box {
-  width: 100%;
-  max-width: 520px;
-  background: #ffffff;
-  color: #0f172a;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-}
-.pdf-modal-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 14px;
-}
-.pdf-preview-sheet {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 10px;
-  background: #f8fafc;
-  font-size: 13px;
-}
-@media print {
-  body > *:not(#pdfPrintArea) {
-    display: none !important;
-  }
-  #pdfPrintArea {
-    display: block !important;
-    position: static !important;
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-}
-    .table-wrap,
-.entries-table-wrap,
-.history-table-wrap {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-@media (max-width: 600px) {
-  table th,
-  table td {
-    padding: 8px 6px !important;
-    font-size: 12px !important;
-    white-space: nowrap;
-  }
-}
-    .footer-share-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  background: rgba(15, 23, 42, 0.75);
-  color: #cbd5e1;
-  font-size: 12px;
-  line-height: 1.2;
-  font-weight: 500;
-  width: auto;
-  max-width: fit-content;
-  cursor: pointer;
-  vertical-align: middle;
-}
-
-.footer-share-btn:active {
-  background: rgba(30, 41, 59, 0.95);
-  color: #ffffff;
-}
   </style>
   <link rel="manifest" href="./manifest.json" />
-<meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#0f172a" />
 </head>
 <body>
 
@@ -631,55 +628,56 @@ table {
       <span>Please check <strong>Terms &amp; Safety Guide</strong> once for important usage and backup details.</span>
     </div>
 
-   <section class="cards-grid">
-    <div class="card">
-      <div class="card-label"><span>Monthly Budget</span></div>
-      <div class="card-value val-blue" id="cardBudget">₹10,000</div>
-    </div>
-    <div class="card">
-      <div class="card-label"><span>Total Income</span></div>
-      <div class="card-value val-green" id="cardIncome">₹0</div>
-    </div>
-    <div class="card">
-      <div class="card-label"><span>Total Expense</span></div>
-      <div class="card-value val-red" id="cardExpense">₹0</div>
-    </div>
-    <div class="card">
-      <div class="card-label"><span>Net Balance</span></div>
-      <div class="card-value val-amber" id="cardBalance">₹10,000</div>
-    </div>
-  </section>
+    <section class="cards-grid">
+      <div class="card">
+        <div class="card-label"><span>Monthly Budget</span></div>
+        <div class="card-value val-blue" id="cardBudget">₹10,000</div>
+      </div>
+      <div class="card">
+        <div class="card-label"><span>Total Income</span></div>
+        <div class="card-value val-green" id="cardIncome">₹0</div>
+      </div>
+      <div class="card">
+        <div class="card-label"><span>Total Expense</span></div>
+        <div class="card-value val-red" id="cardExpense">₹0</div>
+      </div>
+      <div class="card">
+        <div class="card-label"><span>Net Balance</span></div>
+        <div class="card-value val-amber" id="cardBalance">₹10,000</div>
+      </div>
+    </section>
+
     <section class="form-box">
-    <h2>➕ Add New Transaction</h2>
-    <form id="entryForm" class="form-grid" onsubmit="addEntry(event)">
-      <div>
-        <label for="entryType">Type</label>
-        <select id="entryType" required>
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
-        </select>
-      </div>
-      <div>
-        <label for="entryAmount">Amount (₹)</label>
-        <input type="number" id="entryAmount" min="1" step="any" placeholder="250" required />
-      </div>
-      <div>
-        <label for="entrySource">Source</label>
-        <input type="text" id="entrySource" placeholder="Groceries, Fuel, Salary" required />
-      </div>
-      <div>
-        <label for="entryDate">Date</label>
-        <input type="date" id="entryDate" required />
-      </div>
-      <div>
-        <label for="entryNote">Note</label>
-        <input type="text" id="entryNote" placeholder="Optional" />
-      </div>
-      <div>
-        <button type="submit" class="btn-primary" style="width:100%; padding:11px;">Save Entry</button>
-      </div>
-    </form>
-  </section>
+      <h2>➕ Add New Transaction</h2>
+      <form id="entryForm" class="form-grid" onsubmit="addEntry(event)">
+        <div>
+          <label for="entryType">Type</label>
+          <select id="entryType" required>
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+        <div>
+          <label for="entryAmount">Amount (₹)</label>
+          <input type="number" id="entryAmount" min="1" step="any" placeholder="250" required />
+        </div>
+        <div>
+          <label for="entrySource">Source</label>
+          <input type="text" id="entrySource" placeholder="Groceries, Fuel, Salary" required />
+        </div>
+        <div>
+          <label for="entryDate">Date</label>
+          <input type="date" id="entryDate" required />
+        </div>
+        <div>
+          <label for="entryNote">Note</label>
+          <input type="text" id="entryNote" placeholder="Optional" />
+        </div>
+        <div>
+          <button type="submit" class="btn-primary" style="width:100%; padding:11px;">Save Entry</button>
+        </div>
+      </form>
+    </section>
 
     <div class="tabs-bar">
       <div class="tabs">
@@ -703,27 +701,27 @@ table {
 
   <footer>
     <div class="footer-wrap">
-      <div>© 2026 DhanLekha </div>
+      <div>© 2026 DhanLekha</div>
       <div class="footer-links">
         <a onclick="openInfoModal('about')">About Us</a>
         <a onclick="openInfoModal('privacy')">Privacy Policy</a>
-        <a onclick="openInfoModal('terms')">Terms & Safety Guide</a>
-        <a onclick="openInfoModal('contact')">Contact & Support</a>
-       <button
-  type="button"
-  class="footer-share-btn"
-  data-share-url="https://dhanlekha-eypj.vercel.app/"
-  onclick="shareDhanLekhaApp(this)"
->
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <circle cx="18" cy="5" r="3"></circle>
-    <circle cx="6" cy="12" r="3"></circle>
-    <circle cx="18" cy="19" r="3"></circle>
-    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-  </svg>
-  <span class="footer-share-label">Share Link</span>
-</button>
+        <a onclick="openInfoModal('terms')">Terms &amp; Safety Guide</a>
+        <a onclick="openInfoModal('contact')">Contact &amp; Support</a>
+        <button
+          type="button"
+          class="footer-share-btn"
+          data-share-url="https://dhanlekha-eypj.vercel.app/"
+          onclick="shareDhanLekhaApp(this)"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+          <span class="footer-share-label">Share Link</span>
+        </button>
       </div>
     </div>
   </footer>
@@ -821,7 +819,7 @@ table {
 
       if (!appState.setupDone) {
         document.getElementById("initialBudgetInput").value = appState.monthlyBudget;
-        document.getElementById("setupModal").classList.add("open");
+        openBudgetModal();
       }
 
       renderApp();
@@ -833,27 +831,27 @@ table {
       appState.setupDone = true;
       saveState();
       const setupModalEl = document.getElementById("setupModal");
-if (setupModalEl) {
-  setupModalEl.classList.remove("open", "active", "show");
-  setupModalEl.style.display = "none";
-}
+      if (setupModalEl) {
+        setupModalEl.classList.remove("open", "active", "show");
+        setupModalEl.style.display = "none";
+      }
       renderApp();
     }
 
-   function openBudgetModal() {
-  const modal = document.getElementById("setupModal");
-  const input = document.getElementById("initialBudgetInput");
-  if (input && typeof appState !== "undefined") {
-    input.value = appState.monthlyBudget ?? "";
-  }
-  if (modal) {
-    modal.classList.remove("open");
-    modal.style.display = "";
-    void modal.offsetWidth;
-    modal.classList.add("open");
-    modal.style.display = "flex";
-  }
-}
+    function openBudgetModal() {
+      const modal = document.getElementById("setupModal");
+      const input = document.getElementById("initialBudgetInput");
+      if (input && typeof appState !== "undefined") {
+        input.value = appState.monthlyBudget ?? "";
+      }
+      if (modal) {
+        modal.classList.remove("open");
+        modal.style.display = "";
+        void modal.offsetWidth;
+        modal.classList.add("open");
+        modal.style.display = "flex";
+      }
+    }
 
     function populateYears() {
       const yearSelect = document.getElementById("yearPicker");
@@ -879,7 +877,7 @@ if (setupModalEl) {
 
       if (!amount || amount <= 0 || !source || !date) return;
 
-     const currentTime = new Date().toLocaleTimeString("en-IN", {
+      const currentTime = new Date().toLocaleTimeString("en-IN", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true
@@ -929,18 +927,14 @@ if (setupModalEl) {
 
       let filtered = [];
       let budgetDisplay = appState.monthlyBudget;
-      let badgeText = "";
 
       if (currentView === "today") {
         filtered = appState.entries.filter(e => e.date === today);
-        badgeText = "Today (" + today + ")";
       } else if (currentView === "monthly") {
         filtered = appState.entries.filter(e => e.date && e.date.startsWith(selectedMonth));
-        badgeText = "Month: " + selectedMonth;
       } else {
         filtered = appState.entries.filter(e => e.date && e.date.startsWith(selectedYear));
         budgetDisplay = appState.monthlyBudget * 12;
-        badgeText = "Year: " + selectedYear + " (12x Monthly Budget)";
       }
 
       let totalIncome = 0;
@@ -1006,6 +1000,7 @@ if (setupModalEl) {
         </table>
       `;
     }
+
     function renderYearlyTable(container, year) {
       const monthNames = [
         "January", "February", "March", "April", "May", "June",
@@ -1144,350 +1139,329 @@ if (setupModalEl) {
     }
 
     initApp();
-   const setupModalEl = document.getElementById("setupModal");
-const closeSetupModalBtn = document.getElementById("closeSetupModal");
 
-if (closeSetupModalBtn && setupModalEl) {
-  closeSetupModalBtn.addEventListener("click", () => {
-    setupModalEl.classList.remove("open", "active", "show");
-    setupModalEl.style.display = "";
-  });
-}
-const termsSafetyCheck = document.getElementById("termsSafetyCheck");
-const startTrackingBtn = document.getElementById("startTrackingBtn");
+    const setupModalEl = document.getElementById("setupModal");
+    const closeSetupModalBtn = document.getElementById("closeSetupModal");
 
-if (termsSafetyCheck && startTrackingBtn) {
-  const syncStartBtnState = () => {
-    startTrackingBtn.disabled = !termsSafetyCheck.checked;
-  };
-
-  syncStartBtnState();
-  termsSafetyCheck.addEventListener("change", syncStartBtnState);
-
-  startTrackingBtn.addEventListener("click", (event) => {
-    if (!termsSafetyCheck.checked) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
+    if (closeSetupModalBtn && setupModalEl) {
+      closeSetupModalBtn.addEventListener("click", () => {
+        setupModalEl.classList.remove("open", "active", "show");
+        setupModalEl.style.display = "none";
+      });
     }
-  }, true);
-}
-const openTermsFromSetupBtn = document.getElementById("openTermsFromSetup");
 
-if (openTermsFromSetupBtn) {
-  openTermsFromSetupBtn.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (typeof openInfoModal === "function") {
-      openInfoModal("terms");
+    const termsSafetyCheck = document.getElementById("termsSafetyCheck");
+    const startTrackingBtn = document.getElementById("startTrackingBtn");
+
+    if (termsSafetyCheck && startTrackingBtn) {
+      const syncStartBtnState = () => {
+        startTrackingBtn.disabled = !termsSafetyCheck.checked;
+      };
+
+      syncStartBtnState();
+      termsSafetyCheck.addEventListener("change", syncStartBtnState);
+
+      startTrackingBtn.addEventListener("click", (event) => {
+        if (!termsSafetyCheck.checked) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
     }
-  });
-}
+
+    const openTermsFromSetupBtn = document.getElementById("openTermsFromSetup");
+
+    if (openTermsFromSetupBtn) {
+      openTermsFromSetupBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof openInfoModal === "function") {
+          openInfoModal("terms");
+        }
+      });
+    }
+
     (function () {
-  const modalHtml = `
-    <div id="pdfPreviewModal" class="pdf-modal-backdrop" onclick="if(event.target===this)closePdfPreview()">
-      <div class="pdf-modal-box" id="pdfPrintArea">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-          <strong style="font-size:16px;">DhanLekha — PDF Preview</strong>
-          <button type="button" onclick="closePdfPreview()" style="background:#e2e8f0;color:#0f172a;padding:6px 10px;border-radius:8px;">✕</button>
+      const modalHtml = `
+        <div id="pdfPreviewModal" class="pdf-modal-backdrop" onclick="if(event.target===this)closePdfPreview()">
+          <div class="pdf-modal-box" id="pdfPrintArea">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+              <strong style="font-size:16px;">DhanLekha — PDF Preview</strong>
+              <button type="button" onclick="closePdfPreview()" style="background:#e2e8f0;color:#0f172a;padding:6px 10px;border-radius:8px;">✕</button>
+            </div>
+            <div id="pdfPreviewContent" class="pdf-preview-sheet"></div>
+            <div class="pdf-modal-actions" data-html2canvas-ignore="true">
+              <button type="button" class="btn-primary" onclick="downloadDhanLekhaPdf()">⬇️ Download PDF</button>
+              <button type="button" class="btn-secondary" style="color:#0f172a;background:#e2e8f0;" onclick="window.print()">🖨️ Print</button>
+            </div>
+          </div>
         </div>
-        <div id="pdfPreviewContent" class="pdf-preview-sheet"></div>
-        <div class="pdf-modal-actions" data-html2canvas-ignore="true">
-          <button type="button" class="btn-primary" onclick="downloadDirectPdf()">⬇️ Download PDF</button>
-          <button type="button" class="btn-secondary" style="color:#0f172a;background:#e2e8f0;" onclick="window.print()">🖨️ Print</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML("beforeend", modalHtml);
+      `;
+      document.body.insertAdjacentHTML("beforeend", modalHtml);
 
-  window.openPdfPreview = function () {
-    const budget = document.getElementById("cardBudget")?.textContent?.trim() || "₹0";
-    const income = document.getElementById("cardIncome")?.textContent?.trim() || "₹0";
-    const expense = document.getElementById("cardExpense")?.textContent?.trim() || "₹0";
-    const balance = document.getElementById("cardBalance")?.textContent?.trim() || "₹0";
+      window.openPdfPreview = function () {
+        const budget = document.getElementById("cardBudget")?.textContent?.trim() || "₹0";
+        const income = document.getElementById("cardIncome")?.textContent?.trim() || "₹0";
+        const expense = document.getElementById("cardExpense")?.textContent?.trim() || "₹0";
+        const balance = document.getElementById("cardBalance")?.textContent?.trim() || "₹0";
 
-    document.getElementById("pdfPreviewContent").innerHTML = `
-      <p><strong>Report Date:</strong> ${new Date().toLocaleDateString("en-IN")}</p>
-      <p><strong>Monthly Budget:</strong> ${budget}</p>
-      <p><strong>Total Income:</strong> ${income}</p>
-      <p><strong>Total Expense:</strong> ${expense}</p>
-      <p><strong>Net Balance:</strong> ${balance}</p>
-    `;
-    document.getElementById("pdfPreviewModal").classList.add("active");
-  };
+        document.getElementById("pdfPreviewContent").innerHTML = `
+          <p><strong>Report Date:</strong> ${new Date().toLocaleDateString("en-IN")}</p>
+          <p><strong>Monthly Budget:</strong> ${budget}</p>
+          <p><strong>Total Income:</strong> ${income}</p>
+          <p><strong>Total Expense:</strong> ${expense}</p>
+          <p><strong>Net Balance:</strong> ${balance}</p>
+        `;
+        document.getElementById("pdfPreviewModal").classList.add("active");
+      };
 
-  window.closePdfPreview = function () {
-    document.getElementById("pdfPreviewModal")?.classList.remove("active");
-  };
-
-  window.downloadDirectPdf = async function () {
-  const contentEl = document.getElementById("pdfPreviewContent");
-  const textLines = contentEl
-    ? Array.from(contentEl.querySelectorAll("p")).map((p) =>
-        p.innerText.replace(/[^\x20-\x7E₹]/g, "").replace(/₹/g, "Rs. ")
-      )
-    : [];
-
-  if (!window.jspdf) {
-    await new Promise((resolve) => {
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js";
-      s.onload = resolve;
-      s.onerror = resolve;
-      document.head.appendChild(s);
-    });
-  }
+      window.closePdfPreview = function () {
+        document.getElementById("pdfPreviewModal")?.classList.remove("active");
+      };
+    })();
 
     window.shareDhanLekhaApp = async function (btnEl) {
-  const url =
-    (btnEl && btnEl.getAttribute("data-share-url")) ||
-    "https://dhanlekha-eypj.vercel.app/";
-  const labelEl = btnEl && btnEl.querySelector(".footer-share-label");
+      const url =
+        (btnEl && btnEl.getAttribute("data-share-url")) ||
+        "https://dhanlekha-eypj.vercel.app/";
+      const labelEl = btnEl && btnEl.querySelector(".footer-share-label");
 
-  const showCopied = () => {
-    if (!labelEl) return;
-    const prev = labelEl.textContent;
-    labelEl.textContent = "Copied!";
-    setTimeout(() => {
-      labelEl.textContent = prev || "Share Link";
-    }, 1800);
-  };
+      const showCopied = () => {
+        if (!labelEl) return;
+        const prev = labelEl.textContent;
+        labelEl.textContent = "Copied!";
+        setTimeout(() => {
+          labelEl.textContent = prev || "Share Link";
+        }, 1800);
+      };
 
-  const copyFallback = async () => {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(url);
-        showCopied();
-        return;
+      const copyFallback = async () => {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(url);
+            showCopied();
+            return;
+          }
+        } catch (_) {}
+
+        const ta = document.createElement("textarea");
+        ta.value = url;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          showCopied();
+        } catch (_) {
+          prompt("Copy app link:", url);
+        }
+        ta.remove();
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: "DhanLekha",
+            text: "DhanLekha app link:",
+            url: url,
+          });
+          return;
+        } catch (err) {
+          if (err && err.name === "AbortError") return;
+        }
       }
-    } catch (_) {}
 
-    const ta = document.createElement("textarea");
-    ta.value = url;
-    ta.setAttribute("readonly", "");
-    ta.style.position = "fixed";
-    ta.style.opacity = "0";
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand("copy");
-      showCopied();
-    } catch (_) {
-      prompt("Copy app link:", url);
-    }
-    ta.remove();
-  };
+      await copyFallback();
+    };
 
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: "DhanLekha",
-        text: "DhanLekha app link:",
-        url: url,
-      });
-      return;
-    } catch (err) {
-      if (err && err.name === "AbortError") return;
-    }
-  }
-
-  await copyFallback();
-};
     window.downloadDhanLekhaPdf = function () {
-  const esc = (str) =>
-    String(str ?? "")
-      .replace(/\\/g, "\\\\")
-      .replace(/\(/g, "\\(")
-      .replace(/\)/g, "\\)")
-      .replace(/[^\x20-\x7E]/g, " ");
+      const esc = (str) =>
+        String(str ?? "")
+          .replace(/\\/g, "\\\\")
+          .replace(/\(/g, "\\(")
+          .replace(/\)/g, "\\)")
+          .replace(/[^\x20-\x7E]/g, " ");
 
-  const cleanText = (el, fallback = "") => {
-    const txt = (el && el.textContent ? el.textContent : fallback).trim();
-    return txt.replace(/\s+/g, " ");
-  };
+      const cleanText = (el, fallback = "") => {
+        const txt = (el && el.textContent ? el.textContent : fallback).trim();
+        return txt.replace(/\s+/g, " ");
+      };
 
-  // Page se summary values aur table rows nikalne ki koshish
-  const summaryCards = Array.from(document.querySelectorAll(".summary-card, .stat-card, .card"));
-  const summaryPairs = [];
-  summaryCards.forEach((card) => {
-    const t = cleanText(card);
-    if (
-      t.includes("Monthly Budget") ||
-      t.includes("Total Income") ||
-      t.includes("Total Expense") ||
-      t.includes("Net Balance")
-    ) {
-      const lines = card.innerText
-        .split("\n")
-        .map((x) => x.trim())
-        .filter(Boolean);
-      if (lines.length >= 2) {
-        summaryPairs.push([lines[0], lines.slice(1).join(" ")]);
-      }
-    }
-  });
+      const summaryCards = Array.from(document.querySelectorAll(".summary-card, .stat-card, .card"));
+      const summaryPairs = [];
+      summaryCards.forEach((card) => {
+        const t = cleanText(card);
+        if (
+          t.includes("Monthly Budget") ||
+          t.includes("Total Income") ||
+          t.includes("Total Expense") ||
+          t.includes("Net Balance")
+        ) {
+          const lines = card.innerText
+            .split("\n")
+            .map((x) => x.trim())
+            .filter(Boolean);
+          if (lines.length >= 2) {
+            summaryPairs.push([lines[0], lines.slice(1).join(" ")]);
+          }
+        }
+      });
 
-  const rows = [];
-  document.querySelectorAll("table tbody tr").forEach((tr) => {
-    const cols = Array.from(tr.querySelectorAll("td")).map((td) => cleanText(td));
-    if (cols.length) rows.push(cols);
-  });
+      const rows = [];
+      document.querySelectorAll("table tbody tr").forEach((tr) => {
+        const cols = Array.from(tr.querySelectorAll("td")).map((td) => cleanText(td));
+        if (cols.length) rows.push(cols);
+      });
 
-  // PDF stream build (A4 portrait: 595 x 842 pt)
-  const ops = [];
-  const pageH = 842;
-  const topY = (yFromTop) => pageH - yFromTop;
+      const ops = [];
+      const pageH = 842;
+      const topY = (yFromTop) => pageH - yFromTop;
 
-  // Top Navy Banner
-  ops.push("0.06 0.13 0.25 rg");
-  ops.push("0 762 595 80 re f");
+      ops.push("0.06 0.13 0.25 rg");
+      ops.push("0 762 595 80 re f");
 
-  // Title & Subtitle in Banner
-  ops.push("1 1 1 rg");
-  ops.push("BT /F2 20 Tf 36 808 Td (DhanLekha - Financial Report) Tj ET");
-  ops.push("0.75 0.85 0.96 rg");
-  ops.push("BT /F1 10 Tf 36 786 Td (Generated: " + esc(new Date().toLocaleString()) + ") Tj ET");
+      ops.push("1 1 1 rg");
+      ops.push("BT /F2 20 Tf 36 808 Td (DhanLekha - Financial Report) Tj ET");
+      ops.push("0.75 0.85 0.96 rg");
+      ops.push("BT /F1 10 Tf 36 786 Td (Generated: " + esc(new Date().toLocaleString()) + ") Tj ET");
 
-  // Summary Section Title
-  ops.push("0.09 0.15 0.24 rg");
-  ops.push("BT /F2 13 Tf 36 " + topY(112) + " Td (Summary Overview) Tj ET");
+      ops.push("0.09 0.15 0.24 rg");
+      ops.push("BT /F2 13 Tf 36 " + topY(112) + " Td (Summary Overview) Tj ET");
 
-  // 4 Colorful Summary Boxes
-  const defaults = [
-    ["Monthly Budget", "Rs. 0", [0.94, 0.96, 1.0], [0.15, 0.39, 0.85]],
-    ["Total Income", "Rs. 0", [0.92, 0.99, 0.95], [0.06, 0.55, 0.32]],
-    ["Total Expense", "Rs. 0", [1.0, 0.94, 0.94], [0.78, 0.16, 0.16]],
-    ["Net Balance", "Rs. 0", [0.96, 0.95, 1.0], [0.39, 0.25, 0.78]],
-  ];
-
-  const cardMap = Object.fromEntries(summaryPairs);
-  const boxW = 124;
-  const boxGap = 9;
-
-  defaults.forEach(([label, fallbackVal, fillRgb, accentRgb], idx) => {
-    const x = 36 + idx * (boxW + boxGap);
-    const yTop = 126;
-    const yBot = pageH - (yTop + 56);
-
-   ops.push(`${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg`);
-   ops.push(`${x} ${yBot} ${boxw} 56 re f`);
-   ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
-   ops.push(`${x} ${yBot + 52} ${boxw} 4 re f`);
-
-    ops.push("0.30 0.36 0.46 rg");
-    ops.push(`BT /F1 9 Tf ${x + 8} ${yBot + 34} Td (${esc(label)}) Tj ET`);
-
-    const valText = cardMap[label] || fallbackVal;
-    ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
-    ops.push(`BT /F2 12 Tf ${x + 8} ${yBot + 14} Td (${esc(valText)}) Tj ET`);
-  });
-
-  // Transactions Table Header
-  let curTop = 212;
-  ops.push("0.09 0.15 0.24 rg");
-  ops.push(`BT /F2 13 Tf 36 ${topY(curTop)} Td (Transactions Statement) Tj ET`);
-
-  curTop += 14;
-  const tableX = 36;
-  const tableW = 523;
-  const colX = [36, 122, 195, 275, 420];
-  const headers = ["Date", "Time", "Type", "Source / Note", "Amount"];
-
-  ops.push("0.12 0.23 0.42 rg");
-  ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
-
-  ops.push("1 1 1 rg");
-  headers.forEach((h, i) => {
-    ops.push(`BT /F2 9.5 Tf ${colX[i] + 6} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
-  });
-
-  curTop += 22;
-
-  if (!rows.length) {
-    ops.push("0.98 0.99 1.0 rg");
-    ops.push(`${tableX} ${pageH - (curTop + 24)} ${tableW} 24 re f`);
-    ops.push("0.35 0.40 0.48 rg");
-    ops.push(`BT /F1 10 Tf ${tableX + 10} ${pageH - (curTop + 16)} Td (No transaction records found.) Tj ET`);
-    curTop += 24;
-  } else {
-    rows.slice(0, 28).forEach((r, rIdx) => {
-      if (curTop > 785) return;
-      const rowH = 20;
-      const yBottom = pageH - (curTop + rowH);
-      const isIncome = (r[2] || "").toLowerCase().includes("income");
-      const isExpense = (r[2] || "").toLowerCase().includes("expense");
-
-      ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
-      ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
-
-      const vals = [
-        r[0] || "-",
-        r[1] || "-",
-        r[2] || "-",
-        (r[3] || r[4] || "-").slice(0, 26),
-        r[r.length - 1] || "-",
+      const defaults = [
+        ["Monthly Budget", "Rs. 0", [0.94, 0.96, 1.0], [0.15, 0.39, 0.85]],
+        ["Total Income", "Rs. 0", [0.92, 0.99, 0.95], [0.06, 0.55, 0.32]],
+        ["Total Expense", "Rs. 0", [1.0, 0.94, 0.94], [0.78, 0.16, 0.16]],
+        ["Net Balance", "Rs. 0", [0.96, 0.95, 1.0], [0.39, 0.25, 0.78]],
       ];
 
-      vals.forEach((v, cIdx) => {
-        if (cIdx === 2 && isIncome) {
-          ops.push("0.06 0.55 0.32 rg");
-        } else if (cIdx === 2 && isExpense) {
-          ops.push("0.78 0.16 0.16 rg");
-        } else {
-          ops.push("0.13 0.17 0.24 rg");
-        }
-        const font = cIdx === 2 || cIdx === 4 ? "/F2" : "/F1";
-        ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
+      const cardMap = Object.fromEntries(summaryPairs);
+      const boxW = 124;
+      const boxGap = 9;
+
+      defaults.forEach(([label, fallbackVal, fillRgb, accentRgb], idx) => {
+        const x = 36 + idx * (boxW + boxGap);
+        const yTop = 126;
+        const yBot = pageH - (yTop + 56);
+
+        ops.push(`${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg`);
+        ops.push(`${x} ${yBot} ${boxW} 56 re f`);
+        ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
+        ops.push(`${x} ${yBot + 52} ${boxW} 4 re f`);
+
+        ops.push("0.30 0.36 0.46 rg");
+        ops.push(`BT /F1 9 Tf ${x + 8} ${yBot + 34} Td (${esc(label)}) Tj ET`);
+
+        const valText = cardMap[label] || fallbackVal;
+        ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
+        ops.push(`BT /F2 12 Tf ${x + 8} ${yBot + 14} Td (${esc(valText)}) Tj ET`);
       });
 
-      curTop += rowH;
-    });
-  }
+      let curTop = 212;
+      ops.push("0.09 0.15 0.24 rg");
+      ops.push(`BT /F2 13 Tf 36 ${topY(curTop)} Td (Transactions Statement) Tj ET`);
 
-  // Footer Note
-  ops.push("0.45 0.50 0.58 rg");
-  ops.push("BT /F1 8.5 Tf 36 28 Td (DhanLekha Report - Generated directly as PDF) Tj ET");
+      curTop += 14;
+      const tableX = 36;
+      const tableW = 523;
+      const colX = [36, 122, 195, 275, 420];
+      const headers = ["Date", "Time", "Type", "Source / Note", "Amount"];
 
-  const streamContent = ops.join("\n");
-  const byteLen = new TextEncoder().encode(streamContent).length;
+      ops.push("0.12 0.23 0.42 rg");
+      ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
 
-  const pdfParts = [
-    "%PDF-1.4\n",
-    "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
-    "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
-    "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n",
-    "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
-    "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
-    `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`,
-  ];
+      ops.push("1 1 1 rg");
+      headers.forEach((h, i) => {
+        ops.push(`BT /F2 9.5 Tf ${colX[i] + 6} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
+      });
 
-  let offset = 0;
-  const offsets = [0];
-  pdfParts.forEach((part) => {
-    offsets.push(offset);
-    offset += new TextEncoder().encode(part).length;
-  });
+      curTop += 22;
 
-  const xrefStart = offset;
-  let xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
-  for (let i = 1; i < offsets.length; i++) {
-    xref += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
-  }
+      if (!rows.length) {
+        ops.push("0.98 0.99 1.0 rg");
+        ops.push(`${tableX} ${pageH - (curTop + 24)} ${tableW} 24 re f`);
+        ops.push("0.35 0.40 0.48 rg");
+        ops.push(`BT /F1 10 Tf ${tableX + 10} ${pageH - (curTop + 16)} Td (No transaction records found.) Tj ET`);
+        curTop += 24;
+      } else {
+        rows.slice(0, 28).forEach((r, rIdx) => {
+          if (curTop > 785) return;
+          const rowH = 20;
+          const yBottom = pageH - (curTop + rowH);
+          const isIncome = (r[2] || "").toLowerCase().includes("income");
+          const isExpense = (r[2] || "").toLowerCase().includes("expense");
 
-  const trailer = `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
-  const pdfBlob = new Blob([...pdfParts, xref, trailer], { type: "application/pdf" });
-  const blobUrl = URL.createObjectURL(pdfBlob);
+          ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
+          ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
 
-  const a = document.createElement("a");
-  a.href = blobUrl;
-  a.download = "DhanLekha-Report.pdf";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+          const vals = [
+            r[0] || "-",
+            r[1] || "-",
+            r[2] || "-",
+            (r[3] || r[4] || "-").slice(0, 26),
+            r[r.length - 1] || "-",
+          ];
 
-  setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
-};
-    
+          vals.forEach((v, cIdx) => {
+            if (cIdx === 2 && isIncome) {
+              ops.push("0.06 0.55 0.32 rg");
+            } else if (cIdx === 2 && isExpense) {
+              ops.push("0.78 0.16 0.16 rg");
+            } else {
+              ops.push("0.13 0.17 0.24 rg");
+            }
+            const font = cIdx === 2 || cIdx === 4 ? "/F2" : "/F1";
+            ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
+          });
+
+          curTop += rowH;
+        });
+      }
+
+      ops.push("0.45 0.50 0.58 rg");
+      ops.push("BT /F1 8.5 Tf 36 28 Td (DhanLekha Report - Generated directly as PDF) Tj ET");
+
+      const streamContent = ops.join("\n");
+      const byteLen = new TextEncoder().encode(streamContent).length;
+
+      const pdfParts = [
+        "%PDF-1.4\n",
+        "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+        "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
+        "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n",
+        "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+        "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
+        `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`,
+      ];
+
+      let offset = 0;
+      const offsets = [0];
+      pdfParts.forEach((part) => {
+        offsets.push(offset);
+        offset += new TextEncoder().encode(part).length;
+      });
+
+      const xrefStart = offset;
+      let xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
+      for (let i = 1; i < offsets.length; i++) {
+        xref += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+      }
+
+      const trailer = `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+      const pdfBlob = new Blob([...pdfParts, xref, trailer], { type: "application/pdf" });
+      const blobUrl = URL.createObjectURL(pdfBlob);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = "DhanLekha-Report.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+    };
   </script>
 </body>
 </html>
