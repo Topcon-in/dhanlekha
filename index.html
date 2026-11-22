@@ -1369,24 +1369,23 @@ if (openTermsFromSetupBtn) {
     const yTop = 126;
     const yBot = pageH - (yTop + 56);
 
-    ops.push(${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg);
-    ops.push(${x} ${yBot} ${boxW} 56 re f);
-
-    ops.push(${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg);
-    ops.push(${x} ${yBot + 52} ${boxW} 4 re f);
+   ops.push(`${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg`);
+   ops.push(`${x} ${yBot} ${boxw} 56 re f`);
+   ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
+   ops.push(`${x} ${yBot + 52} ${boxw} 4 re f`);
 
     ops.push("0.30 0.36 0.46 rg");
-    ops.push(BT /F1 9 Tf ${x + 8} ${yBot + 34} Td (${esc(label)}) Tj ET);
+    ops.push(`BT /F1 9 Tf ${x + 8} ${yBot + 34} Td (${esc(label)}) Tj ET`);
 
     const valText = cardMap[label] || fallbackVal;
-    ops.push(${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg);
-    ops.push(BT /F2 12 Tf ${x + 8} ${yBot + 14} Td (${esc(valText)}) Tj ET);
+    ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
+    ops.push(`BT /F2 12 Tf ${x + 8} ${yBot + 14} Td (${esc(valText)}) Tj ET`);
   });
 
   // Transactions Table Header
   let curTop = 212;
   ops.push("0.09 0.15 0.24 rg");
-  ops.push(BT /F2 13 Tf 36 ${topY(curTop)} Td (Transactions Statement) Tj ET);
+  ops.push(`BT /F2 13 Tf 36 ${topY(curTop)} Td (Transactions Statement) Tj ET`);
 
   curTop += 14;
   const tableX = 36;
@@ -1395,20 +1394,20 @@ if (openTermsFromSetupBtn) {
   const headers = ["Date", "Time", "Type", "Source / Note", "Amount"];
 
   ops.push("0.12 0.23 0.42 rg");
-  ops.push(${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f);
+  ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
 
   ops.push("1 1 1 rg");
   headers.forEach((h, i) => {
-    ops.push(BT /F2 9.5 Tf ${colX[i] + 6} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET);
+    ops.push(`BT /F2 9.5 Tf ${colX[i] + 6} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
   });
 
   curTop += 22;
 
   if (!rows.length) {
     ops.push("0.98 0.99 1.0 rg");
-    ops.push(${tableX} ${pageH - (curTop + 24)} ${tableW} 24 re f);
+    ops.push(`${tableX} ${pageH - (curTop + 24)} ${tableW} 24 re f`);
     ops.push("0.35 0.40 0.48 rg");
-    ops.push(BT /F1 10 Tf ${tableX + 10} ${pageH - (curTop + 16)} Td (No transaction records found.) Tj ET);
+    ops.push(`BT /F1 10 Tf ${tableX + 10} ${pageH - (curTop + 16)} Td (No transaction records found.) Tj ET`);
     curTop += 24;
   } else {
     rows.slice(0, 28).forEach((r, rIdx) => {
@@ -1419,7 +1418,7 @@ if (openTermsFromSetupBtn) {
       const isExpense = (r[2] || "").toLowerCase().includes("expense");
 
       ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
-      ops.push(${tableX} ${yBottom} ${tableW} ${rowH} re f);
+      ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
 
       const vals = [
         r[0] || "-",
@@ -1438,7 +1437,7 @@ if (openTermsFromSetupBtn) {
           ops.push("0.13 0.17 0.24 rg");
         }
         const font = cIdx === 2 || cIdx === 4 ? "/F2" : "/F1";
-        ops.push(BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET);
+        ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
       });
 
       curTop += rowH;
@@ -1459,7 +1458,7 @@ if (openTermsFromSetupBtn) {
     "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n",
     "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
     "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
-    6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n,
+    `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`,
   ];
 
   let offset = 0;
@@ -1470,12 +1469,12 @@ if (openTermsFromSetupBtn) {
   });
 
   const xrefStart = offset;
-  let xref = xref\n0 ${offsets.length}\n0000000000 65535 f \n;
+  let xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
   for (let i = 1; i < offsets.length; i++) {
     xref += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
   }
 
-  const trailer = trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF;
+  const trailer = `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
   const pdfBlob = new Blob([...pdfParts, xref, trailer], { type: "application/pdf" });
   const blobUrl = URL.createObjectURL(pdfBlob);
 
@@ -1488,6 +1487,7 @@ if (openTermsFromSetupBtn) {
 
   setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
 };
+    
   </script>
 </body>
 </html>
