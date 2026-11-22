@@ -539,6 +539,7 @@
   <div class="dl-splash-mark">
     <span class="dl-glyph dl-rupee">₹</span>
     <span class="dl-glyph dl-letter-d">D</span>
+    <span class="dl-glyph dl-letter-l">L</span>
   </div>
   <div class="dl-splash-title">DhanLekha</div>
   <div class="dl-splash-sub">Smart Money Tracker</div>
@@ -1440,9 +1441,9 @@ window.downloadDhanLekhaPdf = function () {
     opacity: 0;
     animation: dlRingPulse 1.65s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
   }
-  .dl-splash-mark {
+.dl-splash-mark {
     position: relative;
-    width: 82px;
+    width: 96px;
     height: 82px;
     border-radius: 22px;
     background: linear-gradient(135deg, var(--primary, #10b981), var(--accent, #38bdf8));
@@ -1457,7 +1458,7 @@ window.downloadDhanLekhaPdf = function () {
     animation: dlMarkSettle 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
   .dl-glyph {
-    font-size: 34px;
+    font-size: 29px;
     line-height: 1;
     opacity: 0;
   }
@@ -1466,13 +1467,13 @@ window.downloadDhanLekhaPdf = function () {
     animation: dlRupeeArrive 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.12s forwards;
   }
   .dl-letter-d {
-    transform: translateX(28px) translateY(-6px) rotate(18deg) scale(0.65);
-    animation: dlLetterArrive 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.24s forwards;
+    transform: translateY(-14px) scale(0.65);
+    animation: dlLetterArrive 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.22s forwards;
   }
-  .dl-splash-title {
-    margin-top: 6px;
-    font-size: 17px;
-    font-weight: 800;
+  .dl-letter-l {
+    transform: translateX(28px) translateY(6px) rotate(18deg) scale(0.65);
+    animation: dlLetterLArrive 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.32s forwards;
+  }
     letter-spacing: 0.6px;
     color: var(--text, #f8fafc);
     opacity: 0;
