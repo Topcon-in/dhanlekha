@@ -1311,7 +1311,7 @@
 
       const rows = [];
       document.querySelectorAll("table tbody tr").forEach((tr) => {
-        const cols = Array.from(tr.querySelectorAll("td")).map((td) => cleanText(td));
+       const cols = Array.from(tr.querySelectorAll("td:not(.no-print)")).map((td) => cleanText(td));
         if (cols.length) rows.push(cols);
       });
 
