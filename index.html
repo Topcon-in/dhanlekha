@@ -1194,8 +1194,7 @@
       }
       await copyFallback();
     };
-
-   window.downloadDhanLekhaPdf = function () {
+window.downloadDhanLekhaPdf = function () {
   const esc = (str) =>
     String(str ?? "")
       .replace(/₹/g, "Rs. ")
@@ -1212,6 +1211,16 @@
   const isYearly =
     currentView === "yearly" ||
     document.getElementById("tabYearly")?.classList.contains("active");
+
+  const fallbackBudgetNum = toSafeNumber(
+    typeof appState !== "undefined" ? appState.monthlyBudget : 0,
+    0
+  );
+  const fallbackBudgetStr = esc(
+    fallbackBudgetNum > 0
+      ? `Rs. ${fallbackBudgetNum.toLocaleString("en-IN")}`
+      : cleanText(document.getElementById("cardBudget"), "Rs. 0")
+  );
 
   const summaryPairs = [
     ["Monthly Budget", cleanText(document.getElementById("cardBudget"), "Rs. 0")],
@@ -1275,16 +1284,16 @@
 
   const tableX = 36;
   const tableW = 523;
-  const colX = isYearly ? [36, 175, 295, 415] : [36, 130, 310, 435];
+  const colX = isYearly ? [36, 154, 256, 358, 458] : [36, 130, 310, 435];
   const headers = isYearly
-    ? ["Month", "Total Income", "Total Expense", "Net Balance"]
+    ? ["Month", "Total Income", "Total Expense", "Net Balance", "Monthly Budget"]
     : ["Date", "Source / Note", "Income", "Expense"];
 
   ops.push("0.12 0.23 0.42 rg");
   ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
   ops.push("1 1 1 rg");
   headers.forEach((h, i) => {
-    ops.push(`BT /F2 9.5 Tf ${colX[i] + 6} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
+    ops.push(`BT /F2 9 Tf ${colX[i] + 4} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
   });
   curTop += 22;
 
@@ -1304,11 +1313,13 @@
       let vals;
       if (isYearly) {
         // Yearly table columns: [0:Month, 1:Entries, 2:Budget, 3:Income, 4:Expense, 5:Net]
+        const monthBudget = esc(r[2]) || fallbackBudgetStr || "-";
         vals = [
-          (r[0] || "-").slice(0, 22),
+          (r[0] || "-").slice(0, 18),
           r[3] || "Rs. 0",
           r[4] || "Rs. 0",
-          r[5] || "Rs. 0"
+          r[5] || "Rs. 0",
+          monthBudget
         ];
       } else {
         // Daily/Monthly columns: [0:Date, 1:Time, 2:Type, 3:Source, 4:Note, 5:Amount]
@@ -1330,6 +1341,7 @@
           if (cIdx === 1) ops.push("0.06 0.55 0.32 rg");
           else if (cIdx === 2) ops.push("0.78 0.16 0.16 rg");
           else if (cIdx === 3) ops.push("0.15 0.39 0.85 rg");
+          else if (cIdx === 4) ops.push("0.55 0.34 0.04 rg");
           else ops.push("0.13 0.17 0.24 rg");
         } else {
           if (cIdx === 2 && v !== "-") ops.push("0.06 0.55 0.32 rg");
@@ -1337,7 +1349,7 @@
           else ops.push("0.13 0.17 0.24 rg");
         }
         const font = cIdx >= 1 && isYearly ? "/F2" : cIdx === 2 || cIdx === 3 ? "/F2" : "/F1";
-        ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
+        ops.push(`BT ${font} 8.5 Tf ${colX[cIdx] + 4} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
       });
       curTop += rowH;
     });
@@ -1382,7 +1394,7 @@
   a.remove();
   setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
 };
-  </script>
+ </script>
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function () {
