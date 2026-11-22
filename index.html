@@ -1396,13 +1396,20 @@
           ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
           ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
 
-          const vals = [
-            r[0] || "-",
-            r[1] || "-",
-            r[2] || "-",
-            (r[3] || r[4] || "-").slice(0, 26),
-            r[r.length - 1] || "-",
-          ];
+         const rawAmount = r.find((cell, idx) => idx >= 3 && /(?:₹|rs\.?|inr|\d)/i.test(cell) && !/delete/i.test(cell)) || "";
+const cleanNum = rawAmount.replace(/[^0-9.]/g, "");
+const prefix = isIncome ? "+" : isExpense ? "-" : "";
+const formattedAmt = cleanNum
+  ? ${prefix}Rs. ${Number(cleanNum).toLocaleString("en-IN")}
+  : "-";
+
+const vals = [
+  r[0] || "-",
+  r[1] || "-",
+  r[2] || "-",
+  (r[3] || "-").slice(0, 26),
+  formattedAmt,
+];
 
           vals.forEach((v, cIdx) => {
             if (cIdx === 2 && isIncome) {
