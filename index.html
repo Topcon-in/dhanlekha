@@ -697,100 +697,166 @@
     let appState = { setupDone: false, monthlyBudget: 10000, entries: [] };
     let currentView = "today";
 
-    function toSafeNumber(val, fallback = 0) {
-      const n = Number(val);
-      return Number.isFinite(n) ? n : fallback;
-    }
+  function toSafeNumber(val, fallback = 0) {
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+}
 
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          const budget = toSafeNumber(parsed.monthlyBudget, 10000);
-          appState = {
-            setupDone: Boolean(parsed.setupDone),
-            monthlyBudget: budget >= 0 ? budget : 10000,
-            entries: Array.isArray(parsed.entries) ? parsed.entries : []
-          };
-        }
-      } catch (e) {
-        console.error("Storage read error:", e);
+function normalizeMonthlyBudgets(rawMap, fallbackDefault = 10000) {
+  const clean = {};
+  if (rawMap && typeof rawMap === "object") {
+    Object.keys(rawMap).forEach((ym) => {
+      if (/^\d{4}-\d{2}$/.test(ym)) {
+        const amt = toSafeNumber(rawMap[ym], NaN);
+        if (Number.isFinite(amt) && amt >= 0) clean[ym] = amt;
       }
-    }
+    });
+  }
+  return clean;
+}
 
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-      } catch (e) {
-        console.error("Storage write error:", e);
+function getMonthBudgetValue(ym) {
+  if (!ym || !appState.monthlyBudgets) return null;
+  return Object.prototype.hasOwnProperty.call(appState.monthlyBudgets, ym)
+    ? toSafeNumber(appState.monthlyBudgets[ym], 0)
+    : null;
+}
+
+function setMonthBudgetValue(ym, amount) {
+  if (!/^\d{4}-\d{2}$/.test(ym)) return;
+  const cleanAmt = Math.max(0, toSafeNumber(amount, 0));
+  if (!appState.monthlyBudgets || typeof appState.monthlyBudgets !== "object") {
+    appState.monthlyBudgets = {};
+  }
+  appState.monthlyBudgets[ym] = cleanAmt;
+  appState.monthlyBudget = cleanAmt;
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const budget = toSafeNumber(parsed.monthlyBudget, 10000);
+      const safeBudget = budget >= 0 ? budget : 10000;
+      const budgetsMap = normalizeMonthlyBudgets(parsed.monthlyBudgets, safeBudget);
+      const currentYM = getTodayISO().slice(0, 7);
+      if (!Object.prototype.hasOwnProperty.call(budgetsMap, currentYM) && parsed.setupDone) {
+        budgetsMap[currentYM] = safeBudget;
       }
+      appState = {
+        setupDone: Boolean(parsed.setupDone),
+        monthlyBudget: safeBudget,
+        monthlyBudgets: budgetsMap,
+        entries: Array.isArray(parsed.entries) ? parsed.entries : []
+      };
+    } else {
+      appState.monthlyBudgets = {};
     }
+  } catch (e) {
+    console.error("Storage read error:", e);
+    appState.monthlyBudgets = {};
+  }
+}
 
-    function getTodayISO() {
-      const now = new Date();
-      const offset = now.getTimezoneOffset() * 60000;
-      return new Date(now - offset).toISOString().slice(0, 10);
-    }
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+  } catch (e) {
+    console.error("Storage write error:", e);
+  }
+}
 
-    function formatINR(num) {
-      return "₹" + toSafeNumber(num, 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
-    }
+function getTodayISO() {
+  const now = new Date();
+  const offset = now.getTimezoneOffset() * 60000;
+  return new Date(now - offset).toISOString().slice(0, 10);
+}
 
-    function escapeHTML(str) {
-      return String(str ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
+function formatINR(num) {
+  return "₹" + toSafeNumber(num, 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+}
 
-    function initApp() {
-      loadState();
-      const today = getTodayISO();
-      const entryDateEl = document.getElementById("entryDate");
-      const monthPickerEl = document.getElementById("monthPicker");
-      if (entryDateEl) entryDateEl.value = today;
-      if (monthPickerEl) monthPickerEl.value = today.slice(0, 7);
-      populateYears();
-      if (!appState.setupDone) {
-        const initBudgetEl = document.getElementById("initialBudgetInput");
-        if (initBudgetEl) initBudgetEl.value = appState.monthlyBudget;
-        openBudgetModal();
-      }
-      renderApp();
-    }
+function escapeHTML(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-    function completeFirstSetup() {
-      const inputEl = document.getElementById("initialBudgetInput");
-      const val = toSafeNumber(inputEl ? inputEl.value : 10000, 10000);
-      appState.monthlyBudget = val >= 0 ? val : 10000;
-      appState.setupDone = true;
-      saveState();
-      const setupModalEl = document.getElementById("setupModal");
-      if (setupModalEl) {
-        setupModalEl.classList.remove("open", "active", "show");
-        setupModalEl.style.display = "none";
-      }
-      renderApp();
-    }
+function promptNewMonthBudgetIfNeeded(todayISO) {
+  if (!appState.setupDone || !todayISO || todayISO.slice(8, 10) !== "01") return false;
+  const currentYM = todayISO.slice(0, 7);
+  if (Object.prototype.hasOwnProperty.call(appState.monthlyBudgets || {}, currentYM)) {
+    return false;
+  }
+  const entered = window.prompt(
+    `Naya month (${currentYM}) shuru ho gaya hai! Is month ka monthly budget (₹) daalein:`,
+    String(appState.monthlyBudget ?? 10000)
+  );
+  if (entered !== null && entered.trim() !== "") {
+    setMonthBudgetValue(currentYM, entered.trim());
+    saveState();
+  }
+  return true;
+}
 
-    function openBudgetModal() {
-      const modal = document.getElementById("setupModal");
-      const input = document.getElementById("initialBudgetInput");
-      if (input && typeof appState !== "undefined") {
-        input.value = appState.monthlyBudget ?? 10000;
-      }
-      if (modal) {
-        modal.classList.remove("open");
-        modal.style.display = "";
-        void modal.offsetWidth;
-        modal.classList.add("open");
-        modal.style.display = "flex";
-      }
-    }
+function initApp() {
+  loadState();
+  const today = getTodayISO();
+  const currentYM = today.slice(0, 7);
+  const entryDateEl = document.getElementById("entryDate");
+  const monthPickerEl = document.getElementById("monthPicker");
+  if (entryDateEl) entryDateEl.value = today;
+  if (monthPickerEl) monthPickerEl.value = currentYM;
+  populateYears();
+  if (!appState.setupDone) {
+    const initBudgetEl = document.getElementById("initialBudgetInput");
+    if (initBudgetEl) initBudgetEl.value = appState.monthlyBudget;
+    openBudgetModal();
+  } else {
+    promptNewMonthBudgetIfNeeded(today);
+  }
+  renderApp();
+}
 
+function completeFirstSetup() {
+  const inputEl = document.getElementById("initialBudgetInput");
+  const activeYM =
+    (document.getElementById("monthPicker") && document.getElementById("monthPicker").value) ||
+    getTodayISO().slice(0, 7);
+  const val = toSafeNumber(inputEl ? inputEl.value : 10000, 10000);
+  setMonthBudgetValue(activeYM, val >= 0 ? val : 10000);
+  appState.setupDone = true;
+  saveState();
+  const setupModalEl = document.getElementById("setupModal");
+  if (setupModalEl) {
+    setupModalEl.classList.remove("open", "active", "show");
+    setupModalEl.style.display = "none";
+  }
+  renderApp();
+}
+
+function openBudgetModal() {
+  const modal = document.getElementById("setupModal");
+  const input = document.getElementById("initialBudgetInput");
+  const activeYM =
+    (document.getElementById("monthPicker") && document.getElementById("monthPicker").value) ||
+    getTodayISO().slice(0, 7);
+  const monthVal = getMonthBudgetValue(activeYM);
+  if (input && typeof appState !== "undefined") {
+    input.value = monthVal !== null ? monthVal : (appState.monthlyBudget ?? 10000);
+  }
+  if (modal) {
+    modal.classList.remove("open");
+    modal.style.display = "";
+    void modal.offsetWidth;
+    modal.classList.add("open");
+    modal.style.display = "flex";
+  }
+}
     function populateYears() {
       const yearSelect = document.getElementById("yearPicker");
       if (!yearSelect) return;
@@ -858,135 +924,146 @@
       renderApp();
     }
 
-    function renderApp() {
-      const today = getTodayISO();
-      const selectedMonth = document.getElementById("monthPicker").value || today.slice(0, 7);
-      const selectedYear = document.getElementById("yearPicker").value || today.slice(0, 4);
+   function renderApp() {
+  const today = getTodayISO();
+  const selectedMonth = document.getElementById("monthPicker").value || today.slice(0, 7);
+  const selectedYear = document.getElementById("yearPicker").value || today.slice(0, 4);
+  let filtered = [];
+  let budgetDisplay = 0;
 
-      let filtered = [];
-      let budgetDisplay = appState.monthlyBudget;
-
-      if (currentView === "today") {
-        filtered = appState.entries.filter((e) => e.date === today);
-      } else if (currentView === "monthly") {
-        filtered = appState.entries.filter((e) => e.date && e.date.startsWith(selectedMonth));
-      } else {
-        filtered = appState.entries.filter((e) => e.date && e.date.startsWith(selectedYear));
-        budgetDisplay = appState.monthlyBudget * 12;
-      }
-
-      let totalIncome = 0;
-      let totalExpense = 0;
-      filtered.forEach((item) => {
-        const amt = toSafeNumber(item.amount, 0);
-        if (item.type === "income") totalIncome += amt;
-        else totalExpense += amt;
-      });
-
-      const netBudgetLeft = budgetDisplay + totalIncome - totalExpense;
-      document.getElementById("cardBudget").textContent = formatINR(budgetDisplay);
-      document.getElementById("cardIncome").textContent = formatINR(totalIncome);
-      document.getElementById("cardExpense").textContent = formatINR(totalExpense);
-      document.getElementById("cardBalance").textContent = formatINR(netBudgetLeft);
-
-      const container = document.getElementById("tableContainer");
-      if (currentView === "yearly") {
-        renderYearlyTable(container, selectedYear);
-        return;
-      }
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="empty-state">No entries saved for this period yet. Add your first transaction above!</div>`;
-        return;
-      }
-
-      const rows = filtered.map((item) => {
-        const isInc = item.type === "income";
-        const safeId = encodeURIComponent(String(item.id ?? ""));
-        return `
-          <tr>
-            <td>${escapeHTML(item.date)}</td>
-            <td>${escapeHTML(item.time || "-")}</td>
-            <td>
-              <span class="badge ${isInc ? "badge-in" : "badge-out"}">
-                ${isInc ? "+ Income" : "- Expense"}
-              </span>
-            </td>
-            <td><strong>${escapeHTML(item.source)}</strong></td>
-            <td>${escapeHTML(item.note || "—")}</td>
-            <td style="font-weight:700; color:${isInc ? "#34d399" : "#f87171"};">
-              ${isInc ? "+" : "-"}${formatINR(item.amount)}
-            </td>
-            <td class="no-print">
-              <button type="button" class="btn-danger" onclick="deleteEntry(decodeURIComponent('${safeId}'))">Delete</button>
-            </td>
-          </tr>
-        `;
-      }).join("");
-
-      container.innerHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Type</th>
-              <th>Source / Category</th>
-              <th>Note</th>
-              <th>Amount</th>
-              <th class="no-print">Action</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
+  if (currentView === "today") {
+    filtered = appState.entries.filter((e) => e.date === today);
+    const todayYM = today.slice(0, 7);
+    const mBudget = getMonthBudgetValue(todayYM);
+    budgetDisplay = mBudget !== null ? mBudget : 0;
+  } else if (currentView === "monthly") {
+    filtered = appState.entries.filter((e) => e.date && e.date.startsWith(selectedMonth));
+    const mBudget = getMonthBudgetValue(selectedMonth);
+    budgetDisplay = mBudget !== null ? mBudget : 0;
+  } else {
+    filtered = appState.entries.filter((e) => e.date && e.date.startsWith(selectedYear));
+    let yearBudgetSum = 0;
+    for (let i = 1; i <= 12; i++) {
+      const ym = `${selectedYear}-${String(i).padStart(2, "0")}`;
+      const mBudget = getMonthBudgetValue(ym);
+      if (mBudget !== null) yearBudgetSum += mBudget;
     }
+    budgetDisplay = yearBudgetSum;
+  }
 
-    function renderYearlyTable(container, year) {
-      const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-      ];
-      const rows = monthNames.map((name, idx) => {
-        const mNum = String(idx + 1).padStart(2, "0");
-        const prefix = `${year}-${mNum}`;
-        const mEntries = appState.entries.filter((e) => e.date && e.date.startsWith(prefix));
-        let inc = 0;
-        let exp = 0;
-        mEntries.forEach((e) => {
-          const amt = toSafeNumber(e.amount, 0);
-          if (e.type === "income") inc += amt;
-          else exp += amt;
-        });
-        const net = appState.monthlyBudget + inc - exp;
-        return `
-          <tr>
-            <td><strong>${name} ${escapeHTML(year)}</strong></td>
-            <td>${mEntries.length} entries</td>
-            <td>${formatINR(appState.monthlyBudget)}</td>
-            <td style="color:#34d399; font-weight:600;">${formatINR(inc)}</td>
-            <td style="color:#f87171; font-weight:600;">${formatINR(exp)}</td>
-            <td style="color:#fbbf24; font-weight:700;">${formatINR(net)}</td>
-          </tr>
-        `;
-      }).join("");
+  let totalIncome = 0;
+  let totalExpense = 0;
+  filtered.forEach((item) => {
+    const amt = toSafeNumber(item.amount, 0);
+    if (item.type === "income") totalIncome += amt;
+    else totalExpense += amt;
+  });
 
-      container.innerHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Total Entries</th>
-              <th>Fixed Budget</th>
-              <th>Total Income</th>
-              <th>Total Expense</th>
-              <th>Net Balance</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
-    }
+  const netBudgetLeft = budgetDisplay + totalIncome - totalExpense;
+  document.getElementById("cardBudget").textContent = formatINR(budgetDisplay);
+  document.getElementById("cardIncome").textContent = formatINR(totalIncome);
+  document.getElementById("cardExpense").textContent = formatINR(totalExpense);
+  document.getElementById("cardBalance").textContent = formatINR(netBudgetLeft);
+
+  const container = document.getElementById("tableContainer");
+  if (currentView === "yearly") {
+    renderYearlyTable(container, selectedYear);
+    return;
+  }
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state">No entries saved for this period yet. Add your first transaction above!</div>`;
+    return;
+  }
+
+  const rows = filtered.map((item) => {
+    const isInc = item.type === "income";
+    const safeId = encodeURIComponent(String(item.id ?? ""));
+    return `
+      <tr>
+        <td>${escapeHTML(item.date)}</td>
+        <td>${escapeHTML(item.time || "-")}</td>
+        <td>
+          <span class="badge ${isInc ? "badge-in" : "badge-out"}">
+            ${isInc ? "+ Income" : "- Expense"}
+          </span>
+        </td>
+        <td><strong>${escapeHTML(item.source)}</strong></td>
+        <td>${escapeHTML(item.note || "—")}</td>
+        <td style="font-weight:700; color:${isInc ? "#34d399" : "#f87171"};">
+          ${isInc ? "+" : "-"}${formatINR(item.amount)}
+        </td>
+        <td class="no-print">
+          <button type="button" class="btn-danger" onclick="deleteEntry(decodeURIComponent('${safeId}'))">Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Type</th>
+          <th>Source / Category</th>
+          <th>Note</th>
+          <th>Amount</th>
+          <th class="no-print">Action</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+function renderYearlyTable(container, year) {
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const rows = monthNames.map((name, idx) => {
+    const mNum = String(idx + 1).padStart(2, "0");
+    const prefix = `${year}-${mNum}`;
+    const mEntries = appState.entries.filter((e) => e.date && e.date.startsWith(prefix));
+    let inc = 0;
+    let exp = 0;
+    mEntries.forEach((e) => {
+      const amt = toSafeNumber(e.amount, 0);
+      if (e.type === "income") inc += amt;
+      else exp += amt;
+    });
+    const setBudget = getMonthBudgetValue(prefix);
+    const budgetCell = setBudget !== null ? formatINR(setBudget) : "-------";
+    const net = (setBudget !== null ? setBudget : 0) + inc - exp;
+    return `
+      <tr>
+        <td><strong>${name} ${escapeHTML(year)}</strong></td>
+        <td>${mEntries.length} entries</td>
+        <td>${budgetCell}</td>
+        <td style="color:#34d399; font-weight:600;">${formatINR(inc)}</td>
+        <td style="color:#f87171; font-weight:600;">${formatINR(exp)}</td>
+        <td style="color:#fbbf24; font-weight:700;">${formatINR(net)}</td>
+      </tr>
+    `;
+  }).join("");
+
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Total Entries</th>
+          <th>Fixed Budget</th>
+          <th>Total Income</th>
+          <th>Total Expense</th>
+          <th>Net Balance</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
 
     function exportBackupFile() {
       const payload = {
@@ -1221,16 +1298,6 @@ window.downloadDhanLekhaPdf = function () {
     currentView === "yearly" ||
     document.getElementById("tabYearly")?.classList.contains("active");
 
-  const fallbackBudgetNum = toSafeNumber(
-    typeof appState !== "undefined" ? appState.monthlyBudget : 0,
-    0
-  );
-  const fallbackBudgetStr = esc(
-    fallbackBudgetNum > 0
-      ? `Rs. ${fallbackBudgetNum.toLocaleString("en-IN")}`
-      : cleanText(document.getElementById("cardBudget"), "Rs. 0")
-  );
-
   const summaryPairs = [
     ["Monthly Budget", cleanText(document.getElementById("cardBudget"), "Rs. 0")],
     ["Total Income", cleanText(document.getElementById("cardIncome"), "Rs. 0")],
@@ -1322,7 +1389,8 @@ window.downloadDhanLekhaPdf = function () {
       let vals;
       if (isYearly) {
         // Yearly table columns: [0:Month, 1:Entries, 2:Budget, 3:Income, 4:Expense, 5:Net]
-        const monthBudget = esc(r[2]) || fallbackBudgetStr || "-";
+        const rawBudget = (r[2] || "").trim();
+        const monthBudget = rawBudget && rawBudget !== "-------" ? esc(rawBudget) : "-------";
         vals = [
           (r[0] || "-").slice(0, 18),
           r[3] || "Rs. 0",
