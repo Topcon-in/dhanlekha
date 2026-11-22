@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "app.vercel.dhanlekha_eypj.twa",
-        "sha256_cert_fingerprints": ["41:4F:BA:ED:0B:D8:0D:0D:F8:93:8A:4F:6D:FB:10:90:C5:9C:F8:A2:D4:05:A7:E8:03:A3:3B:A7:0B:CB:35:05"]
+        "sha256_cert_fingerprints": ["2A:6B:A4:91:82:DD:0A:64:23:21:2E:B8:12:AA:79:7C:7B:02:04:B3:DC:B5:EB:9D:ED:29:55:38:F7:BE:E8:66"]
       }
     }]
