@@ -1366,8 +1366,8 @@
       curTop += 14;
       const tableX = 36;
       const tableW = 523;
-      const colX = [36, 122, 195, 275, 420];
-      const headers = ["Date", "Time", "Type", "Source / Note", "Amount"];
+     const colX = [36, 130, 310, 435];
+const headers = ["Date", "Source / Note", "Income", "Expense"];
 
       ops.push("0.12 0.23 0.42 rg");
       ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
@@ -1396,31 +1396,30 @@
           ops.push(rIdx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
           ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
 
-         const rawAmount = r.find((cell, idx) => idx >= 3 && /(?:₹|rs\.?|inr|\d)/i.test(cell) && !/delete/i.test(cell)) || "";
-const cleanNum = rawAmount.replace(/[^0-9.]/g, "");
-const prefix = isIncome ? "+" : isExpense ? "-" : "";
-const formattedAmt = cleanNum
-  ? ${prefix}Rs. ${Number(cleanNum).toLocaleString("en-IN")}
-  : "-";
+     const rawAmt = r.slice(3).find((cell) => /\d/.test(cell) && !/delete/i.test(cell)) || "";
+const numVal = Number(rawAmt.replace(/[^0-9.]/g, ""));
+const amtText = numVal > 0 ? Rs. ${numVal.toLocaleString("en-IN")} : "-";
+
+const incomeVal = isIncome ? amtText : "-";
+const expenseVal = isExpense ? amtText : "-";
 
 const vals = [
   r[0] || "-",
-  r[1] || "-",
-  r[2] || "-",
-  (r[3] || "-").slice(0, 26),
-  formattedAmt,
+  (r[3] || "-").slice(0, 28),
+  incomeVal,
+  expenseVal,
 ];
 
           vals.forEach((v, cIdx) => {
-            if (cIdx === 2 && isIncome) {
-              ops.push("0.06 0.55 0.32 rg");
-            } else if (cIdx === 2 && isExpense) {
-              ops.push("0.78 0.16 0.16 rg");
-            } else {
-              ops.push("0.13 0.17 0.24 rg");
-            }
-            const font = cIdx === 2 || cIdx === 4 ? "/F2" : "/F1";
-            ops.push(`BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
+           if (cIdx === 2 && v !== "-") {
+  ops.push("0.06 0.55 0.32 rg");
+} else if (cIdx === 3 && v !== "-") {
+  ops.push("0.78 0.16 0.16 rg");
+} else {
+  ops.push("0.13 0.17 0.24 rg");
+}
+const font = cIdx === 2 || cIdx === 3 ? "/F2" : "/F1";
+ops.push(BT ${font} 9 Tf ${colX[cIdx] + 6} ${yBottom + 6} Td (${esc(v)}) Tj ET);
           });
 
           curTop += rowH;
