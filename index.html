@@ -543,6 +543,17 @@
         font-size: 12px !important;
         white-space: nowrap;
       }
+      #filtersPopoverPanel > input,
+  #filtersPopoverPanel > select,
+  #filtersPopoverPanel .filter-controls,
+  #filtersPopoverPanel #monthFilterWrap,
+  #filtersPopoverPanel #yearFilterWrap,
+  #filtersPopoverPanel #monthPicker,
+  #filtersPopoverPanel #yearPicker,
+  #filtersPopoverPanel #typeFilterSelect,
+  #filtersPopoverPanel #categoryFilterSelect {
+    width: 100% !important;
+  }
     }
     body.light-theme {
   --bg: #f8fafc;
@@ -839,30 +850,32 @@ body {
         <button type="button" class="tab-btn" id="tabMonthly" onclick="switchView('monthly')">🗓️ Monthly</button>
         <button type="button" class="tab-btn" id="tabYearly" onclick="switchView('yearly')">📆 Yearly</button>
       </div>
-      <div class="filter-controls">
-        <div id="monthFilterWrap">
-          <input type="month" id="monthPicker" onchange="renderApp()" />
-        </div>
-        <div id="yearFilterWrap" style="display:none;">
-          <select id="yearPicker" onchange="renderApp()"></select>
+     <div class="filter-controls">
+        <button type="button" class="btn-secondary" id="toggleFiltersBtn" onclick="toggleAccountsFiltersPanel()" style="padding:7px 12px; font-size:13px;">Filters</button>
+        <div id="filtersPopoverPanel" style="display:none; width:100%; flex-wrap:wrap; gap:8px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px;">
+          <div id="monthFilterWrap">
+            <input type="month" id="monthPicker" onchange="renderApp()" />
+          </div>
+          <div id="yearFilterWrap" style="display:none;">
+            <select id="yearPicker" onchange="renderApp()"></select>
+          </div>
+          <select id="typeFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
+            <option value="all">All Types</option>
+            <option value="income">Income Only</option>
+            <option value="expense">Expense Only</option>
+          </select>
+          <select id="categoryFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
+            <option value="all">All Categories</option>
+            <option value="General">General</option>
+            <option value="Food">Food</option>
+            <option value="Travel">Travel</option>
+            <option value="Bills">Bills</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Health">Health</option>
+            <option value="Salary/Income">Salary / Income</option>
+          </select>
         </div>
       </div>
-      <input type="text" id="searchEntryInput" placeholder="🔍 Search source or note..." oninput="renderApp()" style="width:185px; padding:7px 10px; font-size:13px;" />
-      <select id="typeFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
-        <option value="all">All Types</option>
-        <option value="income">Income Only</option>
-        <option value="expense">Expense Only</option>
-      </select>
-      <select id="categoryFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
-        <option value="all">All Categories</option>
-        <option value="General">General</option>
-        <option value="Food">Food</option>
-        <option value="Travel">Travel</option>
-        <option value="Bills">Bills</option>
-        <option value="Shopping">Shopping</option>
-        <option value="Health">Health</option>
-        <option value="Salary/Income">Salary / Income</option>
-      </select>
       <button type="button" class="btn-secondary" style="padding:7px 10px; font-size:13px;" onclick="resetAccountsFilters()">Reset</button>
     </div>
 
@@ -1760,6 +1773,16 @@ function deleteSplitEntry(id) {
   appState.splits = appState.splits.filter((s) => String(s.id) !== String(id));
   saveState();
   renderSplitSection();
+}
+  function toggleAccountsFiltersPanel() {
+  const panel = document.getElementById("filtersPopoverPanel");
+  const btn = document.getElementById("toggleFiltersBtn");
+  if (!panel) return;
+  const isOpen = panel.style.display === "flex";
+  panel.style.display = isOpen ? "none" : "flex";
+  if (btn) {
+    btn.classList.toggle("active", !isOpen);
+  }
 }
 function resetAccountsFilters() {
   const searchEl = document.getElementById("searchEntryInput");
@@ -3447,6 +3470,7 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
 
 
