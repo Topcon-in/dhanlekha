@@ -2363,13 +2363,14 @@ function renderYearlyTable(container, year) {
         </ol>
       </div>
 
-      <div style="background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.35); border-radius:10px; padding:12px;">
+     <div style="background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.35); border-radius:10px; padding:12px;">
         <h4 style="margin:0 0 6px 0; color:#fbbf24; font-size:15px;">4. Settings, Backup &amp; Data Safety Rules</h4>
         <ol style="margin:0; padding-left:18px;">
           <li><strong>Theme &amp; Currency:</strong> Switch between <em>Midnight Dark</em> and <em>Clean Light</em> themes, or change your display currency symbol (₹, $, €, £) anytime.</li>
           <li><strong>Custom Categories:</strong> Add your own personal categories (such as Gym, Rent, EMI, or Subscriptions) in Settings—they immediately appear in both Add Entry and Edit Entry dropdowns.</li>
-          <li><strong>Mandatory Backup Habit:</strong> Because DhanLekha stores 100% of your records offline inside your device browser (<code>localStorage</code>) with zero cloud tracking, always click <strong>Save Backup File</strong> before clearing browser data, uninstalling the app, or changing phones.</li>
-          <li><strong>Restore &amp; Safe Reset:</strong> Use <strong>Restore Backup</strong> to reload your saved <code>.json</code> file anytime. Use <strong>Safe Reset</strong> only after downloading a backup if you want to clear all records and start fresh.</li>
+          <li><strong>Important Backup Rule (Before Deleting App, Resetting Phone, or Switching Devices):</strong> Because DhanLekha stores 100% of your records offline on your device (<code>localStorage</code>) with zero cloud server storage, <strong>before deleting this app, resetting your phone, clearing browser data, or selling/changing your phone</strong>, always click <strong>Save Backup File</strong> to download your backup file and keep it in a safe place (such as Google Drive, email, or another device).</li>
+          <li><strong>How to Recover Your Old Data on a Reset or New Phone:</strong> After resetting your phone or buying a new phone, simply open/install <strong>DhanLekha</strong>, click <strong>Restore Backup</strong>, and select that previously downloaded backup file—all your old entries, budgets, and records will immediately appear again.</li>
+          <li><strong>Safe Reset:</strong> Use <strong>Safe Reset</strong> only after downloading a backup file if you want to clear all records and start fresh.</li>
         </ol>
       </div>
     </div>
@@ -3304,6 +3305,7 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
 
 
