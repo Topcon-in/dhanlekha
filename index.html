@@ -5,7 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DhanLekha — Monthly & Yearly Personal Money Tracker</title>
   <link rel="manifest" href="./manifest.json" />
-  <meta name="theme-color" content="#0f172a" />
+  <meta name="theme-color" content="#000000" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<style id="instantSplashBootStyle">
+  html, body { background-color: #000000 !important; }
+  #dhanlekhaSplash {
+    position: fixed !important;
+    inset: 0 !important;
+    background: #000000 !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+</style>
   <style>
     :root {
       --bg: #0f172a;
@@ -3231,3 +3246,4 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
