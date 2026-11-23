@@ -586,6 +586,18 @@ body.light-theme .footer-share-btn {
   color: #0f172a;
   border-color: #94a3b8;
 }
+    body.light-theme .val-red,
+body.light-theme .val-amber,
+body.light-theme #reportComparisonContainer strong {
+  filter: brightness(0.72) saturate(1.25);
+}
+body.light-theme #categoryBreakdownList strong {
+  color: #0f172a;
+}
+body.light-theme #reportDonutContainer strong,
+body.light-theme #reportIncomeDonutContainer strong {
+  color: #0f172a;
+}
     /* === 4-Section Modular Layout & Fixed Bottom Nav === */
 body {
   padding-bottom: 76px;
@@ -862,7 +874,14 @@ body {
         <div class="card-value val-blue" id="splitNetTotal">₹0</div>
       </div>
     </section>
-
+<div class="tabs-bar" style="margin-bottom:12px;">
+      <input type="text" id="splitSearchInput" placeholder="🔍 Search person or note..." oninput="renderSplitSection()" style="width:200px; padding:7px 10px; font-size:13px;" />
+      <select id="splitStatusFilter" onchange="renderSplitSection()" style="width:auto; padding:7px 10px; font-size:13px;">
+        <option value="all">All Balances</option>
+        <option value="unsettled">Unsettled Only</option>
+        <option value="settled">Settled Only</option>
+      </select>
+    </div>
     <section class="table-wrap" id="splitListContainer"></section>
   </div>
 
@@ -892,7 +911,10 @@ body {
       <div id="reportComparisonContainer"></div>
     </div>
   </div>
-
+<div class="form-box">
+      <h2 style="font-size:15px; margin-bottom:12px;">🗓️ Last 6 Months Trend (Income vs Expense)</h2>
+      <div id="reportSixMonthTrendContainer"></div>
+    </div>
   <!-- SECTION 4: SETTINGS (Preferences, Categories, Backup & Info) -->
   <div id="section-settings" class="dl-section">
     <section class="form-box">
@@ -1563,12 +1585,25 @@ function renderSplitSection() {
   if (oweEl) oweEl.textContent = formatINR(youOwe);
   if (netEl) netEl.textContent = (net >= 0 ? "+" : "-") + formatINR(Math.abs(net));
 
-  if (!splits.length) {
-    listEl.innerHTML = `<div class="empty-state">No shared expenses or balances added yet.</div>`;
+  const q = (document.getElementById("splitSearchInput")?.value || "").trim().toLowerCase();
+  const statusFilter = document.getElementById("splitStatusFilter")?.value || "all";
+
+  const filteredSplits = splits.filter((s) => {
+    if (statusFilter === "unsettled" && s.settled) return false;
+    if (statusFilter === "settled" && !s.settled) return false;
+    if (q) {
+      const hay = `${s.person || ""} ${s.note || ""} ${s.date || ""}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  if (!filteredSplits.length) {
+    listEl.innerHTML = `<div class="empty-state">${splits.length ? "No matching split records found." : "No shared expenses or balances added yet."}</div>`;
     return;
   }
 
-  const rows = splits.map((s) => {
+  const rows = filteredSplits.map((s) => {
     const isGet = s.direction === "owed_to_me";
     const safeId = encodeURIComponent(String(s.id));
     return `
@@ -1919,6 +1954,52 @@ buildDonutMarkup(incomeDonutEl, incomes, totalInc, "No income data available for
           <div style="width:${expPct}%; height:100%; background:#ef4444;"></div>
         </div>
       </div>
+    </div>
+  `;
+  renderSixMonthTrend();
+}
+  function renderSixMonthTrend() {
+  const trendEl = document.getElementById("reportSixMonthTrendContainer");
+  if (!trendEl) return;
+
+  const now = new Date();
+  const months = [];
+  for (let offset = 5; offset >= 0; offset--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const label = d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    months.push({ ym, label, inc: 0, exp: 0 });
+  }
+
+  (appState.entries || []).forEach((e) => {
+    if (!e.date || e.date.length < 7) return;
+    const prefix = e.date.slice(0, 7);
+    const mObj = months.find((m) => m.ym === prefix);
+    if (!mObj) return;
+    const amt = toSafeNumber(e.amount, 0);
+    if (e.type === "income") mObj.inc += amt;
+    else mObj.exp += amt;
+  });
+
+  const peak = Math.max(...months.flatMap((m) => [m.inc, m.exp]), 1);
+
+  trendEl.innerHTML = `
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(92px, 1fr)); gap:12px; align-items:end;">
+      ${months.map((m) => {
+        const incH = Math.max(4, Math.round((m.inc / peak) * 90));
+        const expH = Math.max(4, Math.round((m.exp / peak) * 90));
+        return `
+          <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 8px; text-align:center;">
+            <div style="height:96px; display:flex; align-items:flex-end; justify-content:center; gap:6px; margin-bottom:8px;">
+              <div title="Income: ${formatINR(m.inc)}" style="width:14px; height:${incH}px; background:#10b981; border-radius:4px 4px 0 0;"></div>
+              <div title="Expense: ${formatINR(m.exp)}" style="width:14px; height:${expH}px; background:#ef4444; border-radius:4px 4px 0 0;"></div>
+            </div>
+            <div style="font-size:12px; font-weight:700;">${escapeHTML(m.label)}</div>
+            <div style="font-size:11px; color:#34d399;">+${formatINR(m.inc)}</div>
+            <div style="font-size:11px; color:#f87171;">-${formatINR(m.exp)}</div>
+          </div>
+        `;
+      }).join("")}
     </div>
   `;
 }
