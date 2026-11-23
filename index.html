@@ -895,6 +895,16 @@ body {
       <p id="reportBudgetStatus" style="font-size:13px; color:var(--muted); margin-top:4px;">
         Track category distribution, monthly budget usage, and income vs expense trends.
       </p>
+      <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border);">
+      <div class="tabs">
+        <button type="button" class="tab-btn active" id="reportTabMonthly" onclick="switchReportPeriod('monthly')">🗓️ Monthly</button>
+        <button type="button" class="tab-btn" id="reportTabYearly" onclick="switchReportPeriod('yearly')">📆 Yearly</button>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+        <input type="month" id="reportMonthPicker" onchange="refreshReportsOnly()" style="width:auto; padding:7px 10px; font-size:13px;" />
+        <select id="reportYearPicker" onchange="refreshReportsOnly()" style="display:none; width:auto; padding:7px 10px; font-size:13px;"></select>
+      </div>
+    </div>
     </div>
 
     <div class="form-box">
@@ -1960,7 +1970,113 @@ function buildDonutMarkup(containerEl, itemsList, totalAmt, emptyMsg, palette, c
     <div style="flex:1; min-width:220px;">${legendHtml}</div>
   `;
 }
+let reportPeriodMode = "monthly";
+
+function syncReportPickers() {
+  const today = getTodayISO();
+  const mPick = document.getElementById("reportMonthPicker");
+  const yPick = document.getElementById("reportYearPicker");
+  if (mPick && !mPick.value) {
+    mPick.value = document.getElementById("monthPicker")?.value || today.slice(0, 7);
+  }
+  if (yPick) {
+    const currentYear = new Date().getFullYear();
+    const years = new Set([currentYear, currentYear - 1, currentYear + 1]);
+    (appState.entries || []).forEach((item) => {
+      if (item.date && item.date.length >= 4) {
+        const y = Number(item.date.slice(0, 4));
+        if (Number.isInteger(y)) years.add(y);
+      }
+    });
+    const prevVal = yPick.value;
+    const sorted = Array.from(years).sort((a, b) => b - a);
+    yPick.innerHTML = sorted.map((y) => `<option value="${y}">${y}</option>`).join("");
+    yPick.value = prevVal && sorted.includes(Number(prevVal)) ? prevVal : String(currentYear);
+  }
+}
+
+function switchReportPeriod(mode) {
+  reportPeriodMode = mode === "yearly" ? "yearly" : "monthly";
+  document.getElementById("reportTabMonthly")?.classList.toggle("active", reportPeriodMode === "monthly");
+  document.getElementById("reportTabYearly")?.classList.toggle("active", reportPeriodMode === "yearly");
+  const mPick = document.getElementById("reportMonthPicker");
+  const yPick = document.getElementById("reportYearPicker");
+  if (mPick) mPick.style.display = reportPeriodMode === "monthly" ? "block" : "none";
+  if (yPick) yPick.style.display = reportPeriodMode === "yearly" ? "block" : "none";
+  refreshReportsOnly();
+}
+
+function refreshReportsOnly() {
+  syncReportPickers();
+  const today = getTodayISO();
+  const selectedMonth = document.getElementById("reportMonthPicker")?.value || today.slice(0, 7);
+  const selectedYear = document.getElementById("reportYearPicker")?.value || today.slice(0, 4);
+
+  let repEntries = [];
+  let repBudget = 0;
+
+  if (reportPeriodMode === "yearly") {
+    repEntries = (appState.entries || []).filter((e) => e.date && e.date.startsWith(selectedYear));
+    for (let i = 1; i <= 12; i++) {
+      const ym = `${selectedYear}-${String(i).padStart(2, "0")}`;
+      const mb = getMonthBudgetValue(ym);
+      if (mb !== null) repBudget += mb;
+    }
+  } else {
+    repEntries = (appState.entries || []).filter((e) => e.date && e.date.startsWith(selectedMonth));
+    const mb = getMonthBudgetValue(selectedMonth);
+    repBudget = mb !== null ? mb : 0;
+  }
+
+  let repIncome = 0;
+  let repExpense = 0;
+  repEntries.forEach((item) => {
+    const amt = toSafeNumber(item.amount, 0);
+    if (item.type === "income") repIncome += amt;
+    else repExpense += amt;
+  });
+
+  renderReportsSection(repEntries, repBudget, repIncome, repExpense);
+}
+
 function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalExpense) {
+  syncReportPickers();
+  const today = getTodayISO();
+  const activePeriodLabel =
+    reportPeriodMode === "yearly"
+      ? `Yearly (${document.getElementById("reportYearPicker")?.value || today.slice(0, 4)})`
+      : `Monthly (${document.getElementById("reportMonthPicker")?.value || today.slice(0, 7)})`;
+
+  // Always compute Reports charts from reportPeriodMode (Monthly or Yearly)
+  const filterPrefix =
+    reportPeriodMode === "yearly"
+      ? document.getElementById("reportYearPicker")?.value || today.slice(0, 4)
+      : document.getElementById("reportMonthPicker")?.value || today.slice(0, 7);
+
+  const scopedEntries = (appState.entries || []).filter(
+    (e) => e.date && e.date.startsWith(filterPrefix)
+  );
+
+  let scopedBudget = 0;
+  if (reportPeriodMode === "yearly") {
+    for (let i = 1; i <= 12; i++) {
+      const ym = `${filterPrefix}-${String(i).padStart(2, "0")}`;
+      const mb = getMonthBudgetValue(ym);
+      if (mb !== null) scopedBudget += mb;
+    }
+  } else {
+    const mb = getMonthBudgetValue(filterPrefix);
+    scopedBudget = mb !== null ? mb : 0;
+  }
+
+  let scopedIncome = 0;
+  let scopedExpense = 0;
+  scopedEntries.forEach((item) => {
+    const amt = toSafeNumber(item.amount, 0);
+    if (item.type === "income") scopedIncome += amt;
+    else scopedExpense += amt;
+  });
+
   const donutEl = document.getElementById("reportDonutContainer");
   const incomeDonutEl = document.getElementById("reportIncomeDonutContainer");
   const compEl = document.getElementById("reportComparisonContainer");
@@ -1968,34 +2084,33 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
   if (!donutEl || !compEl) return;
 
   if (statusEl) {
-    if (budgetDisplay > 0) {
-      const usedPct = Math.min(999, Math.round((totalExpense / budgetDisplay) * 100));
-      statusEl.innerHTML = `Monthly Budget: <strong>${formatINR(budgetDisplay)}</strong> • Used: <strong>${usedPct}%</strong> (${formatINR(totalExpense)} spent)`;
+    if (scopedBudget > 0) {
+      const usedPct = Math.min(999, Math.round((scopedExpense / scopedBudget) * 100));
+      statusEl.innerHTML = `<strong>${escapeHTML(activePeriodLabel)}</strong> • Budget: <strong>${formatINR(scopedBudget)}</strong> • Used: <strong>${usedPct}%</strong> (${formatINR(scopedExpense)} spent)`;
     } else {
-      statusEl.innerHTML = `No monthly budget limit set for this period. Set one in <strong>Settings</strong> or via <strong>Set Monthly Budget</strong>.`;
+      statusEl.innerHTML = `<strong>${escapeHTML(activePeriodLabel)}</strong> • No budget limit recorded for this period.`;
     }
   }
 
-  const expenses = periodEntries.filter((e) => e.type === "expense");
+  const expenses = scopedEntries.filter((e) => e.type === "expense");
   const totalExp = expenses.reduce((sum, e) => sum + toSafeNumber(e.amount, 0), 0);
   const expensePalette = ["#38bdf8", "#f59e0b", "#a855f7", "#10b981", "#f43f5e", "#eab308", "#6366f1"];
- buildDonutMarkup(donutEl, expenses, totalExp, "No expense data available for this period yet.", expensePalette, "expense");
+  buildDonutMarkup(donutEl, expenses, totalExp, "No expense data available for this period yet.", expensePalette, "expense");
 
-  const incomes = periodEntries.filter((e) => e.type === "income");
+  const incomes = scopedEntries.filter((e) => e.type === "income");
   const totalInc = incomes.reduce((sum, e) => sum + toSafeNumber(e.amount, 0), 0);
   const incomePalette = ["#10b981", "#38bdf8", "#a855f7", "#f59e0b", "#14b8a6", "#6366f1", "#ec4899"];
-buildDonutMarkup(incomeDonutEl, incomes, totalInc, "No income data available for this period yet.", incomePalette, "income");
+  buildDonutMarkup(incomeDonutEl, incomes, totalInc, "No income data available for this period yet.", incomePalette, "income");
 
-  const maxVal = Math.max(totalIncome, totalExpense, 1);
-  const incPct = Math.min(100, Math.round((totalIncome / maxVal) * 100));
-  const expPct = Math.min(100, Math.round((totalExpense / maxVal) * 100));
-
+  const maxVal = Math.max(scopedIncome, scopedExpense, 1);
+  const incPct = Math.min(100, Math.round((scopedIncome / maxVal) * 100));
+  const expPct = Math.min(100, Math.round((scopedExpense / maxVal) * 100));
   compEl.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:14px;">
       <div>
         <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
           <span style="color:#34d399; font-weight:600;">🟢 Income</span>
-          <strong style="color:#34d399;">${formatINR(totalIncome)}</strong>
+          <strong style="color:#34d399;">${formatINR(scopedIncome)}</strong>
         </div>
         <div style="width:100%; height:12px; background:var(--bg); border-radius:999px; overflow:hidden; border:1px solid var(--border);">
           <div style="width:${incPct}%; height:100%; background:#10b981;"></div>
@@ -2004,7 +2119,7 @@ buildDonutMarkup(incomeDonutEl, incomes, totalInc, "No income data available for
       <div>
         <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
           <span style="color:#f87171; font-weight:600;">🔴 Expense</span>
-          <strong style="color:#f87171;">${formatINR(totalExpense)}</strong>
+          <strong style="color:#f87171;">${formatINR(scopedExpense)}</strong>
         </div>
         <div style="width:100%; height:12px; background:var(--bg); border-radius:999px; overflow:hidden; border:1px solid var(--border);">
           <div style="width:${expPct}%; height:100%; background:#ef4444;"></div>
@@ -2628,9 +2743,11 @@ window.downloadDhanLekhaPdf = function () {
   ops.push("0 762 595 80 re f");
   ops.push("1 1 1 rg");
   ops.push("BT /F2 19 Tf 36 808 Td (DhanLekha - Report Chart Analysis) Tj ET");
+  const repModeText = reportPeriodMode === "yearly"
+    ? "Yearly Report (" + (document.getElementById("reportYearPicker")?.value || getTodayISO().slice(0, 4)) + ")"
+    : "Monthly Report (" + (document.getElementById("reportMonthPicker")?.value || getTodayISO().slice(0, 7)) + ")";
   ops.push("0.75 0.85 0.96 rg");
-  ops.push("BT /F1 10 Tf 36 786 Td (Generated: " + esc(new Date().toLocaleString()) + ") Tj ET");
-
+  ops.push("BT /F1 10 Tf 36 786 Td (" + esc(repModeText + "  |  Generated: " + new Date().toLocaleString()) + ") Tj ET");
   // Income vs Expense Comparison Bars
   let curTop = 108;
   ops.push("0.09 0.15 0.24 rg");
@@ -2761,7 +2878,9 @@ window.downloadDhanLekhaPdf = function () {
   const blobUrl = URL.createObjectURL(pdfBlob);
   const a = document.createElement("a");
   a.href = blobUrl;
-  a.download = "DhanLekha-Report-Analysis.pdf";
+ a.download = reportPeriodMode === "yearly"
+    ? `DhanLekha-Yearly-Analysis-${document.getElementById("reportYearPicker")?.value || getTodayISO().slice(0, 4)}.pdf`
+    : `DhanLekha-Monthly-Analysis-${document.getElementById("reportMonthPicker")?.value || getTodayISO().slice(0, 7)}.pdf`;
   document.body.appendChild(a);
   a.click();
   a.remove();
