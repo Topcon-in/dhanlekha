@@ -814,6 +814,10 @@ body {
       <h2 style="font-size:15px; margin-bottom:12px;">🍩 Category Distribution</h2>
       <div id="reportDonutContainer" style="display:flex; flex-wrap:wrap; align-items:center; gap:24px;"></div>
     </div>
+    <div class="form-box">
+      <h2 style="font-size:15px; margin-bottom:12px;">💰 Income Distribution</h2>
+      <div id="reportIncomeDonutContainer" style="display:flex; flex-wrap:wrap; align-items:center; gap:24px;"></div>
+    </div>
 
     <div class="form-box">
       <h2 style="font-size:15px; margin-bottom:12px;">📶 Income vs Expense Overview</h2>
@@ -1746,8 +1750,61 @@ renderSplitSection();
     </table>
   `;
 }
+function buildDonutMarkup(containerEl, itemsList, totalAmt, emptyMsg, palette) {
+  if (!containerEl) return;
+  if (totalAmt <= 0 || !itemsList.length) {
+    containerEl.innerHTML = `<div class="empty-state" style="width:100%;">${escapeHTML(emptyMsg)}</div>`;
+    return;
+  }
+
+  const catMap = {};
+  itemsList.forEach((e) => {
+    const c = e.category || "General";
+    catMap[c] = (catMap[c] || 0) + toSafeNumber(e.amount, 0);
+  });
+
+  const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  let offsetSoFar = 0;
+
+  const circlesSvg = sorted.map(([cat, amt], idx) => {
+    const frac = amt / totalAmt;
+    const dash = frac * circumference;
+    const color = palette[idx % palette.length];
+    const circle = `<circle cx="70" cy="70" r="${radius}" fill="transparent" stroke="${color}" stroke-width="16" stroke-dasharray="${dash.toFixed(2)} ${circumference.toFixed(2)}" stroke-dashoffset="${(-offsetSoFar).toFixed(2)}" transform="rotate(-90 70 70)"></circle>`;
+    offsetSoFar += dash;
+    return { cat, amt, pct: (frac * 100).toFixed(1), color, circle };
+  });
+
+  const legendHtml = circlesSvg.map((item) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:14px; padding:6px 0; border-bottom:1px solid rgba(148,163,184,0.14); font-size:13.5px;">
+      <span style="display:inline-flex; align-items:center; gap:8px;">
+        <span style="width:10px; height:10px; border-radius:50%; background:${item.color}; display:inline-block;"></span>
+        <strong>${escapeHTML(item.cat)}</strong>
+      </span>
+      <span style="font-weight:700; color:var(--text);">${item.pct}% <span style="color:var(--muted); font-weight:500;">(${formatINR(item.amt)})</span></span>
+    </div>
+  `).join("");
+
+  containerEl.innerHTML = `
+    <div style="position:relative; width:140px; height:140px; flex-shrink:0;">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="${radius}" fill="transparent" stroke="rgba(148,163,184,0.18)" stroke-width="16"></circle>
+        ${circlesSvg.map((x) => x.circle).join("")}
+      </svg>
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none;">
+        <strong style="font-size:15px;">${formatINR(totalAmt)}</strong>
+        <span style="font-size:11px; color:var(--muted);">total</span>
+      </div>
+    </div>
+    <div style="flex:1; min-width:220px;">${legendHtml}</div>
+  `;
+}
+
 function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalExpense) {
   const donutEl = document.getElementById("reportDonutContainer");
+  const incomeDonutEl = document.getElementById("reportIncomeDonutContainer");
   const compEl = document.getElementById("reportComparisonContainer");
   const statusEl = document.getElementById("reportBudgetStatus");
   if (!donutEl || !compEl) return;
@@ -1763,54 +1820,13 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
 
   const expenses = periodEntries.filter((e) => e.type === "expense");
   const totalExp = expenses.reduce((sum, e) => sum + toSafeNumber(e.amount, 0), 0);
+  const expensePalette = ["#38bdf8", "#f59e0b", "#a855f7", "#10b981", "#f43f5e", "#eab308", "#6366f1"];
+  buildDonutMarkup(donutEl, expenses, totalExp, "No expense data available for this period yet.", expensePalette);
 
-  if (totalExp <= 0) {
-    donutEl.innerHTML = `<div class="empty-state" style="width:100%;">No expense data available for this period yet.</div>`;
-  } else {
-    const palette = ["#38bdf8", "#f59e0b", "#a855f7", "#10b981", "#f43f5e", "#eab308", "#6366f1"];
-    const catMap = {};
-    expenses.forEach((e) => {
-      const c = e.category || "General";
-      catMap[c] = (catMap[c] || 0) + toSafeNumber(e.amount, 0);
-    });
-    const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
-    const radius = 54;
-    const circumference = 2 * Math.PI * radius;
-    let offsetSoFar = 0;
-
-    const circlesSvg = sorted.map(([cat, amt], idx) => {
-      const frac = amt / totalExp;
-      const dash = frac * circumference;
-      const color = palette[idx % palette.length];
-      const circle = `<circle cx="70" cy="70" r="${radius}" fill="transparent" stroke="${color}" stroke-width="16" stroke-dasharray="${dash.toFixed(2)} ${circumference.toFixed(2)}" stroke-dashoffset="${(-offsetSoFar).toFixed(2)}" transform="rotate(-90 70 70)"></circle>`;
-      offsetSoFar += dash;
-      return { cat, amt, pct: (frac * 100).toFixed(1), color, circle };
-    });
-
-    const legendHtml = circlesSvg.map((item) => `
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:14px; padding:6px 0; border-bottom:1px solid rgba(148,163,184,0.14); font-size:13.5px;">
-        <span style="display:inline-flex; align-items:center; gap:8px;">
-          <span style="width:10px; height:10px; border-radius:50%; background:${item.color}; display:inline-block;"></span>
-          <strong>${escapeHTML(item.cat)}</strong>
-        </span>
-        <span style="font-weight:700; color:var(--text);">${item.pct}% <span style="color:var(--muted); font-weight:500;">(${formatINR(item.amt)})</span></span>
-      </div>
-    `).join("");
-
-    donutEl.innerHTML = `
-      <div style="position:relative; width:140px; height:140px; flex-shrink:0;">
-        <svg width="140" height="140" viewBox="0 0 140 140">
-          <circle cx="70" cy="70" r="${radius}" fill="transparent" stroke="rgba(148,163,184,0.18)" stroke-width="16"></circle>
-          ${circlesSvg.map((x) => x.circle).join("")}
-        </svg>
-        <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none;">
-          <strong style="font-size:15px;">${formatINR(totalExp)}</strong>
-          <span style="font-size:11px; color:var(--muted);">total</span>
-        </div>
-      </div>
-      <div style="flex:1; min-width:220px;">${legendHtml}</div>
-    `;
-  }
+  const incomes = periodEntries.filter((e) => e.type === "income");
+  const totalInc = incomes.reduce((sum, e) => sum + toSafeNumber(e.amount, 0), 0);
+  const incomePalette = ["#10b981", "#38bdf8", "#a855f7", "#f59e0b", "#14b8a6", "#6366f1", "#ec4899"];
+  buildDonutMarkup(incomeDonutEl, incomes, totalInc, "No income data available for this period yet.", incomePalette);
 
   const maxVal = Math.max(totalIncome, totalExpense, 1);
   const incPct = Math.min(100, Math.round((totalIncome / maxVal) * 100));
