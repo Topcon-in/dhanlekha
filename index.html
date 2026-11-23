@@ -598,7 +598,7 @@
       <form id="entryForm" class="form-grid" onsubmit="addEntry(event)">
         <div>
           <label for="entryType">Type</label>
-          <select id="entryType" required>
+          <select id="entryType">
             <option value="expense">Expense</option>
             <option value="income">Income</option>
           </select>
@@ -617,7 +617,7 @@
 </div>
 <div>
   <label for="entryPaymentMode">Payment Mode</label>
-  <select id="entryPaymentMode">
+  <select id="entryPaymentMode" required>
     <option value="UPI">UPI</option>
     <option value="Cash">Cash</option>
     <option value="Bank">Bank / Card</option>
@@ -629,7 +629,7 @@
         </div>
         <div>
           <label for="entrySource">Source</label>
-          <input type="text" id="entrySource" placeholder="Groceries, Fuel, Salary" required />
+          <input type="text" id="entrySource" placeholder="Groceries, Fuel, Salary" />
         </div>
         <div>
           <label for="entryDate">Date</label>
@@ -916,39 +916,55 @@ function openBudgetModal() {
       yearSelect.value = String(currentYear);
     }
 
-    function addEntry(e) {
-      e.preventDefault();
-      const type = document.getElementById("entryType").value;
-      const amount = Number(document.getElementById("entryAmount").value);
-      const source = document.getElementById("entrySource").value.trim();
-      const date = document.getElementById("entryDate").value;
-      const note = document.getElementById("entryNote").value.trim();
-      if (!Number.isFinite(amount) || amount <= 0 || !source || !date) return;
+ function addEntry(e) {
+  e.preventDefault();
 
-      const currentTime = new Date().toLocaleTimeString("en-IN", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-      });
+  const rawType = document.getElementById("entryType")?.value || "expense";
+  const amount = Number(document.getElementById("entryAmount")?.value);
+  const date = (document.getElementById("entryDate")?.value || "").trim();
+  const paymentMode = (document.getElementById("entryPaymentMode")?.value || "").trim();
 
-      appState.entries.unshift({
-        id: Date.now() + "_" + Math.random().toString(36).slice(2, 7),
-        type: type === "income" ? "income" : "expense",
-        amount,
-        source,
-        date,
-        time: currentTime,
-        note
-      });
+  // Optional fields
+  const rawSource = (document.getElementById("entrySource")?.value || "").trim();
+  const category = document.getElementById("entryCategory")?.value || "General";
+  const note = (document.getElementById("entryNote")?.value || "").trim();
 
-      saveState();
-      populateYears();
-      document.getElementById("entryAmount").value = "";
-      document.getElementById("entrySource").value = "";
-      document.getElementById("entryNote").value = "";
-      renderApp();
-    }
+  // Zaroori check: Amount (> 0), Date, aur Payment Mode
+  if (!Number.isFinite(amount) || amount <= 0 || !date || !paymentMode) return;
 
+  const type = rawType === "income" ? "income" : "expense";
+  const source = rawSource || category || (type === "income" ? "Income" : "Expense");
+
+  const currentTime = new Date().toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+
+  appState.entries.unshift({
+    id: Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+    type,
+    amount,
+    source,
+    category,
+    paymentMode,
+    date,
+    time: currentTime,
+    note
+  });
+
+  saveState();
+  populateYears();
+
+  const amountEl = document.getElementById("entryAmount");
+  const sourceEl = document.getElementById("entrySource");
+  const noteEl = document.getElementById("entryNote");
+  if (amountEl) amountEl.value = "";
+  if (sourceEl) sourceEl.value = "";
+  if (noteEl) noteEl.value = "";
+
+  renderApp();
+}
     function deleteEntry(id) {
       if (!confirm("Are you sure you want to delete this entry?")) return;
       appState.entries = appState.entries.filter((item) => String(item.id) !== String(id));
