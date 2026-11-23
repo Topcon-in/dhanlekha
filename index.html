@@ -2516,9 +2516,9 @@ window.downloadDhanLekhaPdf = function () {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
 };
   window.shareDhanLekhaPdf = async function () {
-  if (typeof window.downloadDhanLekhaPdf === "function") {
-    window.downloadDhanLekhaPdf();
-  }
+ if (typeof window.downloadReportAnalysisPdf === "function") {
+  window.downloadReportAnalysisPdf();
+}
   const shareUrl = window.location.href || "https://dhanlekha-eypj.vercel.app/";
   const shareText = "DhanLekha PDF report downloaded. Sharing DhanLekha app link:";
   if (navigator.share) {
@@ -2536,6 +2536,236 @@ window.downloadDhanLekhaPdf = function () {
   if (typeof window.shareDhanLekhaApp === "function") {
     await window.shareDhanLekhaApp();
   }
+};
+  window.downloadReportAnalysisPdf = function () {
+  const esc = (str) =>
+    String(str ?? "")
+      .replace(/₹/g, "Rs. ")
+      .replace(/\\/g, "\\\\")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)")
+      .replace(/[^\x20-\x7E]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const cleanText = (el, fallback = "") =>
+    (el && el.textContent ? el.textContent : fallback).replace(/\s+/g, " ").trim();
+
+  const parseLegendItems = (containerId, palette) => {
+    const el = document.getElementById(containerId);
+    if (!el) return [];
+    const rows = Array.from(el.querySelectorAll("div")).filter((d) => {
+      const spans = d.querySelectorAll("span");
+      return spans.length >= 2 && d.children.length === 2;
+    });
+    return rows.map((row, idx) => {
+      const leftName = cleanText(row.children[0], "Category");
+      const rightText = cleanText(row.children[1], "0%");
+      const pctMatch = rightText.match(/([0-9]+(?:\.[0-9]+)?%)/);
+      const amtMatch = rightText.match(/\(([^)]+)\)/);
+      const pct = pctMatch ? pctMatch[1] : "";
+      const amt = amtMatch ? amtMatch[1] : rightText.replace(pct, "").trim();
+      const rgb = palette[idx % palette.length] || [0.15, 0.39, 0.85];
+      return { label: leftName, pct, amt, rgb };
+    });
+  };
+
+  const expPalette = [
+    [0.22, 0.74, 0.97],
+    [0.96, 0.62, 0.04],
+    [0.66, 0.33, 0.97],
+    [0.06, 0.73, 0.51],
+    [0.96, 0.25, 0.37],
+    [0.92, 0.70, 0.03],
+    [0.39, 0.40, 0.95]
+  ];
+  const incPalette = [
+    [0.06, 0.73, 0.51],
+    [0.22, 0.74, 0.97],
+    [0.66, 0.33, 0.97],
+    [0.96, 0.62, 0.04],
+    [0.08, 0.72, 0.65],
+    [0.39, 0.40, 0.95],
+    [0.93, 0.28, 0.60]
+  ];
+
+  const expItems = parseLegendItems("reportDonutContainer", expPalette);
+  const incItems = parseLegendItems("reportIncomeDonutContainer", incPalette);
+
+  const compEl = document.getElementById("reportComparisonContainer");
+  const compRows = compEl ? Array.from(compEl.querySelectorAll("div > div")) : [];
+  let incTotalText = cleanText(document.getElementById("cardIncome"), "Rs. 0");
+  let expTotalText = cleanText(document.getElementById("cardExpense"), "Rs. 0");
+  if (compRows.length >= 2) {
+    const incStrong = compRows[0].querySelector("strong");
+    const expStrong = compRows[1].querySelector("strong");
+    if (incStrong) incTotalText = cleanText(incStrong, incTotalText);
+    if (expStrong) expTotalText = cleanText(expStrong, expTotalText);
+  }
+
+  const trendCards = Array.from(
+    document.querySelectorAll("#reportSixMonthTrendContainer > div > div")
+  ).map((card) => {
+    const lines = cleanText(card, "")
+      .split(" ")
+      .filter(Boolean);
+    const label = lines[0] ? `${lines[0]} ${lines[1] || ""}`.trim() : "Month";
+    const plusMatch = card.textContent.match(/\+([^\s-]+)/);
+    const minusMatch = card.textContent.match(/-([^\s+]+)/);
+    return {
+      label,
+      incText: plusMatch ? `+${plusMatch[1]}` : "+Rs. 0",
+      expText: minusMatch ? `-${minusMatch[1]}` : "-Rs. 0"
+    };
+  });
+
+  const ops = [];
+  const pageH = 842;
+  const topY = (yFromTop) => pageH - yFromTop;
+
+  // Header Banner
+  ops.push("0.06 0.13 0.25 rg");
+  ops.push("0 762 595 80 re f");
+  ops.push("1 1 1 rg");
+  ops.push("BT /F2 19 Tf 36 808 Td (DhanLekha - Report Chart Analysis) Tj ET");
+  ops.push("0.75 0.85 0.96 rg");
+  ops.push("BT /F1 10 Tf 36 786 Td (Generated: " + esc(new Date().toLocaleString()) + ") Tj ET");
+
+  // Income vs Expense Comparison Bars
+  let curTop = 108;
+  ops.push("0.09 0.15 0.24 rg");
+  ops.push(`BT /F2 12 Tf 36 ${topY(curTop)} Td (Income vs Expense Overview) Tj ET`);
+  curTop += 14;
+
+  const drawBarRow = (title, valStr, barRgb, bgRgb, textRgb, fillFrac = 0.78) => {
+    const boxY = pageH - (curTop + 28);
+    ops.push(`${bgRgb[0]} ${bgRgb[1]} ${bgRgb[2]} rg`);
+    ops.push(`36 ${boxY} 523 28 re f`);
+    ops.push(`${barRgb[0]} ${barRgb[1]} ${barRgb[2]} rg`);
+    const safeFrac = Math.max(0.06, Math.min(1, fillFrac));
+    ops.push(`44 ${boxY + 18} ${Math.round(330 * safeFrac)} 6 re f`);
+    ops.push(`${textRgb[0]} ${textRgb[1]} ${textRgb[2]} rg`);
+    ops.push(`BT /F2 9.5 Tf 44 ${boxY + 6} Td (${esc(title)}) Tj ET`);
+    ops.push(`BT /F2 10 Tf 400 ${boxY + 10} Td (${esc(valStr)}) Tj ET`);
+    curTop += 34;
+  };
+
+  const numInc = Number(incTotalText.replace(/[^0-9.]/g, "")) || 0;
+  const numExp = Number(expTotalText.replace(/[^0-9.]/g, "")) || 0;
+  const maxIE = Math.max(numInc, numExp, 1);
+
+  drawBarRow(
+    "Income",
+    incTotalText,
+    [0.06, 0.73, 0.51],
+    [0.92, 0.99, 0.95],
+    [0.04, 0.45, 0.25],
+    numInc / maxIE
+  );
+  drawBarRow(
+    "Expense",
+    expTotalText,
+    [0.94, 0.27, 0.27],
+    [1.0, 0.94, 0.94],
+    [0.72, 0.14, 0.14],
+    numExp / maxIE
+  );
+
+  // Expense Category & Income Distribution Side-by-Side Color Breakdown
+  curTop += 8;
+  ops.push("0.09 0.15 0.24 rg");
+  ops.push(`BT /F2 12 Tf 36 ${topY(curTop)} Td (Expense Category Analysis) Tj ET`);
+  ops.push(`BT /F2 12 Tf 308 ${topY(curTop)} Td (Income Distribution Analysis) Tj ET`);
+  curTop += 14;
+
+  const drawCategoryColumn = (items, startX, emptyMsg) => {
+    let y = curTop;
+    if (!items.length) {
+      ops.push("0.97 0.98 1.0 rg");
+      ops.push(`${startX} ${pageH - (y + 24)} 251 24 re f`);
+      ops.push("0.35 0.40 0.48 rg");
+      ops.push(`BT /F1 9 Tf ${startX + 8} ${pageH - (y + 15)} Td (${esc(emptyMsg)}) Tj ET`);
+      return y + 28;
+    }
+    items.slice(0, 7).forEach((item) => {
+      const rowH = 22;
+      const yBot = pageH - (y + rowH);
+      ops.push("0.98 0.99 1.0 rg");
+      ops.push(`${startX} ${yBot} 251 ${rowH} re f`);
+      ops.push(`${item.rgb[0]} ${item.rgb[1]} ${item.rgb[2]} rg`);
+      ops.push(`${startX + 6} ${yBot + 6} 10 10 re f`);
+      ops.push("0.12 0.16 0.23 rg");
+      ops.push(`BT /F2 8.5 Tf ${startX + 22} ${yBot + 7} Td (${esc(item.label.slice(0, 16))}) Tj ET`);
+      ops.push("0.20 0.25 0.33 rg");
+      ops.push(`BT /F2 8.5 Tf ${startX + 132} ${yBot + 7} Td (${esc(item.pct + " (" + item.amt + ")")}) Tj ET`);
+      y += rowH + 3;
+    });
+    return y;
+  };
+
+  const expEndY = drawCategoryColumn(expItems, 36, "No expense chart data.");
+  const incEndY = drawCategoryColumn(incItems, 308, "No income chart data.");
+  curTop = Math.max(expEndY, incEndY) + 12;
+
+  // Last 6 Months Trend Summary
+  if (trendCards.length && curTop + 145 < 795) {
+    ops.push("0.09 0.15 0.24 rg");
+    ops.push(`BT /F2 12 Tf 36 ${topY(curTop)} Td (Last 6 Months Trend - Income vs Expense) Tj ET`);
+    curTop += 14;
+    trendCards.slice(0, 6).forEach((m, idx) => {
+      const rowH = 20;
+      const yBot = pageH - (curTop + rowH);
+      ops.push(idx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
+      ops.push(`36 ${yBot} 523 ${rowH} re f`);
+      ops.push("0.12 0.16 0.23 rg");
+      ops.push(`BT /F2 8.5 Tf 44 ${yBot + 6} Td (${esc(m.label)}) Tj ET`);
+      ops.push("0.06 0.55 0.32 rg");
+      ops.push(`BT /F2 8.5 Tf 175 ${yBot + 6} Td (Income: ${esc(m.incText)}) Tj ET`);
+      ops.push("0.78 0.16 0.16 rg");
+      ops.push(`BT /F2 8.5 Tf 355 ${yBot + 6} Td (Expense: ${esc(m.expText)}) Tj ET`);
+      curTop += rowH + 2;
+    });
+  }
+
+  ops.push("0.45 0.50 0.58 rg");
+  ops.push("BT /F1 8.5 Tf 36 28 Td (DhanLekha Report Section - Color Chart Analysis PDF) Tj ET");
+
+  const streamContent = ops.join("\n");
+  const byteLen = new TextEncoder().encode(streamContent).length;
+
+  const pdfParts = [
+    "%PDF-1.4\n",
+    "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+    "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
+    "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n",
+    "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+    "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
+    `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`
+  ];
+
+  let offset = 0;
+  const offsets = [0];
+  pdfParts.forEach((part) => {
+    offsets.push(offset);
+    offset += new TextEncoder().encode(part).length;
+  });
+
+  const xrefStart = offset;
+  let xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
+  for (let i = 1; i < offsets.length; i++) {
+    xref += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+  }
+  const trailer = `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+
+  const pdfBlob = new Blob([...pdfParts, xref, trailer], { type: "application/pdf" });
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = "DhanLekha-Report-Analysis.pdf";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
 };
  </script>
 <script>
