@@ -1447,6 +1447,18 @@ function addEntry(e) {
   if (sourceEl) sourceEl.value = "";
   if (noteEl) noteEl.value = "";
 
+  const todayISO = getTodayISO();
+if (date !== todayISO) {
+  if (date.slice(0, 4) !== todayISO.slice(0, 4)) {
+    switchView("yearly");
+    const yrSel = document.getElementById("yearPicker");
+    if (yrSel) yrSel.value = date.slice(0, 4);
+  } else {
+    switchView("monthly");
+    const moInp = document.getElementById("monthPicker");
+    if (moInp) moInp.value = date.slice(0, 7);
+  }
+}
   renderApp();
 }
   function copyPreviousMonthEntries() {
@@ -3411,6 +3423,7 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
 
 
