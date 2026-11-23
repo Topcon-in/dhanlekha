@@ -893,7 +893,7 @@ body {
     <div class="form-box" id="reportsHeaderBox">
       <h2 style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
         <span>📊 Financial Reports &amp; Insights</span>
-        <button type="button" class="btn-secondary" onclick="shareDhanLekhaPdf()">📤 Share PDF</button>
+       <button type="button" class="btn-secondary" id="reportSharePdfBtn" onclick="shareDhanLekhaPdf()" style="opacity:0.78; border-style:dashed;" title="Premium Feature">🔒 Share PDF <span style="font-size:10px; background:rgba(245,158,11,0.2); color:#fbbf24; padding:2px 6px; border-radius:999px; margin-left:4px;">PRO</span></button>
       </h2>
       <p id="reportBudgetStatus" style="font-size:13px; color:var(--muted); margin-top:4px;">
         Track category distribution, monthly budget usage, and income vs expense trends.
@@ -2634,6 +2634,13 @@ window.downloadDhanLekhaPdf = function () {
   setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
 };
   window.shareDhanLekhaPdf = async function () {
+    const DHANLEKHA_REPORTS_PDF_PREMIUM_UNLOCKED = false;
+
+window.shareDhanLekhaPdf = async function () {
+  if (!DHANLEKHA_REPORTS_PDF_PREMIUM_UNLOCKED) {
+    alert("Report Chart Analysis PDF export & share is a DhanLekha Pro feature and is currently locked. It will be available in the upcoming Premium version.");
+    return;
+  }
  if (typeof window.downloadReportAnalysisPdf === "function") {
   window.downloadReportAnalysisPdf();
 }
