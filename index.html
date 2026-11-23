@@ -975,7 +975,17 @@ body {
     </div>
   </div>
 </div>
-
+<!-- Info Modal (About Us, Privacy Policy, Terms & Safety Guide, Support) -->
+  <div class="modal-backdrop" id="infoModal" onclick="if(event.target===this)closeInfoModal()">
+    <div class="modal">
+      <button type="button" class="modal-close-btn" onclick="closeInfoModal()" aria-label="Close info modal">&times;</button>
+      <h3 id="infoModalTitle">Information</h3>
+      <div id="infoModalBody"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-primary" onclick="closeInfoModal()">Close</button>
+      </div>
+    </div>
+  </div>
 <!-- Fixed Bottom Navigation -->
 <nav class="dl-bottom-nav" aria-label="Primary Navigation">
   <button type="button" class="dl-nav-item active" data-target="hisaab" onclick="switchAppSection('hisaab')">
