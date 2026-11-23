@@ -2329,17 +2329,52 @@ function renderYearlyTable(container, year) {
           <p><strong>2. Local Device Storage Only:</strong> All entries and budget configurations remain exclusively inside your device's local browser storage (<code>localStorage</code>).</p>
           <p><strong>3. Full User Ownership:</strong> You retain complete control over your records. You can export a full JSON backup file or delete entries at any time.</p>
         `;
-      } else if (type === "terms") {
-        titleEl.textContent = "Terms of Use & Data Safety Guide";
-        bodyEl.innerHTML = `
-          <ul>
-            <li>DhanLekha is provided as a personal budgeting and record-keeping utility.</li>
-            <li>Because all data is stored locally on your device, <strong>you are responsible for maintaining regular backups</strong> using the <em>Save Backup File</em> option before resetting your device, switching phones, or clearing browser storage.</li>
-            <li>Use the <em>Download PDF</em> button anytime to generate clean statements for personal records.</li>
-            <li>Before resetting your phone or clearing browser data, click <strong>Save Backup File</strong> to download your backup file and keep it in a safe place. Once resetting or clearing is done, return to DhanLekha and click <strong>Restore Backup</strong> to select that downloaded file so your previous data appears again.</li>
-          </ul>
-        `;
-      } else {
+   } else if (type === "terms") {
+  titleEl.textContent = "Complete User Guide, Terms & Safety";
+  bodyEl.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:14px; font-size:13.5px; line-height:1.6;">
+      <div style="background:rgba(16,185,129,0.10); border:1px solid rgba(16,185,129,0.35); border-radius:10px; padding:12px;">
+        <h4 style="margin:0 0 6px 0; color:#10b981; font-size:15px;">1. Hisaab Section (Daily, Monthly &amp; Yearly Personal Tracker)</h4>
+        <ol style="margin:0; padding-left:18px;">
+          <li><strong>Set Your Monthly Budget:</strong> Click <em>Set Monthly Budget</em> in the top bar (or in Settings) to fix your target budget for the current month. Each month stores its own separate budget, and on the 1st of every new month DhanLekha automatically prompts you to set the new month's budget.</li>
+          <li><strong>Add Income or Expense:</strong> Choose <strong>Type</strong> (Expense or Income), select a <strong>Category</strong> (Food, Travel, Bills, Shopping, Health, General, or your custom category), select <strong>Payment Mode</strong> (UPI, Cash, or Bank/Card), enter the <strong>Amount</strong>, and pick the <strong>Date</strong>. Source and Note are optional. Click <strong>Save Entry</strong>.</li>
+          <li><strong>Track Live Summary Cards:</strong> The top 4 cards automatically calculate your <em>Monthly Budget</em>, <em>Total Income</em>, <em>Total Expense</em>, and <em>Net Balance</em> (Budget + Income − Expense). When spending reaches 80% or exceeds 100%, a budget alert banner appears automatically.</li>
+          <li><strong>Switch Views &amp; Filter Records:</strong> Use <strong>Today</strong>, <strong>Monthly</strong> (with month picker), and <strong>Yearly</strong> (12-month consolidated summary) tabs. Use the search box, Type filter, or Category filter to find any entry instantly.</li>
+          <li><strong>Edit, Delete &amp; PDF Statement:</strong> Click <em>Edit</em> on any row to update details, <em>Delete</em> (with confirmation) to remove an entry, or <em>Download PDF</em> in the top header to save a clean color statement.</li>
+        </ol>
+      </div>
+
+      <div style="background:rgba(56,189,248,0.10); border:1px solid rgba(56,189,248,0.35); border-radius:10px; padding:12px;">
+        <h4 style="margin:0 0 6px 0; color:#38bdf8; font-size:15px;">2. Split Section (Friends, Roommates &amp; Group Balances)</h4>
+        <ol style="margin:0; padding-left:18px;">
+          <li><strong>Keep Shared Money Separate:</strong> Use the <strong>Split</strong> tab to record money lent to or borrowed from friends without mixing it into your personal monthly expense budget.</li>
+          <li><strong>Record a Split Entry:</strong> Enter the <strong>Friend / Group Member</strong> name, select <strong>Balance Type</strong> (<em>They Owe Me</em> when you paid and need money back, or <em>I Owe Them</em> when you need to pay them), enter the <strong>Amount</strong>, Date, and an optional Note (e.g., Dinner, Cab, Trip), then click <strong>Add Split</strong>.</li>
+          <li><strong>Check Live Split Cards:</strong> View total pending receivables in <em>You Will Get</em>, total payables in <em>You Owe</em>, and overall standing in <em>Net Split Balance</em>.</li>
+          <li><strong>Settle &amp; Share Statement:</strong> Once someone pays you back (or you pay them), click <strong>Settle</strong> to mark the record completed (or <em>Reopen</em> if needed). Click <strong>Share PDF</strong> in the Split header to download and share a clean PDF statement with your friend or group.</li>
+        </ol>
+      </div>
+
+      <div style="background:rgba(168,85,247,0.10); border:1px solid rgba(168,85,247,0.35); border-radius:10px; padding:12px;">
+        <h4 style="margin:0 0 6px 0; color:#c084fc; font-size:15px;">3. Reports Section (Visual Insights &amp; Trends)</h4>
+        <ol style="margin:0; padding-left:18px;">
+          <li><strong>Monthly vs. Yearly Analysis:</strong> Switch between <strong>Monthly</strong> and <strong>Yearly</strong> at the top of the Reports tab and choose any month or year to inspect your financial performance.</li>
+          <li><strong>Category Donut Charts:</strong> Inspect percentage and amount breakdowns in the <em>Expense Category</em> and <em>Income Distribution</em> donut charts to see where your money goes and comes from.</li>
+          <li><strong>Income vs. Expense &amp; 6-Month Trend:</strong> Compare total income against total expenses in the horizontal comparison bar, and review your last 6 months' cash-flow pattern in the vertical trend chart.</li>
+        </ol>
+      </div>
+
+      <div style="background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.35); border-radius:10px; padding:12px;">
+        <h4 style="margin:0 0 6px 0; color:#fbbf24; font-size:15px;">4. Settings, Backup &amp; Data Safety Rules</h4>
+        <ol style="margin:0; padding-left:18px;">
+          <li><strong>Theme &amp; Currency:</strong> Switch between <em>Midnight Dark</em> and <em>Clean Light</em> themes, or change your display currency symbol (₹, $, €, £) anytime.</li>
+          <li><strong>Custom Categories:</strong> Add your own personal categories (such as Gym, Rent, EMI, or Subscriptions) in Settings—they immediately appear in both Add Entry and Edit Entry dropdowns.</li>
+          <li><strong>Mandatory Backup Habit:</strong> Because DhanLekha stores 100% of your records offline inside your device browser (<code>localStorage</code>) with zero cloud tracking, always click <strong>Save Backup File</strong> before clearing browser data, uninstalling the app, or changing phones.</li>
+          <li><strong>Restore &amp; Safe Reset:</strong> Use <strong>Restore Backup</strong> to reload your saved <code>.json</code> file anytime. Use <strong>Safe Reset</strong> only after downloading a backup if you want to clear all records and start fresh.</li>
+        </ol>
+      </div>
+    </div>
+  `;
+} else {
         titleEl.textContent = "Contact & Support";
         bodyEl.innerHTML = `
           <p>Have suggestions, feedback, or feature ideas to make DhanLekha even more useful?</p>
@@ -3269,5 +3304,6 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
 
