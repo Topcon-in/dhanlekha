@@ -1201,9 +1201,9 @@ function promptNewMonthBudgetIfNeeded(todayISO) {
     return false;
   }
   const entered = window.prompt(
-    `Naya month (${currentYM}) shuru ho gaya hai! Is month ka monthly budget (₹) daalein:`,
-    String(appState.monthlyBudget ?? 10000)
-  );
+  `A new month (${currentYM}) has started! Enter the monthly budget for this month:`,
+  String(appState.monthlyBudget ?? 10000)
+);
   if (entered !== null && entered.trim() !== "") {
     setMonthBudgetValue(currentYM, entered.trim());
     saveState();
@@ -1334,15 +1334,11 @@ function addEntry(e) {
 }
    function deleteEntry(id) {
   const target = appState.entries.find((item) => String(item.id) === String(id));
-  const label = target
-    ? `${target.source || "Entry"} (${formatINR(target.amount)} on ${target.date || ""})`
-    : "this entry";
-
+  const label = target ? `${target.source || "Entry"} (${formatINR(target.amount)} on ${target.date || ""})` : "this entry";
   const confirmed = window.confirm(
-    `Kya aap waqai "${label}" ko delete karna chahte hain?\n\nDelete confirm karne ke baad ye entry list se hat jayegi.`
+    `Are you sure you want to delete "${label}"?\n\nOnce confirmed, this entry will be removed from the list.`
   );
   if (!confirmed) return;
-
   appState.entries = appState.entries.filter((item) => String(item.id) !== String(id));
   saveState();
   populateYears();
@@ -1420,9 +1416,9 @@ function closeSafeResetModal() {
 }
 
 function confirmSafeReset() {
-  const doubleCheck = window.confirm(
-    "Aakhri confirmation: Kya aap poora data reset karna chahte hain? Agar backup nahi liya hai toh pehle 'Download Backup First' dabayein."
-  );
+ const doubleCheck = window.confirm(
+  "Final confirmation: Are you sure you want to reset all data? If you haven't taken a backup yet, click 'Download Backup First'."
+);
   if (!doubleCheck) return;
 
   const defaultBudget = 10000;
