@@ -1663,6 +1663,44 @@ function toggleSplitSettled(id) {
   renderSplitSection();
 }
 
+  function partialPaySplitEntry(id) {
+  if (!Array.isArray(appState.splits)) return;
+  const item = appState.splits.find((s) => String(s.id) === String(id));
+  if (!item || item.settled) return;
+
+  const currentAmt = Math.max(0, toSafeNumber(item.amount, 0));
+  if (currentAmt <= 0) return;
+
+  const rawInput = window.prompt(
+    `Record partial payment for ${item.person}\nCurrent remaining balance: ${formatINR(currentAmt)}\n\nEnter amount paid now:`,
+    ""
+  );
+  if (rawInput === null) return;
+
+  const paidAmt = Number(rawInput.trim());
+  if (!Number.isFinite(paidAmt) || paidAmt <= 0) {
+    alert("Please enter a valid positive amount.");
+    return;
+  }
+  if (paidAmt > currentAmt) {
+    alert(`Amount cannot be greater than remaining balance (${formatINR(currentAmt)}).`);
+    return;
+  }
+
+  const remaining = Number((currentAmt - paidAmt).toFixed(2));
+  const paidTag = `Paid ${formatINR(paidAmt)} on ${getTodayISO()}`;
+  item.note = item.note ? `${item.note} • ${paidTag}` : paidTag;
+
+  if (remaining <= 0) {
+    item.amount = 0;
+    item.settled = true;
+  } else {
+    item.amount = remaining;
+  }
+
+  saveState();
+  renderSplitSection();
+}
 function deleteSplitEntry(id) {
   if (!Array.isArray(appState.splits)) return;
   appState.splits = appState.splits.filter((s) => String(s.id) !== String(id));
@@ -1725,6 +1763,7 @@ function renderSplitSection() {
         <td>${escapeHTML(s.note || "—")}</td>
         <td style="font-weight:700; color:${isGet ? "#34d399" : "#f87171"};">${formatINR(s.amount)}</td>
         <td>
+        ${!s.settled ? `<button type="button" class="btn-secondary" style="padding:5px 8px; font-size:12px; margin-right:4px;" onclick="partialPaySplitEntry(decodeURIComponent('${safeId}'))">Partial Pay</button>` : ""}
           <button type="button" class="btn-secondary" style="padding:5px 8px; font-size:12px; margin-right:4px;" onclick="toggleSplitSettled(decodeURIComponent('${safeId}'))">
             ${s.settled ? "↩️ Reopen" : "✅ Settle"}
           </button>
@@ -3305,6 +3344,7 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
 
 
