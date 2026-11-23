@@ -1136,7 +1136,7 @@ body {
 <nav class="dl-bottom-nav" aria-label="Primary Navigation">
   <button type="button" class="dl-nav-item active" data-target="hisaab" onclick="switchAppSection('hisaab')">
     <span class="nav-icon">📒</span>
-    <span>Hisaab</span>
+    <span>Accounts</span>
   </button>
   <button type="button" class="dl-nav-item" data-target="split" onclick="switchAppSection('split')">
     <span class="nav-icon">🤝</span>
@@ -2334,7 +2334,7 @@ function renderYearlyTable(container, year) {
   bodyEl.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:14px; font-size:13.5px; line-height:1.6;">
       <div style="background:rgba(16,185,129,0.10); border:1px solid rgba(16,185,129,0.35); border-radius:10px; padding:12px;">
-        <h4 style="margin:0 0 6px 0; color:#10b981; font-size:15px;">1. Hisaab Section (Daily, Monthly &amp; Yearly Personal Tracker)</h4>
+        <h4 style="margin:0 0 6px 0; color:#10b981; font-size:15px;">1. Accounts Section (Daily, Monthly &amp; Yearly Personal Tracker)</h4>
         <ol style="margin:0; padding-left:18px;">
           <li><strong>Set Your Monthly Budget:</strong> Click <em>Set Monthly Budget</em> in the top bar (or in Settings) to fix your target budget for the current month. Each month stores its own separate budget, and on the 1st of every new month DhanLekha automatically prompts you to set the new month's budget.</li>
           <li><strong>Add Income or Expense:</strong> Choose <strong>Type</strong> (Expense or Income), select a <strong>Category</strong> (Food, Travel, Bills, Shopping, Health, General, or your custom category), select <strong>Payment Mode</strong> (UPI, Cash, or Bank/Card), enter the <strong>Amount</strong>, and pick the <strong>Date</strong>. Source and Note are optional. Click <strong>Save Entry</strong>.</li>
@@ -3305,6 +3305,7 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
 
 
