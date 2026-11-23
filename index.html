@@ -779,7 +779,10 @@ body {
     </section>
 
     <section class="form-box">
-      <h2>➕ Add New Transaction</h2>
+      <h2 style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+  <span>➕ Add New Transaction</span>
+  <button type="button" class="btn-secondary" style="padding:5px 10px; font-size:12px;" onclick="copyPreviousMonthEntries()">🔁 Copy Last Month</button>
+</h2>
       <form id="entryForm" class="form-grid" onsubmit="addEntry(event)">
         <div>
           <label for="entryType">Type</label>
@@ -1019,6 +1022,7 @@ body {
         <button type="button" class="btn-secondary" onclick="document.getElementById('importFileInput').click()">📂 Restore Backup</button>
         <button type="button" class="btn-danger" onclick="openSafeResetModal()">🗑️ Safe Reset</button>
       </div>
+      <p id="lastBackupStatusText" style="font-size:12.5px; color:var(--muted); margin-bottom:12px;">Last Backup: Never</p>
       <div class="footer-links">
         <a onclick="openInfoModal('about')">ℹ️ About Us</a>
         <a onclick="openInfoModal('privacy')">🔒 Privacy Policy</a>
@@ -1443,6 +1447,41 @@ function addEntry(e) {
   if (sourceEl) sourceEl.value = "";
   if (noteEl) noteEl.value = "";
 
+  renderApp();
+}
+  function copyPreviousMonthEntries() {
+  const pickerVal = (document.getElementById("monthPicker")?.value || getTodayISO().slice(0, 7));
+  const parts = pickerVal.split("-");
+  if (parts.length !== 2) return;
+  const yr = Number(parts[0]);
+  const mo = Number(parts[1]);
+  if (!Number.isInteger(yr) || !Number.isInteger(mo)) return;
+
+  const prevDateObj = new Date(yr, mo - 2, 1);
+  const prevYM = `${prevDateObj.getFullYear()}-${String(prevDateObj.getMonth() + 1).padStart(2, "0")}`;
+  const targetYM = `${yr}-${String(mo).padStart(2, "0")}`;
+  const targetDefaultDate = `${targetYM}-01`;
+
+  const prevEntries = (appState.entries || []).filter((item) => item.date && item.date.startsWith(prevYM));
+  if (!prevEntries.length) {
+    alert(`No entries found in previous month (${prevYM}) to copy.`);
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Copy ${prevEntries.length} entry/entries from ${prevYM} into ${targetYM} (dated ${targetDefaultDate})?`
+  );
+  if (!confirmed) return;
+
+  const cloned = prevEntries.map((item, idx) => ({
+    ...item,
+    id: Date.now() + "_" + idx + "_" + Math.random().toString(36).slice(2, 6),
+    date: targetDefaultDate
+  }));
+
+  appState.entries = [...cloned, ...appState.entries];
+  saveState();
+  populateYears();
   renderApp();
 }
    function deleteEntry(id) {
@@ -2321,6 +2360,12 @@ function renderYearlyTable(container, year) {
   `;
 }
 
+  function updateLastBackupUI() {
+  const el = document.getElementById("lastBackupStatusText");
+  if (!el) return;
+  const stamp = appState && appState.lastBackupAt ? appState.lastBackupAt : "";
+  el.textContent = stamp ? `Last Backup: ${stamp}` : "Last Backup: Never";
+}
     function exportBackupFile() {
       const payload = {
         app: "DhanLekha",
@@ -2335,6 +2380,9 @@ function renderYearlyTable(container, year) {
       a.download = `DhanLekha_Backup_${getTodayISO()}.json`;
       document.body.appendChild(a);
       a.click();
+      appState.lastBackupAt = `${getTodayISO()} ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true })}`;
+saveState();
+updateLastBackupUI();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 10000);
     }
@@ -3363,6 +3411,7 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
 
 
