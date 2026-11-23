@@ -618,244 +618,125 @@ body {
       <span>Please check <strong>Terms &amp; Safety Guide</strong> once for important usage and backup details.</span>
     </div>
 
-    <section class="cards-grid">
-      <div class="card">
-        <div class="card-label"><span>Monthly Budget</span></div>
-        <div class="card-value val-blue" id="cardBudget">₹10,000</div>
-      </div>
-      <div class="card">
-        <div class="card-label"><span>Total Income</span></div>
-        <div class="card-value val-green" id="cardIncome">₹0</div>
-      </div>
-      <div class="card">
-        <div class="card-label"><span>Total Expense</span></div>
-        <div class="card-value val-red" id="cardExpense">₹0</div>
-      </div>
-      <div class="card">
-        <div class="card-label"><span>Net Balance</span></div>
-        <div class="card-value val-amber" id="cardBalance">₹10,000</div>
-      </div>
-    </section>
-<!-- Feature 3: Budget Alert Banner -->
-<div id="budgetAlertBox" style="display:none; margin-bottom:18px; padding:12px 16px; border-radius:12px; font-size:13.5px; font-weight:600;"></div>
-
-<!-- Feature 1: Category-wise Expense Breakdown -->
-<section class="form-box" id="categoryBreakdownBox" style="display:none; padding:14px 18px;">
-  <h2 style="font-size:15px; margin-bottom:10px;">📊 Expense Breakdown (Category-wise)</h2>
-  <div id="categoryBreakdownList" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;"></div>
-</section>
-    <section class="form-box">
-      <h2>➕ Add New Transaction</h2>
-      <form id="entryForm" class="form-grid" onsubmit="addEntry(event)">
-        <div>
-          <label for="entryType">Type</label>
-          <select id="entryType">
-            <option value="expense">Expense</option>
-            <option value="income">Income</option>
-          </select>
-        </div>
-        <div>
-  <label for="entryCategory">Category</label>
-  <select id="entryCategory">
-    <option value="General">General</option>
-    <option value="Food">Food</option>
-    <option value="Travel">Travel</option>
-    <option value="Bills">Bills</option>
-    <option value="Shopping">Shopping</option>
-    <option value="Health">Health</option>
-    <option value="Salary/Income">Salary / Income</option>
-  </select>
-</div>
-<div>
-  <label for="entryPaymentMode">Payment Mode</label>
-  <select id="entryPaymentMode" required>
-    <option value="UPI">UPI</option>
-    <option value="Cash">Cash</option>
-    <option value="Bank">Bank / Card</option>
-  </select>
-</div>
-        <div>
-          <label for="entryAmount">Amount (₹)</label>
-          <input type="number" id="entryAmount" min="1" step="any" placeholder="250" required />
-        </div>
-        <div>
-          <label for="entrySource">Source</label>
-          <input type="text" id="entrySource" placeholder="Groceries, Fuel, Salary" />
-        </div>
-        <div>
-          <label for="entryDate">Date</label>
-          <input type="date" id="entryDate" required />
-        </div>
-        <div>
-          <label for="entryNote">Note</label>
-          <input type="text" id="entryNote" placeholder="Optional" />
-        </div>
-        <div>
-          <button type="submit" class="btn-primary" style="width:100%; padding:11px;">Save Entry</button>
-        </div>
-      </form>
-    </section>
-
-    <div class="tabs-bar">
-      <div class="tabs">
-        <button type="button" class="tab-btn active" id="tabToday" onclick="switchView('today')">Today</button>
-        <button type="button" class="tab-btn" id="tabMonthly" onclick="switchView('monthly')">Monthly View</button>
-        <button type="button" class="tab-btn" id="tabYearly" onclick="switchView('yearly')">Yearly View</button>
-      </div>
-      <div class="filter-controls">
-        <div id="monthFilterWrap">
-          <input type="month" id="monthPicker" onchange="renderApp()" />
-        </div>
-        <div id="yearFilterWrap" style="display:none;">
-          <select id="yearPicker" onchange="renderApp()"></select>
-        </div>
-      </div>
-      <input type="text" id="searchEntryInput" placeholder="Search source or note..." oninput="renderApp()" style="width:170px; padding:7px 10px; font-size:13px;" />
-<select id="typeFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
-  <option value="all">All Types</option>
-  <option value="income">Income Only</option>
-  <option value="expense">Expense Only</option>
-</select>
-<select id="categoryFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
-  <option value="all">All Categories</option>
-  <option value="General">General</option>
-  <option value="Food">Food</option>
-  <option value="Travel">Travel</option>
-  <option value="Bills">Bills</option>
-  <option value="Shopping">Shopping</option>
-  <option value="Health">Health</option>
-  <option value="Salary/Income">Salary / Income</option>
-</select>
+ <!-- SECTION 1: HISAAB (Personal Tracker) -->
+<div id="section-hisaab" class="dl-section active-section">
+  <section class="cards-grid">
+    <div class="card">
+      <div class="card-label"><span>Monthly Budget</span><span>🎯</span></div>
+      <div class="card-value val-blue" id="cardBudget">₹10,000</div>
     </div>
-
-    <section class="table-wrap" id="tableContainer"></section>
-    <!-- SECTION 1: HISAAB (Personal Tracker) -->
-<div id="section-hisaab" class="dl-section active-section"></div>
-
-<!-- SECTION 2: SPLIT (Group & Udhaar-Lenden) -->
-<div id="section-split" class="dl-section">
-  <div class="form-box">
-    <h2>🤝 Split &amp; Udhaar-Lenden</h2>
-    <p style="font-size:13px; color:var(--muted);">Group expenses aur doston ke hisaab ka section (Step 3 mein activate hoga).</p>
-  </div>
-</div>
-
-<!-- SECTION 3: REPORTS (Analytics & PDF) -->
-<div id="section-reports" class="dl-section">
-  <div class="form-box" id="reportsHeaderBox">
-    <h2 style="display:flex; justify-content:space-between; align-items:center;">
-      <span>📈 Financial Reports &amp; Summary</span>
-      <button type="button" class="btn-primary" onclick="downloadDhanLekhaPdf()">⬇️ Download PDF</button>
-    </h2>
-  </div>
-</div>
-
-<!-- SECTION 4: SETTINGS (Preferences, Backup & Info) -->
-<div id="section-settings" class="dl-section">
-  <div class="form-box">
-    <h2>⚙️ App Settings &amp; Data Safety</h2>
-    <p style="font-size:13px; color:var(--muted);">Theme, currency, custom categories aur backup controls (Step 3 mein activate honge).</p>
-  </div>
-</div>
-  </main>
-
-  <footer>
-    <div class="footer-wrap">
-      <div>© 2026 DhanLekha</div>
-      <div class="footer-links">
-        <a onclick="openInfoModal('about')">About Us</a>
-        <a onclick="openInfoModal('privacy')">Privacy Policy</a>
-        <a onclick="openInfoModal('terms')">Terms &amp; Safety Guide</a>
-        <a onclick="openInfoModal('contact')">Contact &amp; Support</a>
-        <button type="button" class="footer-share-btn" data-share-url="https://dhanlekha-eypj.vercel.app/" onclick="shareDhanLekhaApp(this)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="18" cy="5" r="3"></circle>
-            <circle cx="6" cy="12" r="3"></circle>
-            <circle cx="18" cy="19" r="3"></circle>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-          </svg>
-          <span class="footer-share-label">Share Link</span>
-        </button>
-      </div>
+    <div class="card">
+      <div class="card-label"><span>Total Income</span><span>📈</span></div>
+      <div class="card-value val-green" id="cardIncome">₹0</div>
     </div>
-  </footer>
-  <nav class="dl-bottom-nav" aria-label="Primary Navigation">
-  <button type="button" class="dl-nav-item active" data-target="hisaab" onclick="switchAppSection('hisaab')">
-    <span class="nav-icon">📒</span>
-    <span>Hisaab</span>
-  </button>
-  <button type="button" class="dl-nav-item" data-target="split" onclick="switchAppSection('split')">
-    <span class="nav-icon">🤝</span>
-    <span>Split</span>
-  </button>
-  <button type="button" class="dl-nav-item" data-target="reports" onclick="switchAppSection('reports')">
-    <span class="nav-icon">📊</span>
-    <span>Reports</span>
-  </button>
-  <button type="button" class="dl-nav-item" data-target="settings" onclick="switchAppSection('settings')">
-    <span class="nav-icon">⚙️</span>
-    <span>Settings</span>
-  </button>
-</nav>
-
-  <div class="modal-backdrop" id="setupModal">
-    <div class="modal">
-      <button type="button" class="modal-close-btn" id="closeSetupModal" aria-label="Close popup">&times;</button>
-      <h3>👋 Welcome to DhanLekha — Important Data Safety Notice</h3>
-      <p>This app helps you track your <strong>monthly fixed payment/budget</strong>, daily earnings (with source), and daily expenses <strong>100% offline</strong> directly on your device.</p>
-      <div class="warning-box">
-        <strong>⚠️ Important Backup Warning:</strong><br />
-        Your financial records are never uploaded to any external server. If you ever <strong>switch devices, factory-reset your phone, or clear browser data</strong>, please export your data beforehand using the <strong>"Save Backup File"</strong> button and store that file in a safe location (such as another device, PC, or personal cloud drive) so your multi-month and multi-year history remains safe.
-      </div>
-      <label for="initialBudgetInput">Set Your Monthly Fixed Budget (₹):</label>
-      <input type="number" id="initialBudgetInput" min="0" value="10000" />
-      <div class="setup-check-row">
-        <input type="checkbox" id="termsSafetyCheck" />
-        <span class="setup-check-text">
-          Please check <button type="button" class="terms-inline-link" id="openTermsFromSetup">Terms &amp; Safety Guide</button> first before proceeding.
-        </span>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-primary" id="startTrackingBtn" onclick="completeFirstSetup()" disabled>I Understand, Start Tracking</button>
-      </div>
+    <div class="card">
+      <div class="card-label"><span>Total Expense</span><span>📉</span></div>
+      <div class="card-value val-red" id="cardExpense">₹0</div>
     </div>
-  </div>
-
-  <div class="modal-backdrop" id="infoModal">
-    <div class="modal">
-      <h3 id="infoModalTitle">Information</h3>
-      <div id="infoModalBody"></div>
-      <div class="modal-actions">
-        <button type="button" class="btn-primary" onclick="closeInfoModal()">Close</button>
-      </div>
+    <div class="card">
+      <div class="card-label"><span>Net Balance</span><span>💼</span></div>
+      <div class="card-value val-amber" id="cardBalance">₹10,000</div>
     </div>
-  </div>
-<div class="modal-backdrop" id="editEntryModal">
-  <div class="modal">
-    <button type="button" class="modal-close-btn" onclick="closeEditEntryModal()" aria-label="Close edit modal">&times;</button>
-    <h3>✏️ Edit Transaction Entry</h3>
-    <form id="editEntryForm" class="form-grid" onsubmit="saveEditedEntry(event)">
-      <input type="hidden" id="editEntryId" />
+  </section>
+
+  <!-- Budget Alert Banner -->
+  <div id="budgetAlertBox" style="display:none; margin-bottom:18px; padding:12px 16px; border-radius:12px; font-size:13.5px; font-weight:600;"></div>
+
+  <!-- Category-wise Expense Breakdown (Hisaab Quick View) -->
+  <section class="form-box" id="categoryBreakdownBox" style="display:none; padding:14px 18px;">
+    <h2 style="font-size:15px; margin-bottom:10px;">🧩 Expense Breakdown (Category-wise)</h2>
+    <div id="categoryBreakdownList" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;"></div>
+  </section>
+
+  <!-- Add Transaction Form -->
+  <section class="form-box">
+    <h2>➕ Add New Transaction</h2>
+    <form id="entryForm" class="form-grid" onsubmit="addEntry(event)">
       <div>
-        <label for="editEntryType">Type</label>
-        <select id="editEntryType">
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
+        <label for="entryType">Type</label>
+        <select id="entryType">
+          <option value="expense">💸 Expense</option>
+          <option value="income">💵 Income</option>
         </select>
       </div>
       <div>
-        <label for="editEntryCategory">Category (Optional)</label>
-        <select id="editEntryCategory">
-          <option value="General">General</option>
-          <option value="Food">Food</option>
-          <option value="Travel">Travel</option>
-          <option value="Bills">Bills</option>
-          <option value="Shopping">Shopping</option>
-          <option value="Health">Health</option>
-          <option value="Salary/Income">Salary / Income</option>
+        <label for="entryCategory">Category</label>
+        <select id="entryCategory">
+          <option value="General">📦 General</option>
+          <option value="Food">🍔 Food</option>
+          <option value="Travel">🚕 Travel</option>
+          <option value="Bills">🧾 Bills</option>
+          <option value="Shopping">🛍️ Shopping</option>
+          <option value="Health">🩺 Health</option>
+          <option value="Salary/Income">💼 Salary / Income</option>
         </select>
       </div>
+      <div>
+        <label for="entryPaymentMode">Payment Mode</label>
+        <select id="entryPaymentMode" required>
+          <option value="UPI">📱 UPI</option>
+          <option value="Cash">💵 Cash</option>
+          <option value="Bank">🏦 Bank / Card</option>
+        </select>
+      </div>
+      <div>
+        <label for="entryAmount">Amount (₹)</label>
+        <input type="number" id="entryAmount" min="1" step="any" placeholder="250" required />
+      </div>
+      <div>
+        <label for="entrySource">Source</label>
+        <input type="text" id="entrySource" placeholder="Groceries, Fuel, Salary" />
+      </div>
+      <div>
+        <label for="entryDate">Date</label>
+        <input type="date" id="entryDate" required />
+      </div>
+      <div>
+        <label for="entryNote">Note</label>
+        <input type="text" id="entryNote" placeholder="Optional" />
+      </div>
+      <div>
+        <button type="submit" class="btn-primary" style="width:100%; padding:11px;">✨ Save Entry</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Filter & Period Tabs -->
+  <div class="tabs-bar">
+    <div class="tabs">
+      <button type="button" class="tab-btn active" id="tabToday" onclick="switchView('today')">📅 Today</button>
+      <button type="button" class="tab-btn" id="tabMonthly" onclick="switchView('monthly')">🗓️ Monthly</button>
+      <button type="button" class="tab-btn" id="tabYearly" onclick="switchView('yearly')">📆 Yearly</button>
+    </div>
+    <div class="filter-controls">
+      <div id="monthFilterWrap">
+        <input type="month" id="monthPicker" onchange="renderApp()" />
+      </div>
+      <div id="yearFilterWrap" style="display:none;">
+        <select id="yearPicker" onchange="renderApp()"></select>
+      </div>
+    </div>
+    <input type="text" id="searchEntryInput" placeholder="🔍 Search source or note..." oninput="renderApp()" style="width:185px; padding:7px 10px; font-size:13px;" />
+    <select id="typeFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
+      <option value="all">All Types</option>
+      <option value="income">Income Only</option>
+      <option value="expense">Expense Only</option>
+    </select>
+    <select id="categoryFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
+      <option value="all">All Categories</option>
+      <option value="General">General</option>
+      <option value="Food">Food</option>
+      <option value="Travel">Travel</option>
+      <option value="Bills">Bills</option>
+      <option value="Shopping">Shopping</option>
+      <option value="Health">Health</option>
+      <option value="Salary/Income">Salary / Income</option>
+    </select>
+  </div>
+
+  <!-- Transactions / Yearly Table -->
+  <section class="table-wrap" id="tableContainer"></section>
+</div>
       <div>
         <label for="editEntryPaymentMode">Payment Mode *</label>
         <select id="editEntryPaymentMode" required>
@@ -1377,6 +1258,7 @@ function renderCategoryBreakdown(entries) {
 
   updateBudgetAlert(budgetDisplay, totalExpense);
   renderCategoryBreakdown(periodEntries);
+    renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalExpense);
 
   const container = document.getElementById("tableContainer");
   if (currentView === "yearly") {
@@ -1448,7 +1330,99 @@ function renderCategoryBreakdown(entries) {
     </table>
   `;
 }
+function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalExpense) {
+  const donutEl = document.getElementById("reportDonutContainer");
+  const compEl = document.getElementById("reportComparisonContainer");
+  const statusEl = document.getElementById("reportBudgetStatus");
+  if (!donutEl || !compEl) return;
 
+  if (statusEl) {
+    if (budgetDisplay > 0) {
+      const usedPct = Math.min(999, Math.round((totalExpense / budgetDisplay) * 100));
+      statusEl.innerHTML = `Monthly Budget: <strong>${formatINR(budgetDisplay)}</strong> • Used: <strong>${usedPct}%</strong> (${formatINR(totalExpense)} spent)`;
+    } else {
+      statusEl.innerHTML = `No monthly budget limit set for this period. Set one in <strong>Settings</strong> or via <strong>Set Monthly Budget</strong>.`;
+    }
+  }
+
+  const expenses = periodEntries.filter((e) => e.type === "expense");
+  const totalExp = expenses.reduce((sum, e) => sum + toSafeNumber(e.amount, 0), 0);
+
+  if (totalExp <= 0) {
+    donutEl.innerHTML = `<div class="empty-state" style="width:100%;">No expense data available for this period yet.</div>`;
+  } else {
+    const palette = ["#38bdf8", "#f59e0b", "#a855f7", "#10b981", "#f43f5e", "#eab308", "#6366f1"];
+    const catMap = {};
+    expenses.forEach((e) => {
+      const c = e.category || "General";
+      catMap[c] = (catMap[c] || 0) + toSafeNumber(e.amount, 0);
+    });
+    const sorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+    const radius = 54;
+    const circumference = 2 * Math.PI * radius;
+    let offsetSoFar = 0;
+
+    const circlesSvg = sorted.map(([cat, amt], idx) => {
+      const frac = amt / totalExp;
+      const dash = frac * circumference;
+      const color = palette[idx % palette.length];
+      const circle = `<circle cx="70" cy="70" r="${radius}" fill="transparent" stroke="${color}" stroke-width="16" stroke-dasharray="${dash.toFixed(2)} ${circumference.toFixed(2)}" stroke-dashoffset="${(-offsetSoFar).toFixed(2)}" transform="rotate(-90 70 70)"></circle>`;
+      offsetSoFar += dash;
+      return { cat, amt, pct: (frac * 100).toFixed(1), color, circle };
+    });
+
+    const legendHtml = circlesSvg.map((item) => `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:14px; padding:6px 0; border-bottom:1px solid rgba(148,163,184,0.14); font-size:13.5px;">
+        <span style="display:inline-flex; align-items:center; gap:8px;">
+          <span style="width:10px; height:10px; border-radius:50%; background:${item.color}; display:inline-block;"></span>
+          <strong>${escapeHTML(item.cat)}</strong>
+        </span>
+        <span style="font-weight:700; color:var(--text);">${item.pct}% <span style="color:var(--muted); font-weight:500;">(${formatINR(item.amt)})</span></span>
+      </div>
+    `).join("");
+
+    donutEl.innerHTML = `
+      <div style="position:relative; width:140px; height:140px; flex-shrink:0;">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="${radius}" fill="transparent" stroke="rgba(148,163,184,0.18)" stroke-width="16"></circle>
+          ${circlesSvg.map((x) => x.circle).join("")}
+        </svg>
+        <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none;">
+          <strong style="font-size:15px;">${formatINR(totalExp)}</strong>
+          <span style="font-size:11px; color:var(--muted);">total</span>
+        </div>
+      </div>
+      <div style="flex:1; min-width:220px;">${legendHtml}</div>
+    `;
+  }
+
+  const maxVal = Math.max(totalIncome, totalExpense, 1);
+  const incPct = Math.min(100, Math.round((totalIncome / maxVal) * 100));
+  const expPct = Math.min(100, Math.round((totalExpense / maxVal) * 100));
+
+  compEl.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+          <span style="color:#34d399; font-weight:600;">🟢 Income</span>
+          <strong style="color:#34d399;">${formatINR(totalIncome)}</strong>
+        </div>
+        <div style="width:100%; height:12px; background:var(--bg); border-radius:999px; overflow:hidden; border:1px solid var(--border);">
+          <div style="width:${incPct}%; height:100%; background:#10b981;"></div>
+        </div>
+      </div>
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+          <span style="color:#f87171; font-weight:600;">🔴 Expense</span>
+          <strong style="color:#f87171;">${formatINR(totalExpense)}</strong>
+        </div>
+        <div style="width:100%; height:12px; background:var(--bg); border-radius:999px; overflow:hidden; border:1px solid var(--border);">
+          <div style="width:${expPct}%; height:100%; background:#ef4444;"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
 function renderYearlyTable(container, year) {
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
