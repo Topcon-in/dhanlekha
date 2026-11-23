@@ -1145,44 +1145,7 @@ function confirmSafeReset() {
   renderApp();
   openBudgetModal();
 }
-    function addEntry(e) {
-  e.preventDefault();
-  const type = document.getElementById("entryType").value;
-  const amount = Number(document.getElementById("entryAmount").value);
-  const source = document.getElementById("entrySource").value.trim();
-  const category = document.getElementById("entryCategory")?.value || "General";
-  const paymentMode = document.getElementById("entryPaymentMode")?.value || "UPI";
-  const date = document.getElementById("entryDate").value;
-  const note = document.getElementById("entryNote").value.trim();
-
-  if (!Number.isFinite(amount) || amount <= 0 || !source || !date) return;
-
-  const currentTime = new Date().toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true
-  });
-
-  appState.entries.unshift({
-    id: Date.now() + "_" + Math.random().toString(36).slice(2, 7),
-    type: type === "income" ? "income" : "expense",
-    amount,
-    source,
-    category,
-    paymentMode,
-    date,
-    time: currentTime,
-    note
-  });
-
-  saveState();
-  populateYears();
-  document.getElementById("entryAmount").value = "";
-  document.getElementById("entrySource").value = "";
-  document.getElementById("entryNote").value = "";
-  renderApp();
-}
-
+ 
     function switchView(view) {
       currentView = view;
       document.getElementById("tabToday").classList.toggle("active", view === "today");
