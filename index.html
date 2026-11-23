@@ -9,16 +9,39 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <style id="instantSplashBootStyle">
-  html, body { background-color: #000000 !important; }
+  html, body { background-color: #000000; }
   #dhanlekhaSplash {
-    position: fixed !important;
-    inset: 0 !important;
-    background: #000000 !important;
-    z-index: 999999 !important;
-    display: flex !important;
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    z-index: 999999;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+  }
+  #dhanlekhaSplash.hide-splash,
+  #dhanlekhaSplash[hidden] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .dl-splash-mark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 44px;
+    font-weight: 800;
+    color: #10b981;
+  }
+  .dl-splash-title {
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #f8fafc;
   }
 </style>
   <style>
@@ -3246,4 +3269,5 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
