@@ -585,7 +585,14 @@
         <div class="card-value val-amber" id="cardBalance">₹10,000</div>
       </div>
     </section>
+<!-- Feature 3: Budget Alert Banner -->
+<div id="budgetAlertBox" style="display:none; margin-bottom:18px; padding:12px 16px; border-radius:12px; font-size:13.5px; font-weight:600;"></div>
 
+<!-- Feature 1: Category-wise Expense Breakdown -->
+<section class="form-box" id="categoryBreakdownBox" style="display:none; padding:14px 18px;">
+  <h2 style="font-size:15px; margin-bottom:10px;">📊 Expense Breakdown (Category-wise)</h2>
+  <div id="categoryBreakdownList" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px;"></div>
+</section>
     <section class="form-box">
       <h2>➕ Add New Transaction</h2>
       <form id="entryForm" class="form-grid" onsubmit="addEntry(event)">
@@ -596,6 +603,26 @@
             <option value="income">Income</option>
           </select>
         </div>
+        <div>
+  <label for="entryCategory">Category</label>
+  <select id="entryCategory">
+    <option value="General">General</option>
+    <option value="Food">Food</option>
+    <option value="Travel">Travel</option>
+    <option value="Bills">Bills</option>
+    <option value="Shopping">Shopping</option>
+    <option value="Health">Health</option>
+    <option value="Salary/Income">Salary / Income</option>
+  </select>
+</div>
+<div>
+  <label for="entryPaymentMode">Payment Mode</label>
+  <select id="entryPaymentMode">
+    <option value="UPI">UPI</option>
+    <option value="Cash">Cash</option>
+    <option value="Bank">Bank / Card</option>
+  </select>
+</div>
         <div>
           <label for="entryAmount">Amount (₹)</label>
           <input type="number" id="entryAmount" min="1" step="any" placeholder="250" required />
@@ -632,6 +659,22 @@
           <select id="yearPicker" onchange="renderApp()"></select>
         </div>
       </div>
+      <input type="text" id="searchEntryInput" placeholder="Search source or note..." oninput="renderApp()" style="width:170px; padding:7px 10px; font-size:13px;" />
+<select id="typeFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
+  <option value="all">All Types</option>
+  <option value="income">Income Only</option>
+  <option value="expense">Expense Only</option>
+</select>
+<select id="categoryFilterSelect" onchange="renderApp()" style="width:auto; padding:7px 10px; font-size:13px;">
+  <option value="all">All Categories</option>
+  <option value="General">General</option>
+  <option value="Food">Food</option>
+  <option value="Travel">Travel</option>
+  <option value="Bills">Bills</option>
+  <option value="Shopping">Shopping</option>
+  <option value="Health">Health</option>
+  <option value="Salary/Income">Salary / Income</option>
+</select>
     </div>
 
     <section class="table-wrap" id="tableContainer"></section>
@@ -913,6 +956,43 @@ function openBudgetModal() {
       populateYears();
       renderApp();
     }
+    function addEntry(e) {
+  e.preventDefault();
+  const type = document.getElementById("entryType").value;
+  const amount = Number(document.getElementById("entryAmount").value);
+  const source = document.getElementById("entrySource").value.trim();
+  const category = document.getElementById("entryCategory")?.value || "General";
+  const paymentMode = document.getElementById("entryPaymentMode")?.value || "UPI";
+  const date = document.getElementById("entryDate").value;
+  const note = document.getElementById("entryNote").value.trim();
+
+  if (!Number.isFinite(amount) || amount <= 0 || !source || !date) return;
+
+  const currentTime = new Date().toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+
+  appState.entries.unshift({
+    id: Date.now() + "_" + Math.random().toString(36).slice(2, 7),
+    type: type === "income" ? "income" : "expense",
+    amount,
+    source,
+    category,
+    paymentMode,
+    date,
+    time: currentTime,
+    note
+  });
+
+  saveState();
+  populateYears();
+  document.getElementById("entryAmount").value = "";
+  document.getElementById("entrySource").value = "";
+  document.getElementById("entryNote").value = "";
+  renderApp();
+}
 
     function switchView(view) {
       currentView = view;
@@ -923,25 +1003,92 @@ function openBudgetModal() {
       document.getElementById("yearFilterWrap").style.display = view === "yearly" ? "block" : "none";
       renderApp();
     }
+function updateBudgetAlert(budget, expense) {
+  const alertBox = document.getElementById("budgetAlertBox");
+  if (!alertBox) return;
 
-   function renderApp() {
+  if (currentView === "yearly" || !budget || budget <= 0) {
+    alertBox.style.display = "none";
+    return;
+  }
+
+  const pct = Math.round((expense / budget) * 100);
+  if (expense > budget) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "rgba(239, 68, 68, 0.16)";
+    alertBox.style.border = "1px solid rgba(239, 68, 68, 0.5)";
+    alertBox.style.color = "#fca5a5";
+    alertBox.innerHTML = `🚨 <strong>Budget Exceeded (${pct}%):</strong> Aapka expense (${formatINR(expense)}) set monthly budget (${formatINR(budget)}) se ${formatINR(expense - budget)} zyada ho gaya hai!`;
+  } else if (pct >= 80) {
+    alertBox.style.display = "block";
+    alertBox.style.background = "rgba(245, 158, 11, 0.16)";
+    alertBox.style.border = "1px solid rgba(245, 158, 11, 0.5)";
+    alertBox.style.color = "#fde68a";
+    alertBox.innerHTML = `⚠️ <strong>Budget Warning (${pct}% Used):</strong> Aapne apne monthly budget (${formatINR(budget)}) ka ${pct}% kharch kar diya hai. Sirf ${formatINR(budget - expense)} bacha hai.`;
+  } else {
+    alertBox.style.display = "none";
+  }
+}
+
+function renderCategoryBreakdown(entries) {
+  const box = document.getElementById("categoryBreakdownBox");
+  const listEl = document.getElementById("categoryBreakdownList");
+  if (!box || !listEl) return;
+
+  const expenses = entries.filter((item) => item.type === "expense");
+  if (expenses.length === 0 || currentView === "yearly") {
+    box.style.display = "none";
+    return;
+  }
+
+  const totalExp = expenses.reduce((sum, item) => sum + toSafeNumber(item.amount, 0), 0);
+  if (totalExp <= 0) {
+    box.style.display = "none";
+    return;
+  }
+
+  const catTotals = {};
+  expenses.forEach((item) => {
+    const cat = item.category || "General";
+    catTotals[cat] = (catTotals[cat] || 0) + toSafeNumber(item.amount, 0);
+  });
+
+  const sortedCats = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+  listEl.innerHTML = sortedCats.map(([cat, amt]) => {
+    const pct = ((amt / totalExp) * 100).toFixed(1);
+    return `
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 12px;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
+          <strong>${escapeHTML(cat)}</strong>
+          <span style="color:#f87171; font-weight:700;">${formatINR(amt)} (${pct}%)</span>
+        </div>
+        <div style="width:100%; height:6px; background:var(--surface-2); border-radius:99px; overflow:hidden;">
+          <div style="width:${pct}%; height:100%; background:var(--primary);"></div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  box.style.display = "block";
+}
+  function renderApp() {
   const today = getTodayISO();
   const selectedMonth = document.getElementById("monthPicker").value || today.slice(0, 7);
   const selectedYear = document.getElementById("yearPicker").value || today.slice(0, 4);
-  let filtered = [];
+
+  let periodEntries = [];
   let budgetDisplay = 0;
 
   if (currentView === "today") {
-    filtered = appState.entries.filter((e) => e.date === today);
-    const todayYM = today.slice(0, 7);
-    const mBudget = getMonthBudgetValue(todayYM);
+    periodEntries = appState.entries.filter((e) => e.date === today);
+    const mBudget = getMonthBudgetValue(today.slice(0, 7));
     budgetDisplay = mBudget !== null ? mBudget : 0;
   } else if (currentView === "monthly") {
-    filtered = appState.entries.filter((e) => e.date && e.date.startsWith(selectedMonth));
+    periodEntries = appState.entries.filter((e) => e.date && e.date.startsWith(selectedMonth));
     const mBudget = getMonthBudgetValue(selectedMonth);
     budgetDisplay = mBudget !== null ? mBudget : 0;
   } else {
-    filtered = appState.entries.filter((e) => e.date && e.date.startsWith(selectedYear));
+    periodEntries = appState.entries.filter((e) => e.date && e.date.startsWith(selectedYear));
     let yearBudgetSum = 0;
     for (let i = 1; i <= 12; i++) {
       const ym = `${selectedYear}-${String(i).padStart(2, "0")}`;
@@ -953,7 +1100,7 @@ function openBudgetModal() {
 
   let totalIncome = 0;
   let totalExpense = 0;
-  filtered.forEach((item) => {
+  periodEntries.forEach((item) => {
     const amt = toSafeNumber(item.amount, 0);
     if (item.type === "income") totalIncome += amt;
     else totalExpense += amt;
@@ -965,19 +1112,40 @@ function openBudgetModal() {
   document.getElementById("cardExpense").textContent = formatINR(totalExpense);
   document.getElementById("cardBalance").textContent = formatINR(netBudgetLeft);
 
+  updateBudgetAlert(budgetDisplay, totalExpense);
+  renderCategoryBreakdown(periodEntries);
+
   const container = document.getElementById("tableContainer");
   if (currentView === "yearly") {
     renderYearlyTable(container, selectedYear);
     return;
   }
+
+  const searchQuery = (document.getElementById("searchEntryInput")?.value || "").trim().toLowerCase();
+  const typeFilter = document.getElementById("typeFilterSelect")?.value || "all";
+  const catFilter = document.getElementById("categoryFilterSelect")?.value || "all";
+
+  const filtered = periodEntries.filter((item) => {
+    if (typeFilter !== "all" && item.type !== typeFilter) return false;
+    if (catFilter !== "all" && (item.category || "General") !== catFilter) return false;
+    if (searchQuery) {
+      const haystack = `${item.source || ""} ${item.note || ""} ${item.category || ""} ${item.paymentMode || ""}`.toLowerCase();
+      if (!haystack.includes(searchQuery)) return false;
+    }
+    return true;
+  });
+
   if (filtered.length === 0) {
-    container.innerHTML = `<div class="empty-state">No entries saved for this period yet. Add your first transaction above!</div>`;
+    container.innerHTML = `<div class="empty-state">No matching entries found for this period/filter.</div>`;
     return;
   }
 
   const rows = filtered.map((item) => {
     const isInc = item.type === "income";
     const safeId = encodeURIComponent(String(item.id ?? ""));
+    const catBadge = item.category ? `<span style="font-size:11px; color:var(--accent); background:rgba(56,189,248,0.12); padding:2px 7px; border-radius:6px; margin-left:6px;">${escapeHTML(item.category)}</span>` : "";
+    const modeTag = item.paymentMode ? `<span style="font-size:11px; color:var(--muted); border:1px solid var(--border); padding:1px 6px; border-radius:6px; margin-right:6px;">${escapeHTML(item.paymentMode)}</span>` : "";
+
     return `
       <tr>
         <td>${escapeHTML(item.date)}</td>
@@ -987,8 +1155,8 @@ function openBudgetModal() {
             ${isInc ? "+ Income" : "- Expense"}
           </span>
         </td>
-        <td><strong>${escapeHTML(item.source)}</strong></td>
-        <td>${escapeHTML(item.note || "—")}</td>
+        <td><strong>${escapeHTML(item.source)}</strong>${catBadge}</td>
+        <td>${modeTag}${escapeHTML(item.note || "—")}</td>
         <td style="font-weight:700; color:${isInc ? "#34d399" : "#f87171"};">
           ${isInc ? "+" : "-"}${formatINR(item.amount)}
         </td>
@@ -1007,7 +1175,7 @@ function openBudgetModal() {
           <th>Time</th>
           <th>Type</th>
           <th>Source / Category</th>
-          <th>Note</th>
+          <th>Mode &amp; Note</th>
           <th>Amount</th>
           <th class="no-print">Action</th>
         </tr>
@@ -1095,12 +1263,14 @@ function renderYearlyTable(container, year) {
             alert("Invalid DhanLekha backup file. Please select a valid .json backup.");
             return;
           }
-          const budget = toSafeNumber(imported.monthlyBudget, 10000);
-          appState = {
-            setupDone: true,
-            monthlyBudget: budget >= 0 ? budget : 10000,
-            entries: imported.entries
-          };
+        const budget = toSafeNumber(imported.monthlyBudget, 10000);
+      const safeBudget = budget >= 0 ? budget : 10000;
+      appState = {
+        setupDone: true,
+        monthlyBudget: safeBudget,
+        monthlyBudgets: normalizeMonthlyBudgets(imported.monthlyBudgets, safeBudget),
+        entries: imported.entries
+      };
           saveState();
           populateYears();
           renderApp();
