@@ -829,7 +829,10 @@ body {
 <!-- SECTION 2: SPLIT (Group & Udhaar-Lenden) -->
   <div id="section-split" class="dl-section">
     <section class="form-box">
-      <h2>🤝 Split &amp; Friend Balances</h2>
+     <h2 style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <span>🤝 Split &amp; Friend Balances</span>
+      <button type="button" class="btn-secondary" onclick="shareSplitReportPdf()">📤 Share PDF</button>
+    </h2>
       <form id="splitEntryForm" class="form-grid" onsubmit="addSplitEntry(event)">
         <div>
           <label for="splitPersonName">Friend / Group Member *</label>
@@ -2885,6 +2888,200 @@ window.downloadDhanLekhaPdf = function () {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+};
+  window.downloadSplitReportPdf = function () {
+  const esc = (str) =>
+    String(str ?? "")
+      .replace(/₹/g, "Rs. ")
+      .replace(/\\/g, "\\\\")
+      .replace(/\(/g, "\\(")
+      .replace(/\)/g, "\\)")
+      .replace(/[^\x20-\x7E]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const cleanText = (el, fallback = "") =>
+    (el && el.textContent ? el.textContent : fallback).replace(/\s+/g, " ").trim();
+
+  const youGetText = cleanText(document.getElementById("splitGetTotal"), "Rs. 0");
+  const youOweText = cleanText(document.getElementById("splitOweTotal"), "Rs. 0");
+  const netSplitText = cleanText(document.getElementById("splitNetTotal"), "Rs. 0");
+
+  const splitRows = [];
+  document.querySelectorAll("#splitListContainer table tbody tr").forEach((tr) => {
+    const tds = Array.from(tr.querySelectorAll("td"));
+    if (tds.length >= 5) {
+      const dateStr = cleanText(tds[0], "-");
+      const personStr = cleanText(tds[1], "-");
+      const typeStr = cleanText(tds[2], "-");
+      const noteStr = cleanText(tds[3], "-");
+      const amtStr = cleanText(tds[4], "Rs. 0");
+      const isSettled = (tr.getAttribute("style") || "").includes("opacity:0.55");
+      splitRows.push({
+        date: dateStr,
+        person: personStr,
+        type: typeStr,
+        note: noteStr,
+        amount: amtStr,
+        status: isSettled ? "Settled" : "Pending"
+      });
+    }
+  });
+
+  const ops = [];
+  const pageH = 842;
+  const topY = (yFromTop) => pageH - yFromTop;
+
+  // Header Banner
+  ops.push("0.06 0.13 0.25 rg");
+  ops.push("0 762 595 80 re f");
+  ops.push("1 1 1 rg");
+  ops.push("BT /F2 19 Tf 36 808 Td (DhanLekha - Split & Friend Balances Report) Tj ET");
+  ops.push("0.75 0.85 0.96 rg");
+  ops.push("BT /F1 10 Tf 36 786 Td (Generated: " + esc(new Date().toLocaleString()) + ") Tj ET");
+
+  // 3 Summary Cards (You Will Get, You Owe, Net Split Balance)
+  const cards = [
+    ["You Will Get", youGetText, [0.92, 0.99, 0.95], [0.06, 0.55, 0.32]],
+    ["You Owe", youOweText, [1.0, 0.94, 0.94], [0.78, 0.16, 0.16]],
+    ["Net Split Balance", netSplitText, [0.94, 0.96, 1.0], [0.15, 0.39, 0.85]]
+  ];
+  const cardW = 168;
+  const cardGap = 9.5;
+  cards.forEach(([label, val, fillRgb, accentRgb], idx) => {
+    const x = 36 + idx * (cardW + cardGap);
+    const yBot = pageH - (112 + 56);
+    ops.push(`${fillRgb[0]} ${fillRgb[1]} ${fillRgb[2]} rg`);
+    ops.push(`${x} ${yBot} ${cardW} 56 re f`);
+    ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
+    ops.push(`${x} ${yBot + 52} ${cardW} 4 re f`);
+    ops.push("0.30 0.36 0.46 rg");
+    ops.push(`BT /F1 9 Tf ${x + 8} ${yBot + 34} Td (${esc(label)}) Tj ET`);
+    ops.push(`${accentRgb[0]} ${accentRgb[1]} ${accentRgb[2]} rg`);
+    ops.push(`BT /F2 12 Tf ${x + 8} ${yBot + 14} Td (${esc(val)}) Tj ET`);
+  });
+
+  // Split Entries Table
+  let curTop = 192;
+  ops.push("0.09 0.15 0.24 rg");
+  ops.push(`BT /F2 12.5 Tf 36 ${topY(curTop)} Td (Split & Balances Statement) Tj ET`);
+  curTop += 14;
+
+  const tableX = 36;
+  const tableW = 523;
+  const colX = [36, 108, 212, 316, 422, 496];
+  const headers = ["Date", "Person", "Type", "Note", "Amount", "Status"];
+
+  ops.push("0.12 0.23 0.42 rg");
+  ops.push(`${tableX} ${pageH - (curTop + 22)} ${tableW} 22 re f`);
+  ops.push("1 1 1 rg");
+  headers.forEach((h, i) => {
+    ops.push(`BT /F2 8.5 Tf ${colX[i] + 3} ${pageH - (curTop + 15)} Td (${esc(h)}) Tj ET`);
+  });
+  curTop += 22;
+
+  if (!splitRows.length) {
+    ops.push("0.98 0.99 1.0 rg");
+    ops.push(`${tableX} ${pageH - (curTop + 24)} ${tableW} 24 re f`);
+    ops.push("0.35 0.40 0.48 rg");
+    ops.push(`BT /F1 10 Tf ${tableX + 10} ${pageH - (curTop + 16)} Td (No split records found.) Tj ET`);
+  } else {
+    splitRows.forEach((r, idx) => {
+      const rowH = 20;
+      if (curTop + rowH > 795) return;
+      const yBottom = pageH - (curTop + rowH);
+      ops.push(idx % 2 === 0 ? "0.98 0.99 1.0 rg" : "0.94 0.96 0.99 rg");
+      ops.push(`${tableX} ${yBottom} ${tableW} ${rowH} re f`);
+
+      const isOwed = r.type.toLowerCase().includes("owe me") || r.type.toLowerCase().includes("get");
+      const vals = [
+        r.date.slice(0, 10),
+        r.person.slice(0, 18),
+        isOwed ? "They Owe Me" : "I Owe Them",
+        r.note.slice(0, 18),
+        r.amount,
+        r.status
+      ];
+
+      vals.forEach((v, cIdx) => {
+        if (cIdx === 2) {
+          ops.push(isOwed ? "0.06 0.55 0.32 rg" : "0.78 0.16 0.16 rg");
+        } else if (cIdx === 4) {
+          ops.push(isOwed ? "0.06 0.55 0.32 rg" : "0.78 0.16 0.16 rg");
+        } else if (cIdx === 5) {
+          ops.push(v === "Settled" ? "0.35 0.40 0.48 rg" : "0.55 0.34 0.04 rg");
+        } else {
+          ops.push("0.13 0.17 0.24 rg");
+        }
+        const font = cIdx === 2 || cIdx === 4 ? "/F2" : "/F1";
+        ops.push(`BT ${font} 8.5 Tf ${colX[cIdx] + 3} ${yBottom + 6} Td (${esc(v)}) Tj ET`);
+      });
+      curTop += rowH;
+    });
+  }
+
+  ops.push("0.45 0.50 0.58 rg");
+  ops.push("BT /F1 8.5 Tf 36 28 Td (DhanLekha Split Section - Color PDF Report) Tj ET");
+
+  const streamContent = ops.join("\n");
+  const byteLen = new TextEncoder().encode(streamContent).length;
+
+  const pdfParts = [
+    "%PDF-1.4\n",
+    "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+    "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
+    "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n",
+    "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+    "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
+    `6 0 obj\n<< /Length ${byteLen} >>\nstream\n${streamContent}\nendstream\nendobj\n`
+  ];
+
+  let offset = 0;
+  const offsets = [0];
+  pdfParts.forEach((part) => {
+    offsets.push(offset);
+    offset += new TextEncoder().encode(part).length;
+  });
+
+  const xrefStart = offset;
+  let xref = `xref\n0 ${offsets.length}\n0000000000 65535 f \n`;
+  for (let i = 1; i < offsets.length; i++) {
+    xref += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
+  }
+  const trailer = `trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+
+  const pdfBlob = new Blob([...pdfParts, xref, trailer], { type: "application/pdf" });
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const a = document.createElement("a");
+  a.href = blobUrl;
+  a.download = `DhanLekha-Split-Report-${getTodayISO()}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+};
+
+window.shareSplitReportPdf = async function () {
+  if (typeof window.downloadSplitReportPdf === "function") {
+    window.downloadSplitReportPdf();
+  }
+  const shareUrl = window.location.href || "https://dhanlekha-eypj.vercel.app/";
+  const shareText = "DhanLekha Split report PDF downloaded. Sharing DhanLekha app link:";
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: "DhanLekha Split Report",
+        text: shareText,
+        url: shareUrl
+      });
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return;
+    }
+  }
+  if (typeof window.shareDhanLekhaApp === "function") {
+    await window.shareDhanLekhaApp();
+  }
 };
  </script>
 <script>
