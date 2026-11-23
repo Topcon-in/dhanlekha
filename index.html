@@ -504,6 +504,56 @@
         white-space: nowrap;
       }
     }
+    /* === 4-Section Modular Layout & Fixed Bottom Nav === */
+body {
+  padding-bottom: 76px;
+}
+.dl-section {
+  display: none;
+}
+.dl-section.active-section {
+  display: block;
+}
+.dl-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  z-index: 45;
+  padding: 4px 6px;
+}
+.dl-nav-item {
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px;
+}
+.dl-nav-item span.nav-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.dl-nav-item.active {
+  color: var(--primary);
+  background: rgba(16, 185, 129, 0.12);
+}
+@media print {
+  .dl-bottom-nav { display: none !important; }
+  body { padding-bottom: 0 !important; }
+}
     @media print {
       header, .form-box, .tabs-bar, .offline-banner, footer, .no-print {
         display: none !important;
@@ -679,6 +729,34 @@
     </div>
 
     <section class="table-wrap" id="tableContainer"></section>
+    <!-- SECTION 1: HISAAB (Personal Tracker) -->
+<div id="section-hisaab" class="dl-section active-section"></div>
+
+<!-- SECTION 2: SPLIT (Group & Udhaar-Lenden) -->
+<div id="section-split" class="dl-section">
+  <div class="form-box">
+    <h2>🤝 Split &amp; Udhaar-Lenden</h2>
+    <p style="font-size:13px; color:var(--muted);">Group expenses aur doston ke hisaab ka section (Step 3 mein activate hoga).</p>
+  </div>
+</div>
+
+<!-- SECTION 3: REPORTS (Analytics & PDF) -->
+<div id="section-reports" class="dl-section">
+  <div class="form-box" id="reportsHeaderBox">
+    <h2 style="display:flex; justify-content:space-between; align-items:center;">
+      <span>📈 Financial Reports &amp; Summary</span>
+      <button type="button" class="btn-primary" onclick="downloadDhanLekhaPdf()">⬇️ Download PDF</button>
+    </h2>
+  </div>
+</div>
+
+<!-- SECTION 4: SETTINGS (Preferences, Backup & Info) -->
+<div id="section-settings" class="dl-section">
+  <div class="form-box">
+    <h2>⚙️ App Settings &amp; Data Safety</h2>
+    <p style="font-size:13px; color:var(--muted);">Theme, currency, custom categories aur backup controls (Step 3 mein activate honge).</p>
+  </div>
+</div>
   </main>
 
   <footer>
@@ -702,6 +780,24 @@
       </div>
     </div>
   </footer>
+  <nav class="dl-bottom-nav" aria-label="Primary Navigation">
+  <button type="button" class="dl-nav-item active" data-target="hisaab" onclick="switchAppSection('hisaab')">
+    <span class="nav-icon">📒</span>
+    <span>Hisaab</span>
+  </button>
+  <button type="button" class="dl-nav-item" data-target="split" onclick="switchAppSection('split')">
+    <span class="nav-icon">🤝</span>
+    <span>Split</span>
+  </button>
+  <button type="button" class="dl-nav-item" data-target="reports" onclick="switchAppSection('reports')">
+    <span class="nav-icon">📊</span>
+    <span>Reports</span>
+  </button>
+  <button type="button" class="dl-nav-item" data-target="settings" onclick="switchAppSection('settings')">
+    <span class="nav-icon">⚙️</span>
+    <span>Settings</span>
+  </button>
+</nav>
 
   <div class="modal-backdrop" id="setupModal">
     <div class="modal">
@@ -1145,7 +1241,22 @@ function confirmSafeReset() {
   renderApp();
   openBudgetModal();
 }
- 
+ function switchAppSection(sectionName) {
+  const validSections = ["hisaab", "split", "reports", "settings"];
+  const target = validSections.includes(sectionName) ? sectionName : "hisaab";
+
+  document.querySelectorAll(".dl-section").forEach((el) => {
+    el.classList.remove("active-section");
+  });
+  const activeEl = document.getElementById("section-" + target);
+  if (activeEl) activeEl.classList.add("active-section");
+
+  document.querySelectorAll(".dl-nav-item").forEach((btn) => {
+    btn.classList.toggle("active", btn.getAttribute("data-target") === target);
+  });
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
     function switchView(view) {
       currentView = view;
       document.getElementById("tabToday").classList.toggle("active", view === "today");
