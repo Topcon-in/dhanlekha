@@ -504,6 +504,20 @@
         white-space: nowrap;
       }
     }
+    body.light-theme {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-2: #f1f5f9;
+  --border: #cbd5e1;
+  --text: #0f172a;
+  --muted: #475569;
+}
+body.light-theme header {
+  background: rgba(255, 255, 255, 0.95);
+}
+body.light-theme .dl-bottom-nav {
+  background: rgba(255, 255, 255, 0.96);
+}
     /* === 4-Section Modular Layout & Fixed Bottom Nav === */
 body {
   padding-bottom: 76px;
@@ -732,12 +746,56 @@ body {
     <section class="table-wrap" id="tableContainer"></section>
   </div>
 
-  <!-- SECTION 2: SPLIT (Shared & Udhaar Placeholder for Step 3) -->
+<!-- SECTION 2: SPLIT (Group & Udhaar-Lenden) -->
   <div id="section-split" class="dl-section">
-    <div class="form-box">
-      <h2>🤝 Shared Expenses &amp; Balances</h2>
-      <p style="font-size:13px; color:var(--muted);">Group splits and friend balances will be enabled in Step 3.</p>
-    </div>
+    <section class="form-box">
+      <h2>🤝 Split &amp; Friend Balances</h2>
+      <form id="splitEntryForm" class="form-grid" onsubmit="addSplitEntry(event)">
+        <div>
+          <label for="splitPersonName">Friend / Group Member *</label>
+          <input type="text" id="splitPersonName" placeholder="Rahul, Goa Trip" required />
+        </div>
+        <div>
+          <label for="splitDirection">Balance Type</label>
+          <select id="splitDirection">
+            <option value="owed_to_me">🟢 They Owe Me (Lenden)</option>
+            <option value="i_owe">🔴 I Owe Them (Udhaar)</option>
+          </select>
+        </div>
+        <div>
+          <label for="splitAmount">Amount *</label>
+          <input type="number" id="splitAmount" min="1" step="any" placeholder="500" required />
+        </div>
+        <div>
+          <label for="splitDate">Date</label>
+          <input type="date" id="splitDate" />
+        </div>
+        <div>
+          <label for="splitNote">Note (Optional)</label>
+          <input type="text" id="splitNote" placeholder="Dinner, Cab, Hotel" />
+        </div>
+        <div>
+          <button type="submit" class="btn-primary" style="width:100%; padding:11px;">➕ Add Split</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="cards-grid">
+      <div class="card">
+        <div class="card-label"><span>You Will Get</span><span>🟢</span></div>
+        <div class="card-value val-green" id="splitGetTotal">₹0</div>
+      </div>
+      <div class="card">
+        <div class="card-label"><span>You Owe</span><span>🔴</span></div>
+        <div class="card-value val-red" id="splitOweTotal">₹0</div>
+      </div>
+      <div class="card">
+        <div class="card-label"><span>Net Split Balance</span><span>⚖️</span></div>
+        <div class="card-value val-blue" id="splitNetTotal">₹0</div>
+      </div>
+    </section>
+
+    <section class="table-wrap" id="splitListContainer"></section>
   </div>
 
   <!-- SECTION 3: REPORTS (Donut, Bars & PDF) -->
@@ -763,14 +821,63 @@ body {
     </div>
   </div>
 
-  <!-- SECTION 4: SETTINGS (Placeholder for Step 3) -->
+  <!-- SECTION 4: SETTINGS (Preferences, Categories, Backup & Info) -->
   <div id="section-settings" class="dl-section">
-    <div class="form-box">
-      <h2>⚙️ Account &amp; Preferences</h2>
-      <p style="font-size:13px; color:var(--muted);">Theme, currency, categories, backup, and info controls will be enabled in Step 3.</p>
-    </div>
+    <section class="form-box">
+      <h2>🎨 Appearance &amp; Currency</h2>
+      <div class="form-grid">
+        <div>
+          <label for="themeModeSelect">Theme Mode</label>
+          <select id="themeModeSelect" onchange="updateAppPreference('theme', this.value)">
+            <option value="dark">🌙 Midnight Dark</option>
+            <option value="light">☀️ Clean Light</option>
+          </select>
+        </div>
+        <div>
+          <label for="currencySymbolSelect">Currency Symbol</label>
+          <select id="currencySymbolSelect" onchange="updateAppPreference('currency', this.value)">
+            <option value="₹">₹ INR (Rupee)</option>
+            <option value="$">$ USD (Dollar)</option>
+            <option value="€">€ EUR (Euro)</option>
+            <option value="£">£ GBP (Pound)</option>
+          </select>
+        </div>
+        <div>
+          <label>Monthly Budget</label>
+          <button type="button" class="btn-secondary" style="width:100%; padding:10px;" onclick="openBudgetModal()">🎯 Set Monthly Budget</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-box">
+      <h2>🏷️ Custom Categories</h2>
+      <form class="form-grid" onsubmit="addCustomCategory(event)" style="margin-bottom:12px;">
+        <div style="grid-column: span 2;">
+          <label for="newCategoryName">Add Custom Category</label>
+          <input type="text" id="newCategoryName" placeholder="e.g., Gym, Subscriptions, Pets" required />
+        </div>
+        <div>
+          <button type="submit" class="btn-primary" style="width:100%; padding:11px;">➕ Add Category</button>
+        </div>
+      </form>
+      <div id="customCategoriesChips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+    </section>
+
+    <section class="form-box">
+      <h2>💾 Backup, Reset &amp; Info</h2>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+        <button type="button" class="btn-warning" onclick="exportBackupFile()">💾 Save Backup File</button>
+        <button type="button" class="btn-secondary" onclick="document.getElementById('importFileInput').click()">📂 Restore Backup</button>
+        <button type="button" class="btn-danger" onclick="openSafeResetModal()">🗑️ Safe Reset</button>
+      </div>
+      <div class="footer-links">
+        <a onclick="openInfoModal('about')">ℹ️ About Us</a>
+        <a onclick="openInfoModal('privacy')">🔒 Privacy Policy</a>
+        <a onclick="openInfoModal('terms')">📜 Terms &amp; Safety Guide</a>
+        <a onclick="openInfoModal('contact')">💬 Support</a>
+      </div>
+    </section>
   </div>
-</main>
 
 <!-- Edit Entry Modal (Hidden until Edit button is clicked) -->
 <div class="modal-backdrop" id="editEntryModal">
@@ -950,9 +1057,9 @@ function getTodayISO() {
 }
 
 function formatINR(num) {
-  return "₹" + toSafeNumber(num, 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
+  const sym = getAppPrefs().currency || "₹";
+  return sym + toSafeNumber(num, 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
 }
-
 function escapeHTML(str) {
   return String(str ?? "")
     .replace(/&/g, "&amp;")
@@ -995,6 +1102,9 @@ function initApp() {
   } else {
     promptNewMonthBudgetIfNeeded(today);
   }
+  if (!Array.isArray(appState.splits)) appState.splits = [];
+  const splitDateEl = document.getElementById("splitDate");
+  if (splitDateEl) splitDateEl.value = today;
   renderApp();
 }
 
@@ -1204,6 +1314,198 @@ function confirmSafeReset() {
   renderApp();
   openBudgetModal();
 }
+  const DEFAULT_CATEGORIES = ["General", "Food", "Travel", "Bills", "Shopping", "Health", "Salary/Income"];
+
+function getAppPrefs() {
+  return {
+    theme: appState.prefs?.theme === "light" ? "light" : "dark",
+    currency: appState.prefs?.currency || "₹",
+    customCategories: Array.isArray(appState.prefs?.customCategories) ? appState.prefs.customCategories : []
+  };
+}
+
+function applyPreferencesUI() {
+  const prefs = getAppPrefs();
+  document.body.classList.toggle("light-theme", prefs.theme === "light");
+  const themeSel = document.getElementById("themeModeSelect");
+  const currSel = document.getElementById("currencySymbolSelect");
+  if (themeSel) themeSel.value = prefs.theme;
+  if (currSel) currSel.value = prefs.currency;
+
+  const allCats = Array.from(new Set([...DEFAULT_CATEGORIES, ...prefs.customCategories]));
+  const selects = ["entryCategory", "editEntryCategory", "categoryFilterSelect"];
+  selects.forEach((id) => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const prevVal = sel.value;
+    const prefix = id === "categoryFilterSelect" ? `<option value="all">All Categories</option>` : "";
+    sel.innerHTML = prefix + allCats.map((c) => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join("");
+    if (prevVal && Array.from(sel.options).some((o) => o.value === prevVal)) {
+      sel.value = prevVal;
+    }
+  });
+
+  const chipsEl = document.getElementById("customCategoriesChips");
+  if (chipsEl) {
+    if (!prefs.customCategories.length) {
+      chipsEl.innerHTML = `<span style="font-size:12.5px; color:var(--muted);">No custom categories added yet.</span>`;
+    } else {
+      chipsEl.innerHTML = prefs.customCategories.map((cat) => `
+        <span style="display:inline-flex; align-items:center; gap:6px; background:var(--bg); border:1px solid var(--border); padding:5px 10px; border-radius:999px; font-size:12.5px;">
+          <span>🏷️ ${escapeHTML(cat)}</span>
+          <button type="button" onclick="removeCustomCategory('${encodeURIComponent(cat)}')" style="background:transparent; color:#f87171; padding:0 2px; font-size:13px;">✕</button>
+        </span>
+      `).join("");
+    }
+  }
+}
+
+function updateAppPreference(key, value) {
+  appState.prefs = getAppPrefs();
+  if (key === "theme") {
+    appState.prefs.theme = value === "light" ? "light" : "dark";
+  } else if (key === "currency") {
+    appState.prefs.currency = value || "₹";
+  }
+  saveState();
+  applyPreferencesUI();
+  renderApp();
+}
+
+function addCustomCategory(e) {
+  e.preventDefault();
+  const input = document.getElementById("newCategoryName");
+  const val = (input?.value || "").trim();
+  if (!val) return;
+  appState.prefs = getAppPrefs();
+  const exists = [...DEFAULT_CATEGORIES, ...appState.prefs.customCategories].some(
+    (c) => c.toLowerCase() === val.toLowerCase()
+  );
+  if (!exists) {
+    appState.prefs.customCategories.push(val);
+    saveState();
+  }
+  if (input) input.value = "";
+  applyPreferencesUI();
+}
+
+function removeCustomCategory(encodedCat) {
+  const catName = decodeURIComponent(encodedCat);
+  appState.prefs = getAppPrefs();
+  appState.prefs.customCategories = appState.prefs.customCategories.filter((c) => c !== catName);
+  saveState();
+  applyPreferencesUI();
+}
+
+function addSplitEntry(e) {
+  e.preventDefault();
+  const person = (document.getElementById("splitPersonName")?.value || "").trim();
+  const direction = document.getElementById("splitDirection")?.value === "i_owe" ? "i_owe" : "owed_to_me";
+  const amount = Number(document.getElementById("splitAmount")?.value);
+  const date = (document.getElementById("splitDate")?.value || "").trim() || getTodayISO();
+  const note = (document.getElementById("splitNote")?.value || "").trim();
+  if (!person || !Number.isFinite(amount) || amount <= 0) return;
+
+  if (!Array.isArray(appState.splits)) appState.splits = [];
+  appState.splits.unshift({
+    id: "sp_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+    person,
+    direction,
+    amount,
+    date,
+    note,
+    settled: false
+  });
+  saveState();
+  document.getElementById("splitPersonName").value = "";
+  document.getElementById("splitAmount").value = "";
+  document.getElementById("splitNote").value = "";
+  renderSplitSection();
+}
+
+function toggleSplitSettled(id) {
+  if (!Array.isArray(appState.splits)) return;
+  const item = appState.splits.find((s) => String(s.id) === String(id));
+  if (!item) return;
+  item.settled = !item.settled;
+  saveState();
+  renderSplitSection();
+}
+
+function deleteSplitEntry(id) {
+  if (!Array.isArray(appState.splits)) return;
+  appState.splits = appState.splits.filter((s) => String(s.id) !== String(id));
+  saveState();
+  renderSplitSection();
+}
+
+function renderSplitSection() {
+  const listEl = document.getElementById("splitListContainer");
+  const getEl = document.getElementById("splitGetTotal");
+  const oweEl = document.getElementById("splitOweTotal");
+  const netEl = document.getElementById("splitNetTotal");
+  if (!listEl) return;
+
+  const splits = Array.isArray(appState.splits) ? appState.splits : [];
+  let youGet = 0;
+  let youOwe = 0;
+  splits.forEach((s) => {
+    if (s.settled) return;
+    const amt = toSafeNumber(s.amount, 0);
+    if (s.direction === "owed_to_me") youGet += amt;
+    else youOwe += amt;
+  });
+  const net = youGet - youOwe;
+
+  if (getEl) getEl.textContent = formatINR(youGet);
+  if (oweEl) oweEl.textContent = formatINR(youOwe);
+  if (netEl) netEl.textContent = (net >= 0 ? "+" : "-") + formatINR(Math.abs(net));
+
+  if (!splits.length) {
+    listEl.innerHTML = `<div class="empty-state">No shared expenses or balances added yet.</div>`;
+    return;
+  }
+
+  const rows = splits.map((s) => {
+    const isGet = s.direction === "owed_to_me";
+    const safeId = encodeURIComponent(String(s.id));
+    return `
+      <tr style="${s.settled ? "opacity:0.55;" : ""}">
+        <td>${escapeHTML(s.date || "")}</td>
+        <td><strong>${escapeHTML(s.person)}</strong></td>
+        <td>
+          <span class="badge ${isGet ? "badge-in" : "badge-out"}">
+            ${isGet ? "🟢 They Owe Me" : "🔴 I Owe Them"}
+          </span>
+        </td>
+        <td>${escapeHTML(s.note || "—")}</td>
+        <td style="font-weight:700; color:${isGet ? "#34d399" : "#f87171"};">${formatINR(s.amount)}</td>
+        <td>
+          <button type="button" class="btn-secondary" style="padding:5px 8px; font-size:12px; margin-right:4px;" onclick="toggleSplitSettled(decodeURIComponent('${safeId}'))">
+            ${s.settled ? "↩️ Reopen" : "✅ Settle"}
+          </button>
+          <button type="button" class="btn-danger" onclick="deleteSplitEntry(decodeURIComponent('${safeId}'))">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  listEl.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Person / Group</th>
+          <th>Balance Type</th>
+          <th>Note</th>
+          <th>Amount</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
  function switchAppSection(sectionName) {
   const validSections = ["hisaab", "split", "reports", "settings"];
   const target = validSections.includes(sectionName) ? sectionName : "hisaab";
@@ -1341,6 +1643,8 @@ function renderCategoryBreakdown(entries) {
   updateBudgetAlert(budgetDisplay, totalExpense);
   renderCategoryBreakdown(periodEntries);
     renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalExpense);
+    applyPreferencesUI();
+renderSplitSection();
 
   const container = document.getElementById("tableContainer");
   if (currentView === "yearly") {
