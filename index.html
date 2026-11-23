@@ -990,21 +990,20 @@ function openBudgetModal() {
       yearSelect.value = String(currentYear);
     }
 
- function addEntry(e) {
+function addEntry(e) {
   e.preventDefault();
 
   const rawType = document.getElementById("entryType")?.value || "expense";
   const amount = Number(document.getElementById("entryAmount")?.value);
-  const date = (document.getElementById("entryDate")?.value || "").trim();
-  const paymentMode = (document.getElementById("entryPaymentMode")?.value || "").trim();
+  const date = (document.getElementById("entryDate")?.value || "").trim() || getTodayISO();
+  const paymentMode = (document.getElementById("entryPaymentMode")?.value || "").trim() || "UPI";
 
-  // Optional fields
+  // Source, Category, Note — sab optional (khali hone par bhi entry save hogi)
   const rawSource = (document.getElementById("entrySource")?.value || "").trim();
   const category = document.getElementById("entryCategory")?.value || "General";
   const note = (document.getElementById("entryNote")?.value || "").trim();
 
-  // Zaroori check: Amount (> 0), Date, aur Payment Mode
-  if (!Number.isFinite(amount) || amount <= 0 || !date || !paymentMode) return;
+  if (!Number.isFinite(amount) || amount <= 0) return;
 
   const type = rawType === "income" ? "income" : "expense";
   const source = rawSource || category || (type === "income" ? "Income" : "Expense");
@@ -1208,13 +1207,13 @@ function updateBudgetAlert(budget, expense) {
     alertBox.style.background = "rgba(239, 68, 68, 0.16)";
     alertBox.style.border = "1px solid rgba(239, 68, 68, 0.5)";
     alertBox.style.color = "#fca5a5";
-    alertBox.innerHTML = `🚨 <strong>Budget Exceeded (${pct}%):</strong> Aapka expense (${formatINR(expense)}) set monthly budget (${formatINR(budget)}) se ${formatINR(expense - budget)} zyada ho gaya hai!`;
+    alertBox.innerHTML = `<strong>Budget Exceeded (${pct}%):</strong> Your expenses (${formatINR(expense)}) have exceeded your monthly budget (${formatINR(budget)}) by ${formatINR(expense - budget)}.`;
   } else if (pct >= 80) {
     alertBox.style.display = "block";
     alertBox.style.background = "rgba(245, 158, 11, 0.16)";
     alertBox.style.border = "1px solid rgba(245, 158, 11, 0.5)";
     alertBox.style.color = "#fde68a";
-    alertBox.innerHTML = `⚠️ <strong>Budget Warning (${pct}% Used):</strong> Aapne apne monthly budget (${formatINR(budget)}) ka ${pct}% kharch kar diya hai. Sirf ${formatINR(budget - expense)} bacha hai.`;
+    alertBox.innerHTML = `<strong>Budget Warning (${pct}% Used):</strong> You have used ${pct}% of your monthly budget (${formatINR(budget)}). ${formatINR(budget - expense)} remaining.`;
   } else {
     alertBox.style.display = "none";
   }
