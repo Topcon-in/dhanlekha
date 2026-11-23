@@ -740,6 +740,7 @@ body {
         <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBackupFile(event)" />
         <button type="button" class="btn-primary" onclick="downloadDhanLekhaPdf()">Download PDF</button>
         <button type="button" class="btn-danger" onclick="openSafeResetModal()">🗑️ Safe Reset</button>
+        <p id="lastBackupStatusText" style="font-size:12.5px; color:var(--muted); margin-bottom:12px;">Last Backup: Never</p>
       </div>
     </div>
   </header>
@@ -859,6 +860,7 @@ body {
         <option value="Health">Health</option>
         <option value="Salary/Income">Salary / Income</option>
       </select>
+      <button type="button" class="btn-secondary" style="padding:7px 10px; font-size:13px;" onclick="resetAccountsFilters()">Reset</button>
     </div>
 
     <section class="table-wrap" id="tableContainer"></section>
@@ -922,6 +924,7 @@ body {
         <option value="unsettled">Unsettled Only</option>
         <option value="settled">Settled Only</option>
       </select>
+  <button type="button" class="btn-secondary" style="padding:7px 10px; font-size:13px;" onclick="resetSplitFilters()">Reset</button>
     </div>
     <section class="table-wrap" id="splitListContainer"></section>
   </div>
@@ -1707,7 +1710,23 @@ function deleteSplitEntry(id) {
   saveState();
   renderSplitSection();
 }
+function resetAccountsFilters() {
+  const searchEl = document.getElementById("searchEntryInput");
+  const typeEl = document.getElementById("typeFilterSelect");
+  const catEl = document.getElementById("categoryFilterSelect");
+  if (searchEl) searchEl.value = "";
+  if (typeEl) typeEl.value = "all";
+  if (catEl) catEl.value = "all";
+  renderApp();
+}
 
+function resetSplitFilters() {
+  const searchEl = document.getElementById("splitSearchInput");
+  const statusEl = document.getElementById("splitStatusFilter");
+  if (searchEl) searchEl.value = "";
+  if (statusEl) statusEl.value = "all";
+  renderSplitSection();
+}
 function renderSplitSection() {
   const listEl = document.getElementById("splitListContainer");
   const getEl = document.getElementById("splitGetTotal");
@@ -3344,6 +3363,7 @@ window.shareSplitReportPdf = async function () {
 </script>
 </body>
 </html>
+
 
 
 
