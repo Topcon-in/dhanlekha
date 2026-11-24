@@ -2348,8 +2348,12 @@ function resetCategoryIsolationState() {
   const f1Inp = document.getElementById("catExtraField1");
   const f2Inp = document.getElementById("catExtraField2");
   const catFilterEl = document.getElementById("categoryFilterSelect");
+  const breakdownBox = document.getElementById("categoryBreakdownBox");
+  const breakdownList = document.getElementById("categoryBreakdownList");
+  const tableWrap = document.getElementById("tableContainer");
+  const alertBox = document.getElementById("budgetAlertBox");
 
-  if (workspaceEl) workspaceEl.style.display = "none";
+  if (workspaceEl) workspaceEl.style.setProperty("display", "none", "important");
   if (hubBox) hubBox.style.display = "block";
   if (activeLbl) activeLbl.textContent = "";
   if (f1Wrap) f1Wrap.style.display = "none";
@@ -2357,6 +2361,10 @@ function resetCategoryIsolationState() {
   if (f1Inp) f1Inp.value = "";
   if (f2Inp) f2Inp.value = "";
   if (catFilterEl) catFilterEl.value = "all";
+  if (breakdownBox) breakdownBox.style.setProperty("display", "none", "important");
+  if (breakdownList) breakdownList.innerHTML = "";
+  if (tableWrap) tableWrap.style.setProperty("display", "none", "important");
+  if (alertBox) alertBox.style.setProperty("display", "none", "important");
 }
 function selectHisaabCategory(encodedCat) {
   if (!encodedCat) {
@@ -2672,17 +2680,21 @@ function renderSplitSection() {
   const validSections = ["hisaab", "split", "reports", "settings"];
   const target = validSections.includes(sectionName) ? sectionName : "hisaab";
 
-  // Always clear active category context when switching top-level sections
+  // Clear active category state and hide all category/hisaab sub-views
   activeHisaabCategory = null;
   resetCategoryIsolationState();
 
   document.querySelectorAll(".dl-section").forEach((el) => {
     el.classList.remove("active-section");
+    el.style.display = "none";
   });
+
   const activeEl = document.getElementById("section-" + target);
   if (activeEl) {
     activeEl.classList.add("active-section");
+    activeEl.style.display = "block";
   }
+
   document.querySelectorAll(".dl-nav-item").forEach((btn) => {
     btn.classList.toggle("active", btn.getAttribute("data-target") === target);
   });
@@ -2697,6 +2709,7 @@ function renderSplitSection() {
     if (typeof applyPreferencesUI === "function") applyPreferencesUI();
     if (typeof updateLastBackupUI === "function") updateLastBackupUI();
   }
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
     function switchView(view) {
