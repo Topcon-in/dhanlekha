@@ -2680,19 +2680,23 @@ function renderSplitSection() {
   const validSections = ["hisaab", "split", "reports", "settings"];
   const target = validSections.includes(sectionName) ? sectionName : "hisaab";
 
-  // Clear active category state and hide all category/hisaab sub-views
+  // Always exit any open category view before switching top-level sections
   activeHisaabCategory = null;
+  const catFilterEl = document.getElementById("categoryFilterSelect");
+  if (catFilterEl) catFilterEl.value = "all";
+  syncActiveCategoryHeaderLabel();
+  syncCategorySpecificFormUI(null);
   resetCategoryIsolationState();
 
   document.querySelectorAll(".dl-section").forEach((el) => {
     el.classList.remove("active-section");
-    el.style.display = "none";
+    el.style.setProperty("display", "none", "important");
   });
 
   const activeEl = document.getElementById("section-" + target);
   if (activeEl) {
     activeEl.classList.add("active-section");
-    activeEl.style.display = "block";
+    activeEl.style.setProperty("display", "block", "important");
   }
 
   document.querySelectorAll(".dl-nav-item").forEach((btn) => {
@@ -2701,6 +2705,7 @@ function renderSplitSection() {
 
   if (target === "hisaab") {
     renderHisaabCategoryHub();
+    if (typeof renderApp === "function") renderApp();
   } else if (target === "split") {
     if (typeof renderSplitSection === "function") renderSplitSection();
   } else if (target === "reports") {
@@ -2874,7 +2879,34 @@ if (activeHisaabCategory && activeHisaabCategory !== "all") {
 
   updateBudgetAlert(budgetDisplay, totalExpense);
   renderCategoryBreakdown(periodEntries);
-    renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalExpense);
+    let basePeriodEntries = [];
+  let baseBudgetDisplay = 0;
+  if (currentView === "today") {
+    basePeriodEntries = appState.entries.filter((e) => e.date === today);
+    const mBudget = getMonthBudgetValue(today.slice(0, 7));
+    baseBudgetDisplay = mBudget !== null ? mBudget : 0;
+  } else if (currentView === "monthly") {
+    basePeriodEntries = appState.entries.filter((e) => e.date && e.date.startsWith(selectedMonth));
+    const mBudget = getMonthBudgetValue(selectedMonth);
+    baseBudgetDisplay = mBudget !== null ? mBudget : 0;
+  } else {
+    basePeriodEntries = appState.entries.filter((e) => e.date && e.date.startsWith(selectedYear));
+    let yearBudgetSum = 0;
+    for (let i = 1; i <= 12; i++) {
+      const ym = `${selectedYear}-${String(i).padStart(2, "0")}`;
+      const mBudget = getMonthBudgetValue(ym);
+      if (mBudget !== null) yearBudgetSum += mBudget;
+    }
+    baseBudgetDisplay = yearBudgetSum;
+  }
+  let baseIncome = 0;
+  let baseExpense = 0;
+  basePeriodEntries.forEach((item) => {
+    const amt = toSafeNumber(item.amount, 0);
+    if (item.type === "income") baseIncome += amt;
+    else baseExpense += amt;
+  });
+  renderReportsSection(basePeriodEntries, baseBudgetDisplay, baseIncome, baseExpense);
     applyPreferencesUI();
 renderSplitSection();
 
