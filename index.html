@@ -763,22 +763,22 @@ body {
     </div>
 <!-- SECTION 1: HISAAB (Personal Tracker) -->
   <div id="section-hisaab" class="dl-section active-section">
-    <section class="form-box" id="hisaabCategoryHubBox">
-        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px;">
-          <div>
-            <h2 style="font-size:16px; margin-bottom:2px;">Select Category</h2>
-            <span style="font-size:12px; color:var(--muted);">Click any category box to open its own records and entry form</span>
-          </div>
-          <input type="text" id="categoryHubSearchInput" placeholder="Search category..." oninput="filterCategoryHubCards()" style="width:200px; padding:7px 10px; font-size:13px;" />
-        </div>
-        <div id="hisaabCategoryGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px;"></div>
-      </section>
+   <section class="form-box" id="hisaabCategoryHubBox">
+     <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px;">
+       <div>
+         <h2 style="font-size:16px; margin-bottom:2px;">Select Category</h2>
+         <span style="font-size:12px; color:var(--muted);">Click any category box to open its own records and entry form</span>
+       </div>
+       <input type="text" id="categoryHubSearchInput" placeholder="Search category..." oninput="filterCategoryHubCards()" style="width:200px; padding:7px 10px; font-size:13px;" />
+     </div>
+     <div id="hisaabCategoryGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px;"></div>
+   </section>
 
-      <div id="hisaabCategoryWorkspace" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
-          <button type="button" class="btn-secondary" onclick="selectHisaabCategory(null)">← All Categories</button>
-          <strong id="activeCategoryWorkspaceLabel" style="font-size:15px;"></strong>
-        </div>
+   <div id="hisaabCategoryWorkspace" style="display:none;">
+     <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+       <button type="button" class="btn-secondary" onclick="selectHisaabCategory(null)">← All Categories</button>
+       <strong id="activeCategoryWorkspaceLabel" style="font-size:15px;"></strong>
+     </div>
     <section class="cards-grid">
       <div class="card">
         <div class="card-label"><span>Monthly Budget</span><span>🎯</span></div>
@@ -905,7 +905,7 @@ body {
 
     <section class="table-wrap" id="tableContainer"></section>
   </div>
-
+  </div>
 <!-- SECTION 2: SPLIT (Group & Udhaar-Lenden) -->
   <div id="section-split" class="dl-section">
     <section class="form-box">
@@ -1813,12 +1813,75 @@ const TEN_CATEGORY_BOXES = [
   "Investments"
 ];
 
+let activeHisaabCategory = null;
+
 function syncHisaabModeVisibility() {
   const hubBox = document.getElementById("hisaabCategoryHubBox");
   const workspaceEl = document.getElementById("hisaabCategoryWorkspace");
   const hasCategory = Boolean(activeHisaabCategory);
   if (hubBox) hubBox.style.display = hasCategory ? "none" : "block";
   if (workspaceEl) workspaceEl.style.display = hasCategory ? "block" : "none";
+}
+
+function getCategoryBucketKey(catName) {
+  return "cat_" + String(catName || "General").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_");
+}
+
+function ensureCategoryBucketsStore() {
+  if (!appState.categoryBuckets || typeof appState.categoryBuckets !== "object") {
+    appState.categoryBuckets = {};
+  }
+  const allCats = Array.from(new Set([...TEN_CATEGORY_BOXES, ...Object.keys(HISAAB_CATEGORY_CONFIG || {})]));
+  allCats.forEach((cat) => {
+    const key = getCategoryBucketKey(cat);
+    if (!Array.isArray(appState.categoryBuckets[key])) {
+      appState.categoryBuckets[key] = [];
+    }
+  });
+}
+
+function syncCategorySpecificFormUI(cat) {
+  const f1Wrap = document.getElementById("catExtraField1Wrap");
+  const f2Wrap = document.getElementById("catExtraField2Wrap");
+  const f1Lbl = document.getElementById("catExtraField1Label");
+  const f2Lbl = document.getElementById("catExtraField2Label");
+  const f1Inp = document.getElementById("catExtraField1");
+  const f2Inp = document.getElementById("catExtraField2");
+  const catSel = document.getElementById("entryCategory");
+
+  if (!cat) {
+    if (f1Wrap) f1Wrap.style.display = "none";
+    if (f2Wrap) f2Wrap.style.display = "none";
+    return;
+  }
+
+  if (catSel) {
+    if (!Array.from(catSel.options).some((o) => o.value === cat)) {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      catSel.appendChild(opt);
+    }
+    catSel.value = cat;
+  }
+
+  const cfg = HISAAB_CATEGORY_CONFIG?.[cat] || {
+    f1Label: `${cat} Detail 1`,
+    f1Placeholder: `Enter ${cat} detail`,
+    f2Label: `${cat} Detail 2`,
+    f2Placeholder: "Optional detail"
+  };
+
+  if (f1Wrap && f1Lbl && f1Inp) {
+    f1Wrap.style.display = "block";
+    f1Lbl.textContent = cfg.f1Label;
+    f1Inp.placeholder = cfg.f1Placeholder;
+  }
+  if (f2Wrap && f2Lbl && f2Inp) {
+    f2Wrap.style.display = "block";
+    f2Lbl.textContent = cfg.f2Label;
+    f2Inp.placeholder = cfg.f2Placeholder;
+  }
 }
 
 function renderHisaabCategoryHub() {
