@@ -1809,14 +1809,21 @@ function renderHisaabCategoryHub() {
 
   ensureCategoryBucketsStore();
   const prefs = getAppPrefs();
-  const cats = Array.from(new Set([...Object.keys(HISAAB_CATEGORY_CONFIG), ...(prefs.customCategories || [])]));
+  const baseCats = Object.keys(HISAAB_CATEGORY_CONFIG || {});
+  const customCats = Array.isArray(prefs.customCategories) ? prefs.customCategories : [];
+  const cats = Array.from(new Set([...baseCats, ...customCats]));
   const q = (document.getElementById("categoryHubSearchInput")?.value || "").trim().toLowerCase();
   const filteredCats = cats.filter((c) => !q || c.toLowerCase().includes(q));
 
+  if (!filteredCats.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No matching categories found.</div>`;
+    return;
+  }
+
   grid.innerHTML = filteredCats.map((cat) => {
     const bucketKey = getCategoryBucketKey(cat);
-    const bucketCount = (appState.categoryBuckets[bucketKey] || []).length;
-    const mainCount = (appState.entries || []).filter((e) => (e.category || "General") === cat).length;
+    const bucketCount = Array.isArray(appState.categoryBuckets?.[bucketKey]) ? appState.categoryBuckets[bucketKey].length : 0;
+    const mainCount = (Array.isArray(appState.entries) ? appState.entries : []).filter((e) => (e.category || "General") === cat).length;
     const totalCatRecords = bucketCount + mainCount;
 
     return `
@@ -2119,18 +2126,29 @@ function renderSplitSection() {
   document.querySelectorAll(".dl-section").forEach((el) => {
     el.classList.remove("active-section");
   });
+
   const activeEl = document.getElementById("section-" + target);
-  if (activeEl) activeEl.classList.add("active-section");
+  if (activeEl) {
+    activeEl.classList.add("active-section");
+  }
 
   document.querySelectorAll(".dl-nav-item").forEach((btn) => {
     btn.classList.toggle("active", btn.getAttribute("data-target") === target);
   });
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
-   if (target === "hisaab") {
+  if (target === "hisaab") {
     activeHisaabCategory = null;
     renderHisaabCategoryHub();
+  } else if (target === "split") {
+    if (typeof renderSplitSection === "function") renderSplitSection();
+  } else if (target === "reports") {
+    if (typeof refreshReportsOnly === "function") refreshReportsOnly();
+  } else if (target === "settings") {
+    if (typeof applyPreferencesUI === "function") applyPreferencesUI();
+    if (typeof updateLastBackupUI === "function") updateLastBackupUI();
   }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
     function switchView(view) {
       currentView = view;
