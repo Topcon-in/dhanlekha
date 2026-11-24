@@ -695,6 +695,29 @@ body {
   color: var(--primary);
   background: rgba(16, 185, 129, 0.12);
 }
+    #toggleTenCategoriesBtn,
+#hisaabCategoryGrid .dl-cat-modern-btn {
+  background: linear-gradient(135deg, #2563eb, #0284c7);
+  color: #ffffff;
+  border: 1px solid rgba(125, 211, 252, 0.45);
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.25);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+#toggleTenCategoriesBtn:hover,
+#hisaabCategoryGrid .dl-cat-modern-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+}
+#toggleTenCategoriesBtn:active,
+#hisaabCategoryGrid .dl-cat-modern-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.97);
+}
+#hisaabCategoryGrid .dl-cat-modern-btn span:last-child {
+  color: #e0f2fe !important;
+}
 @media print {
   .dl-bottom-nav { display: none !important; }
   body { padding-bottom: 0 !important; }
@@ -2188,14 +2211,12 @@ function renderHisaabCategoryHub() {
     const mainCount = (Array.isArray(appState?.entries) ? appState.entries : []).filter((e) => (e.category || "General") === cat).length;
     const totalCatRecords = bucketCount + mainCount;
 
-    return `
-      <button type="button"
-        onclick="selectHisaabCategory('${encodeURIComponent(cat)}')"
-        style="text-align:left; padding:14px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text); display:flex; flex-direction:column; gap:5px;">
-        <span style="font-size:15px; font-weight:700;">${escapeHTML(cat)}</span>
-        <span style="font-size:12px; color:var(--muted);">${totalCatRecords} record(s)</span>
-      </button>
-    `;
+   return `
+  <button type="button" class="dl-cat-modern-btn" onclick="selectHisaabCategory('${encodeURIComponent(cat)}')" style="text-align:left; padding:14px; display:flex; flex-direction:column; gap:5px;">
+    <span style="font-size:15px; font-weight:700;">${escapeHTML(cat)}</span>
+    <span style="font-size:12px;">${totalCatRecords} record(s)</span>
+  </button>
+`;
   }).join("");
 }
 
