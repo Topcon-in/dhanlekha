@@ -1398,7 +1398,7 @@ function getTodayISO() {
   function getAppPrefs() {
   const raw = appState && typeof appState.prefs === "object" && appState.prefs ? appState.prefs : {};
   return {
-    theme: raw.theme === "light" ? "light" : "dark",
+    theme: raw.theme === "dark" ? "dark" : "light",
     currency: raw.currency || "₹",
     customCategories: Array.isArray(raw.customCategories) ? raw.customCategories : []
   };
@@ -1493,6 +1493,7 @@ function promptNewMonthBudgetIfNeeded(todayISO) {
 
 function initApp() {
   loadState();
+  applyPreferencesUI();
   const today = getTodayISO();
   const currentYM = today.slice(0, 7);
   const entryDateEl = document.getElementById("entryDate");
