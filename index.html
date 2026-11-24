@@ -1450,29 +1450,29 @@ function openBudgetModal() {
 
 function addEntry(e) {
   e.preventDefault();
-
   const rawType = document.getElementById("entryType")?.value || "expense";
   const amount = Number(document.getElementById("entryAmount")?.value);
-  const date = (document.getElementById("entryDate")?.value || "").trim() || getTodayISO();
-  const paymentMode = (document.getElementById("entryPaymentMode")?.value || "").trim() || "UPI";
+  const date = (document.getElementById("entryDate")?.value || "").trim();
+  const paymentMode = (document.getElementById("entryPaymentMode")?.value || "").trim();
 
-  // Source, Category, Note — sab optional (khali hone par bhi entry save hogi)
+  if (!date || !paymentMode || !Number.isFinite(amount) || amount <= 0) {
+    alert("Please enter valid Date, Payment Mode, and Amount.");
+    return;
+  }
+
+  const activeCat = (activeHisaabCategory && activeHisaabCategory !== "all") ? activeHisaabCategory : null;
+  const category = activeCat || (document.getElementById("entryCategory")?.value || "General");
   const rawSource = (document.getElementById("entrySource")?.value || "").trim();
-  const category = document.getElementById("entryCategory")?.value || "General";
-  const note = (document.getElementById("entryNote")?.value || "").trim();
-
-  if (!Number.isFinite(amount) || amount <= 0) return;
+  const rawNote = (document.getElementById("entryNote")?.value || "").trim();
+  const f1Val = (document.getElementById("catExtraField1")?.value || "").trim();
+  const f2Val = (document.getElementById("catExtraField2")?.value || "").trim();
 
   const type = rawType === "income" ? "income" : "expense";
-  const source = rawSource || category || (type === "income" ? "Income" : "Expense");
+  const source = rawSource || category;
+  const combinedNote = [rawNote, f1Val, f2Val].filter(Boolean).join(" | ");
+  const currentTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
 
-  const currentTime = new Date().toLocaleTimeString("en-IN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true
-  });
-
-  appState.entries.unshift({
+  const newRecord = {
     id: Date.now() + "_" + Math.random().toString(36).slice(2, 7),
     type,
     amount,
@@ -1481,48 +1481,48 @@ function addEntry(e) {
     paymentMode,
     date,
     time: currentTime,
-    note
-  });
+    note: combinedNote
+  };
 
-  const f1Val = (document.getElementById("catExtraField1")?.value || "").trim();
-  const f2Val = (document.getElementById("catExtraField2")?.value || "").trim();
-  const extraParts = [f1Val, f2Val].filter(Boolean);
-  if (extraParts.length > 0) {
-    const lastEntry = appState.entries[0];
-    if (lastEntry) {
-      lastEntry.note = [lastEntry.note, extraParts.join(" | ")].filter(Boolean).join(" — ");
-    }
-  }
   ensureCategoryBucketsStore();
-  if (appState.entries[0]) {
-    const bucketKey = getCategoryBucketKey(appState.entries[0].category || "General");
-    appState.categoryBuckets[bucketKey].unshift({ ...appState.entries[0] });
+  if (activeCat) {
+    const bucketKey = getCategoryBucketKey(activeCat);
+    appState.categoryBuckets[bucketKey].unshift(newRecord);
+  } else {
+    appState.entries.unshift(newRecord);
+    const bucketKey = getCategoryBucketKey(category);
+    appState.categoryBuckets[bucketKey].unshift({ ...newRecord });
   }
-  if (document.getElementById("catExtraField1")) document.getElementById("catExtraField1").value = "";
-  if (document.getElementById("catExtraField2")) document.getElementById("catExtraField2").value = "";
+
   saveState();
   populateYears();
 
   const amountEl = document.getElementById("entryAmount");
   const sourceEl = document.getElementById("entrySource");
   const noteEl = document.getElementById("entryNote");
+  const f1El = document.getElementById("catExtraField1");
+  const f2El = document.getElementById("catExtraField2");
   if (amountEl) amountEl.value = "";
   if (sourceEl) sourceEl.value = "";
   if (noteEl) noteEl.value = "";
+  if (f1El) f1El.value = "";
+  if (f2El) f2El.value = "";
 
   const todayISO = getTodayISO();
-if (date !== todayISO) {
-  if (date.slice(0, 4) !== todayISO.slice(0, 4)) {
-    switchView("yearly");
-    const yrSel = document.getElementById("yearPicker");
-    if (yrSel) yrSel.value = date.slice(0, 4);
-  } else {
-    switchView("monthly");
-    const moInp = document.getElementById("monthPicker");
-    if (moInp) moInp.value = date.slice(0, 7);
+  if (date !== todayISO) {
+    if (date.slice(0, 4) !== todayISO.slice(0, 4)) {
+      switchView("yearly");
+      const yrSel = document.getElementById("yearPicker");
+      if (yrSel) yrSel.value = date.slice(0, 4);
+    } else {
+      switchView("monthly");
+      const moInp = document.getElementById("monthPicker");
+      if (moInp) moInp.value = date.slice(0, 7);
+    }
   }
-}
+
   renderApp();
+  renderHisaabCategoryHub();
 }
   function copyPreviousMonthEntries() {
   const pickerVal = (document.getElementById("monthPicker")?.value || getTodayISO().slice(0, 7));
