@@ -1570,31 +1570,88 @@ function addEntry(e) {
   populateYears();
   renderApp();
 }
-   function deleteEntry(id) {
-  const target = appState.entries.find((item) => String(item.id) === String(id));
+   function findEntryAcrossStore(id) {
+  const targetId = String(id);
+  const mainIdx = (appState.entries || []).findIndex((item) => String(item.id) === targetId);
+  if (mainIdx !== -1) {
+    return { sourceArr: appState.entries, index: mainIdx, item: appState.entries[mainIdx] };
+  }
+  ensureCategoryBucketsStore();
+  const buckets = appState.categoryBuckets || {};
+  for (const key of Object.keys(buckets)) {
+    const arr = buckets[key];
+    if (!Array.isArray(arr)) continue;
+    const idx = arr.findIndex((item) => String(item.id) === targetId);
+    if (idx !== -1) {
+      return { sourceArr: arr, index: idx, item: arr[idx] };
+    }
+  }
+  return null;
+}
+
+function removeEntryIdEverywhere(id) {
+  const targetId = String(id);
+  appState.entries = (appState.entries || []).filter((item) => String(item.id) !== targetId);
+  ensureCategoryBucketsStore();
+  Object.keys(appState.categoryBuckets).forEach((key) => {
+    if (Array.isArray(appState.categoryBuckets[key])) {
+      appState.categoryBuckets[key] = appState.categoryBuckets[key].filter((item) => String(item.id) !== targetId);
+    }
+  });
+}
+
+function updateEntryEverywhere(id, updatedFields) {
+  const targetId = String(id);
+  let foundAny = false;
+  appState.entries = (appState.entries || []).map((entry) => {
+    if (String(entry.id) === targetId) {
+      foundAny = true;
+      return { ...entry, ...updatedFields };
+    }
+    return entry;
+  });
+  ensureCategoryBucketsStore();
+  Object.keys(appState.categoryBuckets).forEach((key) => {
+    if (Array.isArray(appState.categoryBuckets[key])) {
+      appState.categoryBuckets[key] = appState.categoryBuckets[key].map((entry) => {
+        if (String(entry.id) === targetId) {
+          foundAny = true;
+          return { ...entry, ...updatedFields };
+        }
+        return entry;
+      });
+    }
+  });
+  return foundAny;
+}
+
+function deleteEntry(id) {
+  const found = findEntryAcrossStore(id);
+  const target = found ? found.item : null;
   const label = target ? `${target.source || "Entry"} (${formatINR(target.amount)} on ${target.date || ""})` : "this entry";
   const confirmed = window.confirm(
     `Are you sure you want to delete "${label}"?\n\nOnce confirmed, this entry will be removed from the list.`
   );
   if (!confirmed) return;
-  appState.entries = appState.entries.filter((item) => String(item.id) !== String(id));
+  removeEntryIdEverywhere(id);
   saveState();
   populateYears();
   renderApp();
+  renderHisaabCategoryHub();
 }
-    function openEditEntryModal(id) {
-  const item = appState.entries.find((entry) => String(entry.id) === String(id));
-  if (!item) return;
 
+function openEditEntryModal(id) {
+  const found = findEntryAcrossStore(id);
+  const item = found ? found.item : null;
+  if (!item) return;
   document.getElementById("editEntryId").value = String(item.id);
   document.getElementById("editEntryType").value = item.type === "income" ? "income" : "expense";
   document.getElementById("editEntryCategory").value = item.category || "General";
   document.getElementById("editEntryPaymentMode").value = item.paymentMode || "UPI";
   document.getElementById("editEntryAmount").value = toSafeNumber(item.amount, "");
-  document.getElementById("editEntrySource").value = item.source || "";
+  document.getElementById("editEntrySource").value = item.source && item.source !== "--------" ? item.source : "";
   document.getElementById("editEntryDate").value = item.date || getTodayISO();
-  document.getElementById("editEntryNote").value = item.note || "";
-
+  document.getElementById("editEntryNote").value = item.note && item.note !== "--------" ? item.note : "";
   const modal = document.getElementById("editEntryModal");
   if (modal) modal.classList.add("open");
 }
@@ -1606,41 +1663,27 @@ function closeEditEntryModal() {
 
 function saveEditedEntry(e) {
   e.preventDefault();
-
   const id = document.getElementById("editEntryId")?.value;
   const rawType = document.getElementById("editEntryType")?.value || "expense";
   const amount = Number(document.getElementById("editEntryAmount")?.value);
   const date = (document.getElementById("editEntryDate")?.value || "").trim();
   const paymentMode = (document.getElementById("editEntryPaymentMode")?.value || "").trim();
-
-  // Optional fields — khali hone par bhi error ya block nahi hoga
   const category = document.getElementById("editEntryCategory")?.value || "General";
   const rawSource = (document.getElementById("editEntrySource")?.value || "").trim();
-  const note = (document.getElementById("editEntryNote")?.value || "").trim();
+  const rawNote = (document.getElementById("editEntryNote")?.value || "").trim();
 
   if (!Number.isFinite(amount) || amount <= 0 || !date || !paymentMode) return;
-
   const type = rawType === "income" ? "income" : "expense";
-  const source = rawSource || category || (type === "income" ? "Income" : "Expense");
+  const source = rawSource || "--------";
+  const note = rawNote || "--------";
 
-  const idx = appState.entries.findIndex((entry) => String(entry.id) === String(id));
-  if (idx === -1) return;
-
-  appState.entries[idx] = {
-    ...appState.entries[idx],
-    type,
-    amount,
-    date,
-    paymentMode,
-    category,
-    source,
-    note
-  };
-
+  const updated = updateEntryEverywhere(id, { type, amount, date, paymentMode, category, source, note });
+  if (!updated) return;
   saveState();
   populateYears();
   closeEditEntryModal();
   renderApp();
+  renderHisaabCategoryHub();
 }
 
 function openSafeResetModal() {
@@ -2125,10 +2168,12 @@ function resetAccountsFilters() {
   const searchEl = document.getElementById("searchEntryInput");
   const typeEl = document.getElementById("typeFilterSelect");
   const catEl = document.getElementById("categoryFilterSelect");
+  const monthEl = document.getElementById("monthPicker");
   if (searchEl) searchEl.value = "";
   if (typeEl) typeEl.value = "all";
-  if (catEl) catEl.value = "all";
-  renderApp();
+  if (catEl) catEl.value = activeHisaabCategory || "all";
+  if (monthEl) monthEl.value = getTodayISO().slice(0, 7);
+  switchView("today");
 }
 
 function resetSplitFilters() {
