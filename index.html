@@ -851,6 +851,7 @@ body {
           <button type="button" class="btn-secondary" onclick="selectHisaabCategory(null)">← Back to Daily Lenden</button>
           <strong id="activeCategoryWorkspaceLabel" style="font-size:15px;"></strong>
           <button type="button" class="btn-primary" id="categoryDownloadPdfBtn" onclick="downloadCategoryReportPdf()">📄 Download PDF</button>
+          <button type="button" class="btn-secondary" onclick="setActiveCategoryBudget()">🎯 Set Category Budget</button>
         </div> 
  </div>
      </div>
@@ -2665,17 +2666,22 @@ function updateBudgetAlert(budget, expense) {
   const alertBox = document.getElementById("budgetAlertBox");
   if (!alertBox) return;
 
-  // Show alert strictly inside a specific category (e.g. Students inside Students, Employees inside Employees)
+  // Alert box should appear only inside an active category (e.g. Students inside Students, Employees inside Employees)
   if (!activeHisaabCategory || activeHisaabCategory === "all" || currentView === "yearly") {
     alertBox.style.display = "none";
     return;
   }
 
-  const catBudgetMap = (appState.categoryBudgets && typeof appState.categoryBudgets === "object")
+  const catName = String(activeHisaabCategory);
+  const catBudgets = (appState.categoryBudgets && typeof appState.categoryBudgets === "object")
     ? appState.categoryBudgets
     : {};
-  const hasOwnCatBudget = Object.prototype.hasOwnProperty.call(catBudgetMap, activeHisaabCategory);
-  const categoryLimit = hasOwnCatBudget ? toSafeNumber(catBudgetMap[activeHisaabCategory], 0) : 0;
+
+  // Each category uses its own stored budget limit if set, otherwise falls back to passed budget
+  const rawCatLimit = Object.prototype.hasOwnProperty.call(catBudgets, catName)
+    ? catBudgets[catName]
+    : budget;
+  const categoryLimit = toSafeNumber(rawCatLimit, 0);
 
   if (!categoryLimit || categoryLimit <= 0) {
     alertBox.style.display = "none";
@@ -2688,13 +2694,13 @@ function updateBudgetAlert(budget, expense) {
     alertBox.style.background = "rgba(239, 68, 68, 0.16)";
     alertBox.style.border = "1px solid rgba(239, 68, 68, 0.5)";
     alertBox.style.color = "#fca5a5";
-    alertBox.innerHTML = `<strong>${escapeHTML(activeHisaabCategory)} Budget Exceeded (${pct}%):</strong> ${escapeHTML(activeHisaabCategory)} expenses (${formatINR(expense)}) have exceeded the ${escapeHTML(activeHisaabCategory)} budget (${formatINR(categoryLimit)}) by ${formatINR(expense - categoryLimit)}.`;
+    alertBox.innerHTML = `<strong>${escapeHTML(catName)} Budget Exceeded (${pct}%):</strong> ${escapeHTML(catName)} expenses (${formatINR(expense)}) have exceeded the ${escapeHTML(catName)} budget (${formatINR(categoryLimit)}) by ${formatINR(expense - categoryLimit)}.`;
   } else if (pct >= 80) {
     alertBox.style.display = "block";
     alertBox.style.background = "rgba(245, 158, 11, 0.16)";
     alertBox.style.border = "1px solid rgba(245, 158, 11, 0.5)";
     alertBox.style.color = "#fde68a";
-    alertBox.innerHTML = `<strong>${escapeHTML(activeHisaabCategory)} Budget Warning (${pct}% Used):</strong> You have used ${pct}% of the ${escapeHTML(activeHisaabCategory)} budget (${formatINR(categoryLimit)}). ${formatINR(categoryLimit - expense)} remaining.`;
+    alertBox.innerHTML = `<strong>${escapeHTML(catName)} Budget Warning (${pct}% Used):</strong> You have used ${pct}% of the ${escapeHTML(catName)} budget (${formatINR(categoryLimit)}). ${formatINR(categoryLimit - expense)} remaining.`;
   } else {
     alertBox.style.display = "none";
   }
