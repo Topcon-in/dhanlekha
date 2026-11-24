@@ -763,6 +763,19 @@ body {
     </div>
 <!-- SECTION 1: HISAAB (Personal Tracker) -->
   <div id="section-hisaab" class="dl-section active-section">
+    <section class="form-box" id="hisaabCategoryHubBox" style="padding:14px 18px; margin-bottom:18px;">
+        <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
+          <div>
+            <h2 style="font-size:15px; margin-bottom:2px;">Select Profile / Category Workspace</h2>
+            <span id="activeCategoryWorkspaceLabel" style="font-size:12px; color:var(--muted);">Active: All Categories (Combined View)</span>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+            <input type="text" id="categoryHubSearchInput" placeholder="Search 10+ categories..." oninput="filterCategoryHubCards()" style="width:200px; padding:7px 10px; font-size:13px;" />
+            <button type="button" class="btn-secondary" style="padding:7px 10px; font-size:12.5px;" onclick="selectHisaabCategory('all')">All Categories</button>
+          </div>
+        </div>
+        <div id="hisaabCategoryGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(135px, 1fr)); gap:8px;"></div>
+      </section>
     <section class="cards-grid">
       <div class="card">
         <div class="card-label"><span>Monthly Budget</span><span>🎯</span></div>
@@ -838,6 +851,14 @@ body {
           <label for="entryNote">Note</label>
           <input type="text" id="entryNote" placeholder="Optional" />
         </div>
+        <div id="catExtraField1Wrap" style="display:none;">
+            <label id="catExtraField1Label" for="catExtraField1">Extra Detail 1</label>
+            <input type="text" id="catExtraField1" placeholder="" />
+          </div>
+          <div id="catExtraField2Wrap" style="display:none;">
+            <label id="catExtraField2Label" for="catExtraField2">Extra Detail 2</label>
+            <input type="text" id="catExtraField2" placeholder="" />
+          </div>
         <div>
           <button type="submit" class="btn-primary" style="width:100%; padding:11px;">✨ Save Entry</button>
         </div>
@@ -1450,6 +1471,22 @@ function addEntry(e) {
     note
   });
 
+  const f1Val = (document.getElementById("catExtraField1")?.value || "").trim();
+  const f2Val = (document.getElementById("catExtraField2")?.value || "").trim();
+  const extraParts = [f1Val, f2Val].filter(Boolean);
+  if (extraParts.length > 0) {
+    const lastEntry = appState.entries[0];
+    if (lastEntry) {
+      lastEntry.note = [lastEntry.note, extraParts.join(" | ")].filter(Boolean).join(" — ");
+    }
+  }
+  ensureCategoryBucketsStore();
+  if (appState.entries[0]) {
+    const bucketKey = getCategoryBucketKey(appState.entries[0].category || "General");
+    appState.categoryBuckets[bucketKey].unshift({ ...appState.entries[0] });
+  }
+  if (document.getElementById("catExtraField1")) document.getElementById("catExtraField1").value = "";
+  if (document.getElementById("catExtraField2")) document.getElementById("catExtraField2").value = "";
   saveState();
   populateYears();
 
@@ -1613,6 +1650,195 @@ function confirmSafeReset() {
   openBudgetModal();
 }
   const DEFAULT_CATEGORIES = ["General", "Food", "Travel", "Bills", "Shopping", "Health", "Salary/Income"];
+  const HISAAB_CATEGORY_CONFIG = {
+  Students: {
+    icon: "",
+    f1Label: "Student / Roll No.",
+    f1Placeholder: "e.g., Rohan - Roll 14",
+    f2Label: "Subject / Fee Type",
+    f2Placeholder: "e.g., Tuition, Books, Exam"
+  },
+  Employees: {
+    icon: "",
+    f1Label: "Employee Name / ID",
+    f1Placeholder: "e.g., Amit - EMP102",
+    f2Label: "Pay / Shift Detail",
+    f2Placeholder: "e.g., Monthly Salary, Advance, Overtime"
+  },
+  Shop: {
+    icon: "",
+    f1Label: "Customer / Bill No.",
+    f1Placeholder: "e.g., INV-204 / Walk-in",
+    f2Label: "Item / Stock Type",
+    f2Placeholder: "e.g., Wholesale, Retail, Goods"
+  },
+  Freelance: {
+    icon: "",
+    f1Label: "Client Name",
+    f1Placeholder: "e.g., Verma Studio",
+    f2Label: "Project / Milestone",
+    f2Placeholder: "e.g., Logo Design, Web Fix"
+  },
+  Business: {
+    icon: "",
+    f1Label: "Vendor / Partner",
+    f1Placeholder: "e.g., Apex Traders",
+    f2Label: "Department / Ref",
+    f2Placeholder: "e.g., Operations, GST Bill"
+  },
+  Family: {
+    icon: "",
+    f1Label: "Family Member",
+    f1Placeholder: "e.g., Mom, Dad, Sister",
+    f2Label: "Purpose",
+    f2Placeholder: "e.g., Allowance, Household"
+  },
+  Travel: {
+    icon: "",
+    f1Label: "Route / Destination",
+    f1Placeholder: "e.g., Indore to Bhopal",
+    f2Label: "Mode / Ticket Ref",
+    f2Placeholder: "e.g., Bus, Cab, Train"
+  },
+  "Rent / Bills": {
+    icon: "",
+    f1Label: "Property / Biller",
+    f1Placeholder: "e.g., House Rent, Electricity",
+    f2Label: "Billing Period",
+    f2Placeholder: "e.g., Nov 2026"
+  },
+  Health: {
+    icon: "",
+    f1Label: "Hospital / Pharmacy",
+    f1Placeholder: "e.g., City Clinic, MedPlus",
+    f2Label: "Patient / Treatment",
+    f2Placeholder: "e.g., Checkup, Medicines"
+  },
+  Investments: {
+    icon: "",
+    f1Label: "Asset / Fund Name",
+    f1Placeholder: "e.g., Nifty 50 SIP, FD",
+    f2Label: "Folio / Platform",
+    f2Placeholder: "e.g., Groww, Bank"
+  },
+  General: {
+    icon: "",
+    f1Label: "Reference",
+    f1Placeholder: "Optional reference",
+    f2Label: "Tag",
+    f2Placeholder: "Optional tag"
+  }
+};
+
+let activeHisaabCategory = "all";
+
+function getCategoryBucketKey(catName) {
+  return "cat_" + String(catName || "General").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_");
+}
+
+function ensureCategoryBucketsStore() {
+  if (!appState.categoryBuckets || typeof appState.categoryBuckets !== "object") {
+    appState.categoryBuckets = {};
+  }
+  const allCats = Array.from(new Set([...Object.keys(HISAAB_CATEGORY_CONFIG), ...(getAppPrefs().customCategories || [])]));
+  allCats.forEach((cat) => {
+    const key = getCategoryBucketKey(cat);
+    if (!Array.isArray(appState.categoryBuckets[key])) {
+      appState.categoryBuckets[key] = [];
+    }
+  });
+}
+
+function syncCategorySpecificFormUI(cat) {
+  const f1Wrap = document.getElementById("catExtraField1Wrap");
+  const f2Wrap = document.getElementById("catExtraField2Wrap");
+  const f1Lbl = document.getElementById("catExtraField1Label");
+  const f2Lbl = document.getElementById("catExtraField2Label");
+  const f1Inp = document.getElementById("catExtraField1");
+  const f2Inp = document.getElementById("catExtraField2");
+  const catSel = document.getElementById("entryCategory");
+
+  if (!cat || cat === "all") {
+    if (f1Wrap) f1Wrap.style.display = "none";
+    if (f2Wrap) f2Wrap.style.display = "none";
+    return;
+  }
+
+  if (catSel && Array.from(catSel.options).some((o) => o.value === cat)) {
+    catSel.value = cat;
+  }
+
+  const cfg = HISAAB_CATEGORY_CONFIG[cat] || {
+    f1Label: `${cat} Detail 1`,
+    f1Placeholder: `Enter ${cat} detail`,
+    f2Label: `${cat} Detail 2`,
+    f2Placeholder: "Optional detail"
+  };
+
+  if (f1Wrap && f1Lbl && f1Inp) {
+    f1Wrap.style.display = "block";
+    f1Lbl.textContent = cfg.f1Label;
+    f1Inp.placeholder = cfg.f1Placeholder;
+  }
+  if (f2Wrap && f2Lbl && f2Inp) {
+    f2Wrap.style.display = "block";
+    f2Lbl.textContent = cfg.f2Label;
+    f2Inp.placeholder = cfg.f2Placeholder;
+  }
+}
+
+function renderHisaabCategoryHub() {
+  const grid = document.getElementById("hisaabCategoryGrid");
+  const activeLbl = document.getElementById("activeCategoryWorkspaceLabel");
+  if (!grid) return;
+
+  ensureCategoryBucketsStore();
+  const prefs = getAppPrefs();
+  const cats = Array.from(new Set([...Object.keys(HISAAB_CATEGORY_CONFIG), ...(prefs.customCategories || [])]));
+  const q = (document.getElementById("categoryHubSearchInput")?.value || "").trim().toLowerCase();
+
+  const filteredCats = cats.filter((c) => !q || c.toLowerCase().includes(q));
+  if (activeLbl) {
+    activeLbl.textContent = activeHisaabCategory === "all"
+      ? "Active: All Categories (Combined View)"
+      : `Active Category: ${activeHisaabCategory} (Separate Record Data)`;
+  }
+
+  grid.innerHTML = filteredCats.map((cat) => {
+    const isSelected = activeHisaabCategory === cat;
+    const bucketKey = getCategoryBucketKey(cat);
+    const bucketCount = (appState.categoryBuckets[bucketKey] || []).length;
+    const mainCount = (appState.entries || []).filter((e) => (e.category || "General") === cat).length;
+    const totalCatRecords = bucketCount + mainCount;
+
+    return `
+      <button type="button"
+        onclick="selectHisaabCategory('${encodeURIComponent(cat)}')"
+        style="text-align:left; padding:10px 12px; border-radius:10px; border:1px solid ${isSelected ? "var(--primary)" : "var(--border)"}; background:${isSelected ? "rgba(16,185,129,0.16)" : "var(--bg)"}; color:var(--text); display:flex; flex-direction:column; gap:3px;">
+        <span style="font-size:13px; font-weight:700;">${escapeHTML(cat)}</span>
+        <span style="font-size:11px; color:var(--muted);">${totalCatRecords} record(s)</span>
+      </button>
+    `;
+  }).join("");
+}
+
+function filterCategoryHubCards() {
+  renderHisaabCategoryHub();
+}
+
+function selectHisaabCategory(encodedCat) {
+  const cat = encodedCat === "all" ? "all" : decodeURIComponent(encodedCat);
+  activeHisaabCategory = cat;
+
+  const catFilterEl = document.getElementById("categoryFilterSelect");
+  if (catFilterEl) {
+    catFilterEl.value = cat === "all" ? "all" : cat;
+  }
+
+  syncCategorySpecificFormUI(cat);
+  renderHisaabCategoryHub();
+  renderApp();
+}
 
 function getAppPrefs() {
   return {
@@ -2001,6 +2227,26 @@ function renderCategoryBreakdown(entries) {
     }
     budgetDisplay = yearBudgetSum;
   }
+    if (activeHisaabCategory && activeHisaabCategory !== "all") {
+    ensureCategoryBucketsStore();
+    const bucketKey = getCategoryBucketKey(activeHisaabCategory);
+    const bucketItems = appState.categoryBuckets[bucketKey] || [];
+    const mainMatches = (appState.entries || []).filter((e) => (e.category || "General") === activeHisaabCategory);
+    const seenIds = new Set();
+    const categoryPool = [...bucketItems, ...mainMatches].filter((item) => {
+      const k = item.id || `${item.date}|${item.amount}|${item.category}|${item.note || ""}`;
+      if (seenIds.has(k)) return false;
+      seenIds.add(k);
+      return true;
+    });
+    if (currentView === "today") {
+      periodEntries = categoryPool.filter((e) => e.date === today);
+    } else if (currentView === "monthly") {
+      periodEntries = categoryPool.filter((e) => e.date && e.date.startsWith(selectedMonth));
+    } else {
+      periodEntries = categoryPool.filter((e) => e.date && e.date.startsWith(selectedYear));
+    }
+  }
 
   let totalIncome = 0;
   let totalExpense = 0;
@@ -2347,6 +2593,7 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
     </div>
   `;
 }
+  renderHisaabCategoryHub();
 function renderYearlyTable(container, year) {
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
