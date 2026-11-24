@@ -2057,9 +2057,20 @@ function filterCategoryHubCards() {
   renderHisaabCategoryHub();
 }
 
+function syncActiveCategoryHeaderLabel() {
+  const activeLbl = document.getElementById("activeCategoryWorkspaceLabel");
+  if (!activeLbl) return;
+  if (activeHisaabCategory && activeHisaabCategory !== "all") {
+    activeLbl.textContent = `📁 ${activeHisaabCategory}`;
+  } else {
+    activeLbl.textContent = "";
+  }
+}
+
 function selectHisaabCategory(encodedCat) {
   if (!encodedCat) {
     activeHisaabCategory = null;
+    syncActiveCategoryHeaderLabel();
     syncHisaabModeVisibility();
     renderHisaabCategoryHub();
     return;
@@ -2070,6 +2081,7 @@ function selectHisaabCategory(encodedCat) {
   const catFilterEl = document.getElementById("categoryFilterSelect");
   if (catFilterEl) catFilterEl.value = cat;
 
+  syncActiveCategoryHeaderLabel();
   syncCategorySpecificFormUI(cat);
   syncHisaabModeVisibility();
   renderApp();
