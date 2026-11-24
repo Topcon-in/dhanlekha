@@ -2359,7 +2359,7 @@ function selectHisaabCategory(encodedCat) {
   syncHisaabModeVisibility();
   renderApp();
 }
-  function setActiveCategoryBudget() {
+function setActiveCategoryBudget() {
   if (!activeHisaabCategory || activeHisaabCategory === "all") return;
   if (!appState.categoryBudgets || typeof appState.categoryBudgets !== "object") {
     appState.categoryBudgets = {};
@@ -2377,7 +2377,9 @@ function selectHisaabCategory(encodedCat) {
   appState.categoryBudgets[activeHisaabCategory] = num;
   saveState();
   renderApp();
-    let _dlRenderRafId = null;
+}
+
+let _dlRenderRafId = null;
 function scheduleRenderApp() {
   if (_dlRenderRafId !== null) return;
   _dlRenderRafId = window.requestAnimationFrame(() => {
@@ -2385,7 +2387,6 @@ function scheduleRenderApp() {
     renderApp();
   });
 }
-  }
 
 function applyPreferencesUI() {
   const prefs = getAppPrefs();
@@ -2828,7 +2829,12 @@ function renderCategoryBreakdown(entries) {
     if (item.type === "income") totalIncome += amt;
     else totalExpense += amt;
   });
-
+if (activeHisaabCategory && activeHisaabCategory !== "all") {
+  const catBudgetsMap = (appState.categoryBudgets && typeof appState.categoryBudgets === "object") ? appState.categoryBudgets : {};
+  if (Object.prototype.hasOwnProperty.call(catBudgetsMap, activeHisaabCategory)) {
+    budgetDisplay = toSafeNumber(catBudgetsMap[activeHisaabCategory], budgetDisplay);
+  }
+}
   const netBudgetLeft = budgetDisplay + totalIncome - totalExpense;
   document.getElementById("cardBudget").textContent = formatINR(budgetDisplay);
   document.getElementById("cardIncome").textContent = formatINR(totalIncome);
