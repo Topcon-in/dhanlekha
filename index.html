@@ -1467,9 +1467,16 @@ function addEntry(e) {
   const f1Val = (document.getElementById("catExtraField1")?.value || "").trim();
   const f2Val = (document.getElementById("catExtraField2")?.value || "").trim();
 
+  const cfg = HISAAB_CATEGORY_CONFIG?.[category] || {
+    f1Label: `${category} Detail 1`,
+    f2Label: `${category} Detail 2`
+  };
+
   const type = rawType === "income" ? "income" : "expense";
-  const source = rawSource || category;
-  const combinedNote = [rawNote, f1Val, f2Val].filter(Boolean).join(" | ");
+  const source = rawSource || "--------";
+  const note = rawNote || "--------";
+  const extra1 = f1Val || "--------";
+  const extra2 = f2Val || "--------";
   const currentTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", hour12: true });
 
   const newRecord = {
@@ -1481,7 +1488,11 @@ function addEntry(e) {
     paymentMode,
     date,
     time: currentTime,
-    note: combinedNote
+    note,
+    extra1Label: cfg.f1Label,
+    extra1,
+    extra2Label: cfg.f2Label,
+    extra2
   };
 
   ensureCategoryBucketsStore();
@@ -2408,27 +2419,49 @@ renderSplitSection();
     return;
   }
 
-  const rows = filtered.map((item) => {
+ const rows = filtered.map((item) => {
     const isInc = item.type === "income";
     const safeId = encodeURIComponent(String(item.id ?? ""));
-    const catBadge = item.category ? `<span style="font-size:11px; color:var(--accent); background:rgba(56,189,248,0.12); padding:2px 7px; border-radius:6px; margin-left:6px;">${escapeHTML(item.category)}</span>` : "";
-    const modeTag = item.paymentMode ? `<span style="font-size:11px; color:var(--muted); border:1px solid var(--border); padding:1px 6px; border-radius:6px; margin-right:6px;">${escapeHTML(item.paymentMode)}</span>` : "";
+    const catName = item.category || "General";
+    const catCfg = HISAAB_CATEGORY_CONFIG?.[catName] || {
+      f1Label: `${catName} Detail 1`,
+      f2Label: `${catName} Detail 2`
+    };
+    const f1Label = escapeHTML(item.extra1Label || catCfg.f1Label);
+    const f1Val = escapeHTML((item.extra1 && String(item.extra1).trim()) || "--------");
+    const f2Label = escapeHTML(item.extra2Label || catCfg.f2Label);
+    const f2Val = escapeHTML((item.extra2 && String(item.extra2).trim()) || "--------");
+    const srcVal = escapeHTML((item.source && String(item.source).trim()) || "--------");
+    const noteVal = escapeHTML((item.note && String(item.note).trim()) || "--------");
+    const modeVal = escapeHTML((item.paymentMode && String(item.paymentMode).trim()) || "--------");
+
+    const catBadge = `<span style="font-size:11px; color:var(--accent); background:rgba(56,189,248,0.12); padding:2px 7px; border-radius:6px; margin-left:6px;">${escapeHTML(catName)}</span>`;
+    const modeTag = `<span style="font-size:11px; color:var(--muted); border:1px solid var(--border); padding:1px 6px; border-radius:6px; margin-right:6px;">${modeVal}</span>`;
+    const extraDetailsHtml = activeHisaabCategory
+      ? `<div style="margin-top:5px; font-size:11.5px; color:var(--muted); display:flex; flex-wrap:wrap; gap:10px;">
+           <span>${f1Label}: <strong style="color:var(--text);">${f1Val}</strong></span>
+           <span>${f2Label}: <strong style="color:var(--text);">${f2Val}</strong></span>
+         </div>`
+      : "";
 
     return `
       <tr>
-        <td>${escapeHTML(item.date)}</td>
-        <td>${escapeHTML(item.time || "-")}</td>
+        <td>${escapeHTML(item.date || "--------")}</td>
+        <td>${escapeHTML(item.time || "--------")}</td>
         <td>
           <span class="badge ${isInc ? "badge-in" : "badge-out"}">
             ${isInc ? "+ Income" : "- Expense"}
           </span>
         </td>
-        <td><strong>${escapeHTML(item.source)}</strong>${catBadge}</td>
-        <td>${modeTag}${escapeHTML(item.note || "—")}</td>
+        <td>
+          <strong>${srcVal}</strong>${catBadge}
+          ${extraDetailsHtml}
+        </td>
+        <td>${modeTag}${noteVal}</td>
         <td style="font-weight:700; color:${isInc ? "#34d399" : "#f87171"};">
           ${isInc ? "+" : "-"}${formatINR(item.amount)}
         </td>
-       <td class="no-print" style="white-space:nowrap;">
+        <td class="no-print" style="white-space:nowrap;">
           <button type="button" class="btn-secondary" style="padding:5px 9px; font-size:12px; margin-right:4px;" onclick="openEditEntryModal(decodeURIComponent('${safeId}'))">Edit</button>
           <button type="button" class="btn-danger" onclick="deleteEntry(decodeURIComponent('${safeId}'))">Delete</button>
         </td>
