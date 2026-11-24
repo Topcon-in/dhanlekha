@@ -2699,6 +2699,27 @@ function renderSplitSection() {
     activeEl.style.setProperty("display", "block", "important");
   }
 
+  // Hide/show Hisaab cards, budget alert, breakdown, entry box, filters & table placed outside #section-hisaab
+  const hisaabOuterSelectors = [
+    ".cards-grid",
+    "#budgetAlertBox",
+    "#categoryBreakdownBox",
+    "#entryForm",
+    ".tabs-bar",
+    "#tableContainer"
+  ];
+  hisaabOuterSelectors.forEach((sel) => {
+    document.querySelectorAll(sel).forEach((el) => {
+      if (el.closest("#hisaabCategoryHubBox") || el.closest("#hisaabCategoryWorkspace")) return;
+      const boxEl = sel === "#entryForm" && el.closest(".form-box") ? el.closest(".form-box") : el;
+      if (target !== "hisaab") {
+        boxEl.style.setProperty("display", "none", "important");
+      } else {
+        boxEl.style.removeProperty("display");
+      }
+    });
+  });
+
   document.querySelectorAll(".dl-nav-item").forEach((btn) => {
     btn.classList.toggle("active", btn.getAttribute("data-target") === target);
   });
