@@ -1501,11 +1501,7 @@ function initApp() {
   if (entryDateEl) entryDateEl.value = today;
   if (monthPickerEl) monthPickerEl.value = currentYM;
   populateYears();
-  if (!appState.setupDone) {
-    const initBudgetEl = document.getElementById("initialBudgetInput");
-    if (initBudgetEl) initBudgetEl.value = appState.monthlyBudget;
-    openBudgetModal();
-  } else {
+  if (appState.setupDone) {
     promptNewMonthBudgetIfNeeded(today);
     handleNewYearRolloverIfNeeded(today);
   }
@@ -1514,7 +1510,7 @@ function initApp() {
   if (splitDateEl) splitDateEl.value = today;
   renderApp();
   activeHisaabCategory = null;
-renderHisaabCategoryHub();
+  renderHisaabCategoryHub();
 }
 
 function completeFirstSetup() {
