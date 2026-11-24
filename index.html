@@ -1253,11 +1253,42 @@ function setMonthBudgetValue(ym, amount) {
   appState.monthlyBudget = cleanAmt;
 }
 
+const BACKUP_SNAPSHOT_KEY = "dhanlekha_last_good_snapshot_v1";
+
+function hasAnySavedRecords(stateObj) {
+  if (!stateObj || typeof stateObj !== "object") return false;
+  const hasMain = Array.isArray(stateObj.entries) && stateObj.entries.length > 0;
+  const hasSplits = Array.isArray(stateObj.splits) && stateObj.splits.length > 0;
+  const buckets = stateObj.categoryBuckets && typeof stateObj.categoryBuckets === "object" ? stateObj.categoryBuckets : {};
+  const hasBuckets = Object.values(buckets).some((arr) => Array.isArray(arr) && arr.length > 0);
+  return hasMain || hasSplits || hasBuckets;
+}
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
+    const backupRaw = localStorage.getItem(BACKUP_SNAPSHOT_KEY);
+    let parsed = null;
+
     if (raw) {
-      const parsed = JSON.parse(raw);
+      parsed = JSON.parse(raw);
+    }
+
+    if ((!parsed || !hasAnySavedRecords(parsed)) && backupRaw) {
+      const backupParsed = JSON.parse(backupRaw);
+      if (hasAnySavedRecords(backupParsed)) {
+        parsed = {
+          ...backupParsed,
+          entries: Array.isArray(backupParsed.entries) ? backupParsed.entries : (parsed?.entries || []),
+          splits: Array.isArray(backupParsed.splits) ? backupParsed.splits : (parsed?.splits || []),
+          categoryBuckets: backupParsed.categoryBuckets && typeof backupParsed.categoryBuckets === "object"
+            ? backupParsed.categoryBuckets
+            : (parsed?.categoryBuckets || {})
+        };
+      }
+    }
+
+    if (parsed) {
       const budget = toSafeNumber(parsed.monthlyBudget, 10000);
       const safeBudget = budget >= 0 ? budget : 10000;
       const budgetsMap = normalizeMonthlyBudgets(parsed.monthlyBudgets, safeBudget);
@@ -1266,23 +1297,32 @@ function loadState() {
         budgetsMap[currentYM] = safeBudget;
       }
       appState = {
+        ...parsed,
         setupDone: Boolean(parsed.setupDone),
         monthlyBudget: safeBudget,
         monthlyBudgets: budgetsMap,
-        entries: Array.isArray(parsed.entries) ? parsed.entries : []
+        entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+        splits: Array.isArray(parsed.splits) ? parsed.splits : [],
+        categoryBuckets: parsed.categoryBuckets && typeof parsed.categoryBuckets === "object" ? parsed.categoryBuckets : {}
       };
     } else {
       appState.monthlyBudgets = {};
+      appState.categoryBuckets = {};
     }
   } catch (e) {
     console.error("Storage read error:", e);
     appState.monthlyBudgets = {};
+    appState.categoryBuckets = {};
   }
 }
 
 function saveState() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    const serialized = JSON.stringify(appState);
+    localStorage.setItem(STORAGE_KEY, serialized);
+    if (hasAnySavedRecords(appState)) {
+      localStorage.setItem(BACKUP_SNAPSHOT_KEY, serialized);
+    }
   } catch (e) {
     console.error("Storage write error:", e);
   }
