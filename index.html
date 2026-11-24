@@ -1972,18 +1972,19 @@ function syncHisaabModeVisibility() {
   if (hubBox) hubBox.style.display = hasCategory ? "none" : "block";
   if (workspaceEl) workspaceEl.style.display = hasCategory ? "block" : "none";
 
-  const extraSelectors = [
-    "#section-hisaab ~ .cards-grid",
-    "#section-hisaab ~ #budgetAlertBox",
-    "#section-hisaab ~ #categoryBreakdownBox",
-    "#section-hisaab ~ .form-box",
-    "#section-hisaab ~ .tabs-bar",
-    "#section-hisaab ~ #tableContainer"
+  const hideInDailySelectors = [
+    ".cards-grid",
+    "#budgetAlertBox",
+    "#categoryBreakdownBox",
+    "#entryForm",
+    ".tabs-bar",
+    "#tableContainer"
   ];
 
-  extraSelectors.forEach((sel) => {
+  hideInDailySelectors.forEach((sel) => {
     document.querySelectorAll(sel).forEach((el) => {
-      el.style.display = hasCategory ? "" : "none";
+      if (el.closest("#hisaabCategoryHubBox") || el.closest("#hisaabCategoryWorkspace")) return;
+      el.style.setProperty("display", hasCategory ? "" : "none", "important");
     });
   });
 }
@@ -2831,6 +2832,7 @@ renderSplitSection();
       <tbody>${rows}</tbody>
     </table>
   `;
+    syncHisaabModeVisibility();
 }
 function buildDonutMarkup(containerEl, itemsList, totalAmt, emptyMsg, palette, centerSubLabel = "total") {
   if (!containerEl) return;
