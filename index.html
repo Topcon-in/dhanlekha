@@ -2377,6 +2377,13 @@ function selectHisaabCategory(encodedCat) {
   appState.categoryBudgets[activeHisaabCategory] = num;
   saveState();
   renderApp();
+    let _dlRenderRafId = null;
+function scheduleRenderApp() {
+  if (_dlRenderRafId !== null) return;
+  _dlRenderRafId = window.requestAnimationFrame(() => {
+    _dlRenderRafId = null;
+    renderApp();
+  });
 }
 
 function applyPreferencesUI() {
