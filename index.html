@@ -3214,14 +3214,18 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
   const statusEl = document.getElementById("reportBudgetStatus");
   if (!donutEl || !compEl) return;
 
-  if (statusEl) {
-    if (scopedBudget > 0) {
-      const usedPct = Math.min(999, Math.round((scopedExpense / scopedBudget) * 100));
-      statusEl.innerHTML = `<strong>${escapeHTML(activePeriodLabel)}</strong> • Budget: <strong>${formatINR(scopedBudget)}</strong> • Used: <strong>${usedPct}%</strong> (${formatINR(scopedExpense)} spent)`;
-    } else {
-      statusEl.innerHTML = `<strong>${escapeHTML(activePeriodLabel)}</strong> • No budget limit recorded for this period.`;
-    }
-  }
+  const allAppEntries = Array.isArray(appState.entries) ? appState.entries : [];
+let overallAppIncome = 0;
+let overallAppExpense = 0;
+allAppEntries.forEach((item) => {
+  const amt = toSafeNumber(item.amount, 0);
+  if (item.type === "income") overallAppIncome += amt;
+  else overallAppExpense += amt;
+});
+const displayExpense = Number.isFinite(Number(totalExpense)) ? toSafeNumber(totalExpense, overallAppExpense) : overallAppExpense;
+if (statusEl) {
+  statusEl.innerHTML = `Total Income: <strong style="color:#34d399;">${formatINR(overallAppIncome)}</strong> &nbsp;•&nbsp; Expense: <strong style="color:#f87171;">${formatINR(displayExpense)}</strong>`;
+}
 
   const expenses = scopedEntries.filter((e) => e.type === "expense");
   const totalExp = expenses.reduce((sum, e) => sum + toSafeNumber(e.amount, 0), 0);
