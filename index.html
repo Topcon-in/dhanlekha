@@ -2369,11 +2369,48 @@ function selectHisaabCategory(encodedCat) {
     renderHisaabCategoryHub();
     return;
   }
+
   const cat = decodeURIComponent(encodedCat);
   activeHisaabCategory = cat;
 
+  // Ensure filters do not hide records saved in this category
   const catFilterEl = document.getElementById("categoryFilterSelect");
-  if (catFilterEl) catFilterEl.value = cat;
+  if (catFilterEl) catFilterEl.value = "all";
+  const typeFilterEl = document.getElementById("typeFilterSelect");
+  if (typeFilterEl) typeFilterEl.value = "all";
+  const searchEl = document.getElementById("searchEntryInput");
+  if (searchEl) searchEl.value = "";
+
+  // Check category records and align monthPicker if entries exist in a specific month
+  ensureCategoryBucketsStore();
+  const bucketKey = getCategoryBucketKey(cat);
+  const bucketItems = Array.isArray(appState.categoryBuckets?.[bucketKey]) ? appState.categoryBuckets[bucketKey] : [];
+  const mainMatches = (Array.isArray(appState.entries) ? appState.entries : []).filter((e) => (e.category || "General") === cat);
+  const combined = [...bucketItems, ...mainMatches];
+
+  currentView = "monthly";
+  const tabToday = document.getElementById("tabToday");
+  const tabMonthly = document.getElementById("tabMonthly");
+  const tabYearly = document.getElementById("tabYearly");
+  if (tabToday) tabToday.classList.remove("active");
+  if (tabMonthly) tabMonthly.classList.add("active");
+  if (tabYearly) tabYearly.classList.remove("active");
+  const monthWrap = document.getElementById("monthFilterWrap");
+  const yearWrap = document.getElementById("yearFilterWrap");
+  if (monthWrap) monthWrap.style.display = "block";
+  if (yearWrap) yearWrap.style.display = "none";
+
+  const monthInp = document.getElementById("monthPicker");
+  const currentYM = getTodayISO().slice(0, 7);
+  if (monthInp) {
+    const hasCurrentMonth = combined.some((item) => item.date && item.date.startsWith(currentYM));
+    if (!hasCurrentMonth) {
+      const firstDated = combined.find((item) => item.date && /^\d{4}-\d{2}/.test(item.date));
+      monthInp.value = firstDated ? firstDated.date.slice(0, 7) : currentYM;
+    } else if (!monthInp.value) {
+      monthInp.value = currentYM;
+    }
+  }
 
   syncActiveCategoryHeaderLabel();
   syncCategorySpecificFormUI(cat);
