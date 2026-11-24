@@ -1385,6 +1385,8 @@ function initApp() {
   const splitDateEl = document.getElementById("splitDate");
   if (splitDateEl) splitDateEl.value = today;
   renderApp();
+  activeHisaabCategory = null;
+renderHisaabCategoryHub();
 }
 
 function completeFirstSetup() {
