@@ -771,8 +771,8 @@ body {
   <div id="hisaabCategoryHubBox" style="margin-bottom:14px;">
         <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
           <div>
-            <h2 style="font-size:16px; margin-bottom:2px;">📒 Daily Lenden</h2>
-            <span style="font-size:12px; color:var(--muted);">Kisi ne diya (Income) ya dukaan/kisi ko diya (Expense) — jaldi save karein</span>
+            <h2 style="font-size:16px; margin-bottom:2px;">📒 Daily Transactions</h2>
+            <span style="font-size:12px; color:var(--muted);">Quickly log money received (Income) or spent (Expense)</span>
           </div>
           <button type="button" class="btn-secondary" id="toggleTenCategoriesBtn" onclick="toggleTenCategoriesDrawer()">🏷️ 10 Categories</button>
         </div>
@@ -788,18 +788,18 @@ body {
         <section class="form-box" style="margin-bottom:14px; padding:14px;">
           <form id="simpleDailyForm" class="form-grid" onsubmit="addSimpleDailyEntry(event)">
             <div>
-              <label for="dailyType">Kya Hua?</label>
+              <label for="dailyType">Type</label>
               <select id="dailyType">
-                <option value="expense">💸 Diya / Kharch (Expense)</option>
-                <option value="income">💵 Mila / Aaya (Income)</option>
+                <option value="expense">💸 Expense (Spent)</option>
+                <option value="income">💵 Income (Received)</option>
               </select>
             </div>
             <div>
-              <label for="dailyAmount">Kitna (₹) *</label>
+              <label for="dailyAmount">Amount *</label>
               <input type="number" id="dailyAmount" min="1" step="any" placeholder="100" required />
             </div>
             <div>
-              <label for="dailyMode">Kaise?</label>
+              <label for="dailyMode">Payment Mode</label>
               <select id="dailyMode">
                 <option value="Cash">💵 Cash</option>
                 <option value="UPI">📱 UPI</option>
@@ -807,8 +807,8 @@ body {
               </select>
             </div>
             <div>
-              <label for="dailyNote">Kiska / Kis Kaam Ka?</label>
-              <input type="text" id="dailyNote" placeholder="Kirana, Raju, Auto..." />
+              <label for="dailyNote">Person / Purpose</label>
+              <input type="text" id="dailyNote" placeholder="Grocery, Friend, Cab..." />
             </div>
             <div>
               <label for="dailyDate">Date</label>
@@ -2210,7 +2210,7 @@ function renderSimpleDailyTable() {
 
   const list = Array.isArray(appState.entries) ? appState.entries : [];
   if (!list.length) {
-    wrap.innerHTML = `<div class="empty-state">Abhi koi daily lenden save nahi hua hai. Upar se jaldi entry add karein.</div>`;
+    wrap.innerHTML = `<div class="empty-state">No daily transactions recorded yet. Add an entry above to get started.</div>`;
     return;
   }
 
@@ -2222,7 +2222,7 @@ function renderSimpleDailyTable() {
         <td>${escapeHTML(item.date || "--------")}</td>
         <td>
           <span class="badge ${isInc ? "badge-in" : "badge-out"}">
-            ${isInc ? "+ Mila" : "- Diya"}
+            ${isInc ? "+ Income" : "- Expense"}
           </span>
         </td>
         <td>${escapeHTML((item.note && item.note !== "--------" ? item.note : item.source) || "--------")}</td>
@@ -2243,7 +2243,7 @@ function renderSimpleDailyTable() {
         <tr>
           <th>Date</th>
           <th>Type</th>
-          <th>Detail</th>
+          <th>Details</th>
           <th>Mode</th>
           <th>Amount</th>
           <th class="no-print">Action</th>
