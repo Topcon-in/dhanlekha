@@ -1967,18 +1967,25 @@ let activeHisaabCategory = null;
 function syncHisaabModeVisibility() {
   const hubBox = document.getElementById("hisaabCategoryHubBox");
   const workspaceEl = document.getElementById("hisaabCategoryWorkspace");
-  const sectionHisaab = document.getElementById("section-hisaab");
   const hasCategory = Boolean(activeHisaabCategory);
 
   if (hubBox) hubBox.style.display = hasCategory ? "none" : "block";
   if (workspaceEl) workspaceEl.style.display = hasCategory ? "block" : "none";
 
-  if (sectionHisaab) {
-    Array.from(sectionHisaab.children).forEach((child) => {
-      if (child.id === "hisaabCategoryHubBox" || child.id === "hisaabCategoryWorkspace") return;
-      child.style.display = hasCategory ? "" : "none";
+  const extraSelectors = [
+    "#section-hisaab ~ .cards-grid",
+    "#section-hisaab ~ #budgetAlertBox",
+    "#section-hisaab ~ #categoryBreakdownBox",
+    "#section-hisaab ~ .form-box",
+    "#section-hisaab ~ .tabs-bar",
+    "#section-hisaab ~ #tableContainer"
+  ];
+
+  extraSelectors.forEach((sel) => {
+    document.querySelectorAll(sel).forEach((el) => {
+      el.style.display = hasCategory ? "" : "none";
     });
-  }
+  });
 }
 
 function getCategoryBucketKey(catName) {
