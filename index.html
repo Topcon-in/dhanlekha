@@ -716,15 +716,20 @@ body {
         color: #000;
         border-bottom: 1px solid #ddd;
       }
-      body > *:not(#pdfPrintArea) {
-        display: none !important;
-      }
-      #pdfPrintArea {
-        display: block !important;
-        position: static !important;
-        background: #ffffff !important;
-        color: #000000 !important;
-      }
+     body > *:not(#pdfPrintArea) {
+    display: none !important;
+  }
+  #pdfPrintArea,
+  #pdfPrintArea * {
+    visibility: visible !important;
+  }
+  #pdfPrintArea {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
     }
   </style>
 </head>
@@ -2906,13 +2911,15 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
     periodEntries = pool.filter((e) => e.date && e.date.startsWith(selectedYear));
   }
 
+  if (!periodEntries.length && activeHisaabCategory && activeHisaabCategory !== "all") {
+    periodEntries = pool;
+  }
+
   const searchQuery = (document.getElementById("searchEntryInput")?.value || "").trim().toLowerCase();
   const typeFilter = document.getElementById("typeFilterSelect")?.value || "all";
-  const catFilter = document.getElementById("categoryFilterSelect")?.value || "all";
 
   return periodEntries.filter((item) => {
     if (typeFilter !== "all" && item.type !== typeFilter) return false;
-    if (catFilter !== "all" && (item.category || "General") !== catFilter) return false;
     if (searchQuery) {
       const haystack = `${item.source || ""} ${item.note || ""} ${item.category || ""} ${item.paymentMode || ""} ${item.extra1 || ""} ${item.extra2 || ""}`.toLowerCase();
       if (!haystack.includes(searchQuery)) return false;
@@ -2949,15 +2956,15 @@ function downloadCategoryReportPdf() {
         const modeVal = escapeHTML((item.paymentMode && String(item.paymentMode).trim()) || "--------");
         return `
           <tr>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; white-space:nowrap;">${escapeHTML(item.date || "--------")}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; white-space:nowrap;">${escapeHTML(item.time || "--------")}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; white-space:nowrap;">${isInc ? "Income" : "Expense"}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; word-break:break-word;">${srcVal}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; white-space:nowrap;">${modeVal}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; word-break:break-word;">${f1Lbl}: ${f1Val}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; word-break:break-word;">${f2Lbl}: ${f2Val}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; word-break:break-word;">${noteVal}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9.5px; font-weight:700; white-space:nowrap; text-align:right;">${isInc ? "+" : "-"}${formatINR(item.amount)}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; white-space:nowrap;">${escapeHTML(item.date || "--------")}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; white-space:nowrap;">${escapeHTML(item.time || "--------")}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; white-space:nowrap;">${isInc ? "Income" : "Expense"}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; word-break:break-word;">${srcVal}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; white-space:nowrap;">${modeVal}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; word-break:break-word;">${f1Lbl}: ${f1Val}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; word-break:break-word;">${f2Lbl}: ${f2Val}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; word-break:break-word;">${noteVal}</td>
+            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; font-weight:700; white-space:nowrap; text-align:right;">${isInc ? "+" : "-"}${formatINR(item.amount)}</td>
           </tr>
         `;
       }).join("")
@@ -2971,28 +2978,28 @@ function downloadCategoryReportPdf() {
   }
 
   printArea.innerHTML = `
-    <div style="font-family:system-ui,sans-serif; color:#0f172a; padding:8px;">
+    <div style="font-family:system-ui,sans-serif; color:#0f172a; padding:8px; background:#ffffff;">
       <div style="display:flex; justify-content:space-between; align-items:baseline; border-bottom:1.5px solid #0f172a; padding-bottom:6px; margin-bottom:8px;">
         <div>
-          <h2 style="margin:0; font-size:15px;">DhanLekha — ${escapeHTML(catName)} Report</h2>
-          <div style="font-size:10px; color:#334155;">View: ${escapeHTML(currentView.toUpperCase())} | Total Records: ${records.length}</div>
+          <h2 style="margin:0; font-size:14px; color:#0f172a;">DhanLekha — ${escapeHTML(catName)} Report</h2>
+          <div style="font-size:9.5px; color:#334155;">View: ${escapeHTML(currentView.toUpperCase())} | Total Records: ${records.length}</div>
         </div>
-        <div style="font-size:10px; text-align:right; color:#334155;">
+        <div style="font-size:9.5px; text-align:right; color:#334155;">
           Income: <strong>${formatINR(inc)}</strong> | Expense: <strong>${formatINR(exp)}</strong>
         </div>
       </div>
-      <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+      <table style="width:100%; border-collapse:collapse; table-layout:fixed; min-width:0;">
         <thead>
           <tr style="background:#f1f5f9;">
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:left;">Date</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:left;">Time</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:left;">Type</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:left;">Source</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:left;">Mode</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:left;">${escapeHTML(catCfg.f1Label)}</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:left;">${escapeHTML(catCfg.f2Label)}</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:left;">Note</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:9px; text-align:right;">Amount</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Date</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Time</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Type</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Source</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Mode</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">${escapeHTML(catCfg.f1Label)}</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">${escapeHTML(catCfg.f2Label)}</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Note</th>
+            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:right; color:#0f172a;">Amount</th>
           </tr>
         </thead>
         <tbody>${rowsHtml}</tbody>
@@ -3000,7 +3007,9 @@ function downloadCategoryReportPdf() {
     </div>
   `;
 
-  window.print();
+  setTimeout(() => {
+    window.print();
+  }, 80);
 }
 function renderYearlyTable(container, year) {
   const monthNames = [
