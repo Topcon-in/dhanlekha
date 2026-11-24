@@ -1984,7 +1984,8 @@ function syncHisaabModeVisibility() {
   hideInDailySelectors.forEach((sel) => {
     document.querySelectorAll(sel).forEach((el) => {
       if (el.closest("#hisaabCategoryHubBox") || el.closest("#hisaabCategoryWorkspace")) return;
-      el.style.setProperty("display", hasCategory ? "" : "none", "important");
+      const targetBox = sel === "#entryForm" && el.closest(".form-box") ? el.closest(".form-box") : el;
+      targetBox.style.setProperty("display", hasCategory ? "" : "none", "important");
     });
   });
 }
