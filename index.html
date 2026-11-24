@@ -2996,60 +2996,86 @@ function downloadCategoryReportPdf() {
         const modeVal = escapeHTML((item.paymentMode && String(item.paymentMode).trim()) || "--------");
         return `
           <tr>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; white-space:nowrap;">${escapeHTML(item.date || "--------")}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; white-space:nowrap;">${escapeHTML(item.time || "--------")}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; white-space:nowrap;">${isInc ? "Income" : "Expense"}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; word-break:break-word;">${srcVal}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; white-space:nowrap;">${modeVal}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; word-break:break-word;">${f1Lbl}: ${f1Val}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; word-break:break-word;">${f2Lbl}: ${f2Val}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; word-break:break-word;">${noteVal}</td>
-            <td style="padding:4px 5px; border:1px solid #cbd5e1; font-size:9px; font-weight:700; white-space:nowrap; text-align:right;">${isInc ? "+" : "-"}${formatINR(item.amount)}</td>
+            <td>${escapeHTML(item.date || "--------")}</td>
+            <td>${escapeHTML(item.time || "--------")}</td>
+            <td>${isInc ? "Income" : "Expense"}</td>
+            <td>${srcVal}</td>
+            <td>${modeVal}</td>
+            <td><strong>${f1Lbl}:</strong> ${f1Val}</td>
+            <td><strong>${f2Lbl}:</strong> ${f2Val}</td>
+            <td>${noteVal}</td>
+            <td style="text-align:right; font-weight:700; color:${isInc ? "#047857" : "#b91c1c"};">${isInc ? "+" : "-"}${formatINR(item.amount)}</td>
           </tr>
         `;
       }).join("")
-    : `<tr><td colspan="9" style="padding:8px; border:1px solid #cbd5e1; font-size:10px; text-align:center;">No records found in ${escapeHTML(catName)} report.</td></tr>`;
+    : `<tr><td colspan="9" style="text-align:center; padding:10px;">No records found in ${escapeHTML(catName)} report.</td></tr>`;
 
-  let printArea = document.getElementById("pdfPrintArea");
-  if (!printArea) {
-    printArea = document.createElement("div");
-    printArea.id = "pdfPrintArea";
-    document.body.appendChild(printArea);
-  }
-
-  printArea.innerHTML = `
-    <div style="font-family:system-ui,sans-serif; color:#0f172a; padding:8px; background:#ffffff;">
-      <div style="display:flex; justify-content:space-between; align-items:baseline; border-bottom:1.5px solid #0f172a; padding-bottom:6px; margin-bottom:8px;">
-        <div>
-          <h2 style="margin:0; font-size:14px; color:#0f172a;">DhanLekha — ${escapeHTML(catName)} Report</h2>
-          <div style="font-size:9.5px; color:#334155;">View: ${escapeHTML(currentView.toUpperCase())} | Total Records: ${records.length}</div>
-        </div>
-        <div style="font-size:9.5px; text-align:right; color:#334155;">
-          Income: <strong>${formatINR(inc)}</strong> | Expense: <strong>${formatINR(exp)}</strong>
-        </div>
-      </div>
-      <table style="width:100%; border-collapse:collapse; table-layout:fixed; min-width:0;">
-        <thead>
-          <tr style="background:#f1f5f9;">
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Date</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Time</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Type</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Source</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Mode</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">${escapeHTML(catCfg.f1Label)}</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">${escapeHTML(catCfg.f2Label)}</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:left; color:#0f172a;">Note</th>
-            <th style="padding:4px 5px; border:1px solid #94a3b8; font-size:8.5px; text-align:right; color:#0f172a;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>${rowsHtml}</tbody>
-      </table>
+  const htmlDoc = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>DhanLekha — ${escapeHTML(catName)} Report</title>
+  <style>
+    @page { size: A4 landscape; margin: 8mm; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; color: #0f172a; background: #ffffff; margin: 0; padding: 6px; font-size: 9px; }
+    .hdr { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1.5px solid #0f172a; padding-bottom: 5px; margin-bottom: 8px; gap: 10px; }
+    .hdr h2 { margin: 0; font-size: 13px; }
+    .meta { font-size: 8.5px; color: #334155; }
+    table { width: 100%; border-collapse: collapse; table-layout: auto; }
+    th, td { border: 1px solid #94a3b8; padding: 3.5px 4.5px; font-size: 8px; line-height: 1.25; vertical-align: top; word-break: break-word; }
+    th { background: #e2e8f0; color: #0f172a; text-align: left; font-weight: 700; }
+    th:last-child { text-align: right; }
+    @media print { .no-print-bar { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="no-print-bar" style="margin-bottom:8px; display:flex; justify-content:flex-end;">
+    <button onclick="window.print()" style="padding:5px 10px; cursor:pointer;">Print / Save PDF</button>
+  </div>
+  <div class="hdr">
+    <div>
+      <h2>DhanLekha — ${escapeHTML(catName)} Report</h2>
+      <div class="meta">View: ${escapeHTML(currentView.toUpperCase())} | Total Records: ${records.length}</div>
     </div>
-  `;
+    <div class="meta" style="text-align:right;">
+      Income: <strong>${formatINR(inc)}</strong> &nbsp;|&nbsp; Expense: <strong>${formatINR(exp)}</strong>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Type</th>
+        <th>Source</th>
+        <th>Mode</th>
+        <th>${escapeHTML(catCfg.f1Label)}</th>
+        <th>${escapeHTML(catCfg.f2Label)}</th>
+        <th>Note</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>${rowsHtml}</tbody>
+  </table>
+  <script>
+    window.onload = function() {
+      setTimeout(function() {
+        window.print();
+      }, 150);
+    };
+  <\/script>
+</body>
+</html>`;
 
-  setTimeout(() => {
-    window.print();
-  }, 80);
+  const printWin = window.open("", "_blank", "width=960,height=680");
+  if (printWin && printWin.document) {
+    printWin.document.open();
+    printWin.document.write(htmlDoc);
+    printWin.document.close();
+  } else {
+    alert("Please allow pop-ups in your browser to open the PDF print preview.");
+  }
 }
 function renderYearlyTable(container, year) {
   const monthNames = [
