@@ -3052,8 +3052,6 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
       : document.getElementById("reportMonthPicker")?.value || today.slice(0, 7);
 
  const scopedEntries = (getAllAppRecordsForCharts()).filter((e) => e.date && e.date.startsWith(filterPrefix));
-(e) => e.date && e.date.startsWith(filterPrefix)
-);
 
   let scopedBudget = 0;
   if (reportPeriodMode === "yearly") {
