@@ -2975,6 +2975,33 @@ function switchReportPeriod(mode) {
   if (yPick) yPick.style.display = reportPeriodMode === "yearly" ? "block" : "none";
   refreshReportsOnly();
 }
+  function getAllAppRecordsForCharts() {
+  const all = [];
+  const seen = new Set();
+
+  const pushUnique = (item) => {
+    if (!item || typeof item !== "object") return;
+    const key = String(
+      item.id ||
+      `${item.date || ""}|${item.type || ""}|${item.amount || ""}|${item.category || ""}|${item.note || ""}|${item.source || ""}`
+    );
+    if (seen.has(key)) return;
+    seen.add(key);
+    all.push(item);
+  };
+
+  if (Array.isArray(appState.entries)) {
+    appState.entries.forEach(pushUnique);
+  }
+
+  if (appState.categoryBuckets && typeof appState.categoryBuckets === "object") {
+    Object.values(appState.categoryBuckets).forEach((bucket) => {
+      if (Array.isArray(bucket)) bucket.forEach(pushUnique);
+    });
+  }
+
+  return all;
+}
 
 function refreshReportsOnly() {
   syncReportPickers();
@@ -2984,19 +3011,20 @@ function refreshReportsOnly() {
 
   let repEntries = [];
   let repBudget = 0;
+  const allRecords = getAllAppRecordsForCharts();
 
   if (reportPeriodMode === "yearly") {
-    repEntries = (appState.entries || []).filter((e) => e.date && e.date.startsWith(selectedYear));
-    for (let i = 1; i <= 12; i++) {
-      const ym = `${selectedYear}-${String(i).padStart(2, "0")}`;
-      const mb = getMonthBudgetValue(ym);
-      if (mb !== null) repBudget += mb;
-    }
-  } else {
-    repEntries = (appState.entries || []).filter((e) => e.date && e.date.startsWith(selectedMonth));
-    const mb = getMonthBudgetValue(selectedMonth);
-    repBudget = mb !== null ? mb : 0;
+  repEntries = allRecords.filter((e) => e.date && e.date.startsWith(selectedYear));
+  for (let i = 1; i <= 12; i++) {
+    const ym = `${selectedYear}-${String(i).padStart(2, "0")}`;
+    const mb = getMonthBudgetValue(ym);
+    if (mb !== null) repBudget += mb;
   }
+} else {
+  repEntries = allRecords.filter((e) => e.date && e.date.startsWith(selectedMonth));
+  const mb = getMonthBudgetValue(selectedMonth);
+  repBudget = mb !== null ? mb : 0;
+}
 
   let repIncome = 0;
   let repExpense = 0;
@@ -3023,9 +3051,9 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
       ? document.getElementById("reportYearPicker")?.value || today.slice(0, 4)
       : document.getElementById("reportMonthPicker")?.value || today.slice(0, 7);
 
-  const scopedEntries = (appState.entries || []).filter(
-    (e) => e.date && e.date.startsWith(filterPrefix)
-  );
+ const scopedEntries = (getAllAppRecordsForCharts()).filter((e) => e.date && e.date.startsWith(filterPrefix));
+(e) => e.date && e.date.startsWith(filterPrefix)
+);
 
   let scopedBudget = 0;
   if (reportPeriodMode === "yearly") {
@@ -3112,7 +3140,7 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
     months.push({ ym, label, inc: 0, exp: 0 });
   }
 
-  (appState.entries || []).forEach((e) => {
+  ((getAllAppRecordsForCharts()).forEach((e) => {
     if (!e.date || e.date.length < 7) return;
     const prefix = e.date.slice(0, 7);
     const mObj = months.find((m) => m.ym === prefix);
