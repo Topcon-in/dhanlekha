@@ -2595,6 +2595,13 @@ function toggleSplitSettled(id) {
 }
 function deleteSplitEntry(id) {
   if (!Array.isArray(appState.splits)) return;
+  const target = appState.splits.find((s) => String(s.id) === String(id));
+  if (!target) return;
+  const label = `${target.person || "Split Entry"} (${formatINR(target.amount)} on ${target.date || ""})`;
+  const confirmed = window.confirm(
+    `Are you sure you want to delete "${label}"?\n\nClick OK to permanently remove this split record.`
+  );
+  if (!confirmed) return;
   appState.splits = appState.splits.filter((s) => String(s.id) !== String(id));
   saveState();
   renderSplitSection();
