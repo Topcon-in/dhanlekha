@@ -775,7 +775,6 @@ body {
         </div>
       </div>
       <div class="top-actions">
-        <button type="button" class="btn-secondary" onclick="openBudgetModal()">⚙️ Set Monthly Budget</button>
         <button type="button" class="btn-warning" onclick="exportBackupFile()">💾 Save Backup File</button>
         <button type="button" class="btn-secondary" onclick="document.getElementById('importFileInput').click()">📂 Restore Backup</button>
         <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importBackupFile(event)" />
@@ -1107,11 +1106,7 @@ body {
             <option value="£">£ GBP (Pound)</option>
           </select>
         </div>
-        <div>
-          <label>Monthly Budget</label>
-          <button type="button" class="btn-secondary" style="width:100%; padding:10px;" onclick="openBudgetModal()">🎯 Set Monthly Budget</button>
-        </div>
-      </div>
+        
     </section>
 
     <section class="form-box">
