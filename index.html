@@ -2359,6 +2359,25 @@ function selectHisaabCategory(encodedCat) {
   syncHisaabModeVisibility();
   renderApp();
 }
+  function setActiveCategoryBudget() {
+  if (!activeHisaabCategory || activeHisaabCategory === "all") return;
+  if (!appState.categoryBudgets || typeof appState.categoryBudgets !== "object") {
+    appState.categoryBudgets = {};
+  }
+  const currentVal = Object.prototype.hasOwnProperty.call(appState.categoryBudgets, activeHisaabCategory)
+    ? appState.categoryBudgets[activeHisaabCategory]
+    : (appState.monthlyBudget ?? 10000);
+  const input = window.prompt(`Set budget limit for "${activeHisaabCategory}":`, String(currentVal));
+  if (input === null || input.trim() === "") return;
+  const num = Number(input.trim());
+  if (!Number.isFinite(num) || num < 0) {
+    alert("Please enter a valid budget amount.");
+    return;
+  }
+  appState.categoryBudgets[activeHisaabCategory] = num;
+  saveState();
+  renderApp();
+}
 
 function applyPreferencesUI() {
   const prefs = getAppPrefs();
