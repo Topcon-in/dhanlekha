@@ -2079,10 +2079,27 @@ function syncHisaabModeVisibility() {
   const hubBox = document.getElementById("hisaabCategoryHubBox");
   const workspaceEl = document.getElementById("hisaabCategoryWorkspace");
   const hasCategory = Boolean(activeHisaabCategory);
+
   if (hubBox) hubBox.style.display = hasCategory ? "none" : "block";
   if (workspaceEl) workspaceEl.style.display = hasCategory ? "block" : "none";
-}
 
+  const hideInDailySelectors = [
+    ".cards-grid",
+    "#budgetAlertBox",
+    "#categoryBreakdownBox",
+    "#entryForm",
+    ".tabs-bar",
+    "#tableContainer"
+  ];
+
+  hideInDailySelectors.forEach((sel) => {
+    document.querySelectorAll(sel).forEach((el) => {
+      if (el.closest("#hisaabCategoryHubBox") || el.closest("#hisaabCategoryWorkspace")) return;
+      const targetBox = sel === "#entryForm" && el.closest(".form-box") ? el.closest(".form-box") : el;
+      targetBox.style.setProperty("display", hasCategory ? "" : "none", "important");
+    });
+  });
+}
 function getCategoryBucketKey(catName) {
   return "cat_" + String(catName || "General").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_");
 }
