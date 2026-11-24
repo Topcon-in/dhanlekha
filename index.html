@@ -3138,15 +3138,15 @@ function renderReportsSection(periodEntries, budgetDisplay, totalIncome, totalEx
     months.push({ ym, label, inc: 0, exp: 0 });
   }
 
-  ((getAllAppRecordsForCharts()).forEach((e) => {
-    if (!e.date || e.date.length < 7) return;
-    const prefix = e.date.slice(0, 7);
-    const mObj = months.find((m) => m.ym === prefix);
-    if (!mObj) return;
-    const amt = toSafeNumber(e.amount, 0);
-    if (e.type === "income") mObj.inc += amt;
-    else mObj.exp += amt;
-  });
+  (getAllAppRecordsForCharts()).forEach((e) => {
+  if (!e.date || e.date.length < 7) return;
+  const prefix = e.date.slice(0, 7);
+  const mObj = months.find((m) => m.ym === prefix);
+  if (!mObj) return;
+  const amt = toSafeNumber(e.amount, 0);
+  if (e.type === "income") mObj.inc += amt;
+  else mObj.exp += amt;
+});
 
   const peak = Math.max(...months.flatMap((m) => [m.inc, m.exp]), 1);
 
