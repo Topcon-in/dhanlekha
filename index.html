@@ -2665,24 +2665,37 @@ function updateBudgetAlert(budget, expense) {
   const alertBox = document.getElementById("budgetAlertBox");
   if (!alertBox) return;
 
-  if (currentView === "yearly" || !budget || budget <= 0) {
+  // Show budget alert only inside a selected category workspace, not in main Accounts view
+  if (!activeHisaabCategory || activeHisaabCategory === "all" || currentView === "yearly") {
     alertBox.style.display = "none";
     return;
   }
 
-  const pct = Math.round((expense / budget) * 100);
-  if (expense > budget) {
+  const catBudgetMap = (appState.categoryBudgets && typeof appState.categoryBudgets === "object")
+    ? appState.categoryBudgets
+    : {};
+  const categoryBudget = Object.prototype.hasOwnProperty.call(catBudgetMap, activeHisaabCategory)
+    ? toSafeNumber(catBudgetMap[activeHisaabCategory], 0)
+    : toSafeNumber(budget, 0);
+
+  if (!categoryBudget || categoryBudget <= 0) {
+    alertBox.style.display = "none";
+    return;
+  }
+
+  const pct = Math.round((expense / categoryBudget) * 100);
+  if (expense > categoryBudget) {
     alertBox.style.display = "block";
     alertBox.style.background = "rgba(239, 68, 68, 0.16)";
     alertBox.style.border = "1px solid rgba(239, 68, 68, 0.5)";
     alertBox.style.color = "#fca5a5";
-    alertBox.innerHTML = `<strong>Budget Exceeded (${pct}%):</strong> Your expenses (${formatINR(expense)}) have exceeded your monthly budget (${formatINR(budget)}) by ${formatINR(expense - budget)}.`;
+    alertBox.innerHTML = `<strong>${escapeHTML(activeHisaabCategory)} Budget Exceeded (${pct}%):</strong> Category expenses (${formatINR(expense)}) have exceeded the ${escapeHTML(activeHisaabCategory)} budget (${formatINR(categoryBudget)}) by ${formatINR(expense - categoryBudget)}.`;
   } else if (pct >= 80) {
     alertBox.style.display = "block";
     alertBox.style.background = "rgba(245, 158, 11, 0.16)";
     alertBox.style.border = "1px solid rgba(245, 158, 11, 0.5)";
     alertBox.style.color = "#fde68a";
-    alertBox.innerHTML = `<strong>Budget Warning (${pct}% Used):</strong> You have used ${pct}% of your monthly budget (${formatINR(budget)}). ${formatINR(budget - expense)} remaining.`;
+    alertBox.innerHTML = `<strong>${escapeHTML(activeHisaabCategory)} Budget Warning (${pct}% Used):</strong> You have used ${pct}% of the ${escapeHTML(activeHisaabCategory)} budget (${formatINR(categoryBudget)}). ${formatINR(categoryBudget - expense)} remaining.`;
   } else {
     alertBox.style.display = "none";
   }
