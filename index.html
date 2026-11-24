@@ -1276,6 +1276,14 @@ function getTodayISO() {
   return new Date(now - offset).toISOString().slice(0, 10);
 }
 
+  function getAppPrefs() {
+  const raw = appState && typeof appState.prefs === "object" && appState.prefs ? appState.prefs : {};
+  return {
+    theme: raw.theme === "light" ? "light" : "dark",
+    currency: raw.currency || "₹",
+    customCategories: Array.isArray(raw.customCategories) ? raw.customCategories : []
+  };
+}
 function formatINR(num) {
   const sym = getAppPrefs().currency || "₹";
   return sym + toSafeNumber(num, 0).toLocaleString("en-IN", { maximumFractionDigits: 2 });
