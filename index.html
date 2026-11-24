@@ -1988,6 +1988,22 @@ function syncHisaabModeVisibility() {
       targetBox.style.setProperty("display", hasCategory ? "" : "none", "important");
     });
   });
+  hideMonthlyBudgetAndLegacySections();
+}
+  function hideMonthlyBudgetAndLegacySections() {
+  const shouldHide = !activeHisaabCategory;
+  const targets = document.querySelectorAll(
+    ".cards-grid, #budgetAlertBox, #categoryBreakdownBox, #entryForm, .tabs-bar, #tableContainer"
+  );
+
+  targets.forEach((el) => {
+    if (el.closest("#hisaabCategoryHubBox") || el.closest("#hisaabCategoryWorkspace")) {
+      return;
+    }
+    const container =
+      el.id === "entryForm" && el.closest(".form-box") ? el.closest(".form-box") : el;
+    container.style.display = shouldHide ? "none" : "";
+  });
 }
 
 function getCategoryBucketKey(catName) {
