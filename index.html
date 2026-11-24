@@ -1119,6 +1119,14 @@ body {
         <label for="editEntryNote">Note (Optional)</label>
         <input type="text" id="editEntryNote" placeholder="Optional note" />
       </div>
+      <div id="editCatExtraField1Wrap" style="display:none;">
+            <label id="editCatExtraField1Label" for="editCatExtraField1">Extra Detail 1</label>
+            <input type="text" id="editCatExtraField1" placeholder="Optional" />
+          </div>
+          <div id="editCatExtraField2Wrap" style="display:none;">
+            <label id="editCatExtraField2Label" for="editCatExtraField2">Extra Detail 2</label>
+            <input type="text" id="editCatExtraField2" placeholder="Optional" />
+          </div>
       <div class="modal-actions" style="grid-column: 1 / -1;">
         <button type="button" class="btn-secondary" onclick="closeEditEntryModal()">Cancel</button>
         <button type="submit" class="btn-primary">Save Changes</button>
@@ -1644,14 +1652,56 @@ function openEditEntryModal(id) {
   const found = findEntryAcrossStore(id);
   const item = found ? found.item : null;
   if (!item) return;
+
+  const catName = item.category || "General";
+  const catCfg = HISAAB_CATEGORY_CONFIG?.[catName] || {
+    f1Label: `${catName} Detail 1`,
+    f1Placeholder: `Enter ${catName} detail`,
+    f2Label: `${catName} Detail 2`,
+    f2Placeholder: "Optional detail"
+  };
+
   document.getElementById("editEntryId").value = String(item.id);
   document.getElementById("editEntryType").value = item.type === "income" ? "income" : "expense";
-  document.getElementById("editEntryCategory").value = item.category || "General";
+
+  const editCatSel = document.getElementById("editEntryCategory");
+  if (editCatSel) {
+    if (!Array.from(editCatSel.options).some((o) => o.value === catName)) {
+      const opt = document.createElement("option");
+      opt.value = catName;
+      opt.textContent = catName;
+      editCatSel.appendChild(opt);
+    }
+    editCatSel.value = catName;
+  }
+
   document.getElementById("editEntryPaymentMode").value = item.paymentMode || "UPI";
   document.getElementById("editEntryAmount").value = toSafeNumber(item.amount, "");
   document.getElementById("editEntrySource").value = item.source && item.source !== "--------" ? item.source : "";
   document.getElementById("editEntryDate").value = item.date || getTodayISO();
   document.getElementById("editEntryNote").value = item.note && item.note !== "--------" ? item.note : "";
+
+  const f1Wrap = document.getElementById("editCatExtraField1Wrap");
+  const f2Wrap = document.getElementById("editCatExtraField2Wrap");
+  const f1Lbl = document.getElementById("editCatExtraField1Label");
+  const f2Lbl = document.getElementById("editCatExtraField2Label");
+  const f1Inp = document.getElementById("editCatExtraField1");
+  const f2Inp = document.getElementById("editCatExtraField2");
+
+  if (f1Wrap && f1Lbl && f1Inp) {
+    f1Wrap.style.display = "block";
+    f1Lbl.textContent = item.extra1Label || catCfg.f1Label;
+    f1Inp.placeholder = catCfg.f1Placeholder || "Optional";
+    f1Inp.value = item.extra1 && String(item.extra1).trim() !== "--------" ? String(item.extra1) : "";
+  }
+
+  if (f2Wrap && f2Lbl && f2Inp) {
+    f2Wrap.style.display = "block";
+    f2Lbl.textContent = item.extra2Label || catCfg.f2Label;
+    f2Inp.placeholder = catCfg.f2Placeholder || "Optional";
+    f2Inp.value = item.extra2 && String(item.extra2).trim() !== "--------" ? String(item.extra2) : "";
+  }
+
   const modal = document.getElementById("editEntryModal");
   if (modal) modal.classList.add("open");
 }
@@ -1671,14 +1721,37 @@ function saveEditedEntry(e) {
   const category = document.getElementById("editEntryCategory")?.value || "General";
   const rawSource = (document.getElementById("editEntrySource")?.value || "").trim();
   const rawNote = (document.getElementById("editEntryNote")?.value || "").trim();
+  const rawExtra1 = (document.getElementById("editCatExtraField1")?.value || "").trim();
+  const rawExtra2 = (document.getElementById("editCatExtraField2")?.value || "").trim();
 
   if (!Number.isFinite(amount) || amount <= 0 || !date || !paymentMode) return;
+
+  const catCfg = HISAAB_CATEGORY_CONFIG?.[category] || {
+    f1Label: `${category} Detail 1`,
+    f2Label: `${category} Detail 2`
+  };
+
   const type = rawType === "income" ? "income" : "expense";
   const source = rawSource || "--------";
   const note = rawNote || "--------";
+  const extra1 = rawExtra1 || "--------";
+  const extra2 = rawExtra2 || "--------";
 
-  const updated = updateEntryEverywhere(id, { type, amount, date, paymentMode, category, source, note });
+  const updated = updateEntryEverywhere(id, {
+    type,
+    amount,
+    date,
+    paymentMode,
+    category,
+    source,
+    note,
+    extra1Label: catCfg.f1Label,
+    extra1,
+    extra2Label: catCfg.f2Label,
+    extra2
+  });
   if (!updated) return;
+
   saveState();
   populateYears();
   closeEditEntryModal();
