@@ -1810,10 +1810,8 @@ function renderHisaabCategoryHub() {
   if (!grid || activeHisaabCategory) return;
 
   ensureCategoryBucketsStore();
-  const prefs = getAppPrefs();
-  const baseCats = Object.keys(HISAAB_CATEGORY_CONFIG || {});
-  const customCats = Array.isArray(prefs.customCategories) ? prefs.customCategories : [];
-  const cats = Array.from(new Set([...baseCats, ...customCats]));
+  const customList = Array.isArray(appState?.prefs?.customCategories) ? appState.prefs.customCategories : [];
+  const cats = Array.from(new Set([...Object.keys(HISAAB_CATEGORY_CONFIG), ...customList]));
   const q = (document.getElementById("categoryHubSearchInput")?.value || "").trim().toLowerCase();
   const filteredCats = cats.filter((c) => !q || c.toLowerCase().includes(q));
 
@@ -1824,8 +1822,8 @@ function renderHisaabCategoryHub() {
 
   grid.innerHTML = filteredCats.map((cat) => {
     const bucketKey = getCategoryBucketKey(cat);
-    const bucketCount = Array.isArray(appState.categoryBuckets?.[bucketKey]) ? appState.categoryBuckets[bucketKey].length : 0;
-    const mainCount = (Array.isArray(appState.entries) ? appState.entries : []).filter((e) => (e.category || "General") === cat).length;
+    const bucketCount = Array.isArray(appState?.categoryBuckets?.[bucketKey]) ? appState.categoryBuckets[bucketKey].length : 0;
+    const mainCount = (Array.isArray(appState?.entries) ? appState.entries : []).filter((e) => (e.category || "General") === cat).length;
     const totalCatRecords = bucketCount + mainCount;
 
     return `
