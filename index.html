@@ -2339,7 +2339,25 @@ function syncActiveCategoryHeaderLabel() {
     activeLbl.textContent = "";
   }
 }
+function resetCategoryIsolationState() {
+  const workspaceEl = document.getElementById("hisaabCategoryWorkspace");
+  const hubBox = document.getElementById("hisaabCategoryHubBox");
+  const activeLbl = document.getElementById("activeCategoryWorkspaceLabel");
+  const f1Wrap = document.getElementById("catExtraField1Wrap");
+  const f2Wrap = document.getElementById("catExtraField2Wrap");
+  const f1Inp = document.getElementById("catExtraField1");
+  const f2Inp = document.getElementById("catExtraField2");
+  const catFilterEl = document.getElementById("categoryFilterSelect");
 
+  if (workspaceEl) workspaceEl.style.display = "none";
+  if (hubBox) hubBox.style.display = "block";
+  if (activeLbl) activeLbl.textContent = "";
+  if (f1Wrap) f1Wrap.style.display = "none";
+  if (f2Wrap) f2Wrap.style.display = "none";
+  if (f1Inp) f1Inp.value = "";
+  if (f2Inp) f2Inp.value = "";
+  if (catFilterEl) catFilterEl.value = "all";
+}
 function selectHisaabCategory(encodedCat) {
   if (!encodedCat) {
     activeHisaabCategory = null;
@@ -2654,21 +2672,22 @@ function renderSplitSection() {
   const validSections = ["hisaab", "split", "reports", "settings"];
   const target = validSections.includes(sectionName) ? sectionName : "hisaab";
 
+  // Always clear active category context when switching top-level sections
+  activeHisaabCategory = null;
+  resetCategoryIsolationState();
+
   document.querySelectorAll(".dl-section").forEach((el) => {
     el.classList.remove("active-section");
   });
-
   const activeEl = document.getElementById("section-" + target);
   if (activeEl) {
     activeEl.classList.add("active-section");
   }
-
   document.querySelectorAll(".dl-nav-item").forEach((btn) => {
     btn.classList.toggle("active", btn.getAttribute("data-target") === target);
   });
 
   if (target === "hisaab") {
-    activeHisaabCategory = null;
     renderHisaabCategoryHub();
   } else if (target === "split") {
     if (typeof renderSplitSection === "function") renderSplitSection();
@@ -2678,7 +2697,6 @@ function renderSplitSection() {
     if (typeof applyPreferencesUI === "function") applyPreferencesUI();
     if (typeof updateLastBackupUI === "function") updateLastBackupUI();
   }
-
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
     function switchView(view) {
