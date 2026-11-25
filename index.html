@@ -1553,12 +1553,15 @@ function completeFirstSetup() {
   const rawInput = (inputEl ? inputEl.value : "").trim();
   const parsedAmt = Number(rawInput);
   if (!rawInput || !Number.isFinite(parsedAmt) || parsedAmt <= 0) {
-    window.alert("Pehle monthly budget amount daalo, uske baad category ke andar jaao.");
+    window.alert("Please enter a valid monthly budget amount (greater than 0) first before entering the category.");
     if (inputEl) inputEl.focus();
     return;
   }
   const targetCat = _pendingCategoryBudgetName;
   _pendingCategoryBudgetName = null;
+  if (!appState.categoryBudgets || typeof appState.categoryBudgets !== "object") {
+    appState.categoryBudgets = {};
+  }
   appState.categoryBudgets[targetCat] = parsedAmt;
   saveState();
   const setupModalEl = document.getElementById("setupModal");
@@ -1566,8 +1569,13 @@ function completeFirstSetup() {
     setupModalEl.classList.remove("open", "active", "show");
     setupModalEl.style.display = "none";
   }
-  if (typeof renderApp === "function") renderApp();
-  if (typeof updateBudgetAlert === "function") updateBudgetAlert();
+  activeHisaabCategory = targetCat;
+  if (typeof selectHisaabCategory === "function") {
+    selectHisaabCategory(encodeURIComponent(targetCat));
+  } else {
+    if (typeof renderApp === "function") renderApp();
+    if (typeof updateBudgetAlert === "function") updateBudgetAlert();
+  }
   return;
 }
   const inputEl = document.getElementById("initialBudgetInput");
