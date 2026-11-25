@@ -3592,9 +3592,9 @@ function downloadCategoryReportPdf() {
     };
   <\/script>
 </body>
-</html>
+</html>`;
 
-const printWin = window.open("", "_blank", "width=960,height=680");
+  const printWin = window.open("", "_blank", "width=960,height=680");
   if (printWin && printWin.document) {
     printWin.document.open();
     printWin.document.write(htmlDoc);
@@ -3603,6 +3603,7 @@ const printWin = window.open("", "_blank", "width=960,height=680");
     alert("Please allow pop-ups in your browser to open the PDF print preview.");
   }
 }
+
 function renderYearlyTable(container, year) {
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
