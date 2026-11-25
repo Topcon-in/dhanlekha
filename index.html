@@ -1078,17 +1078,20 @@ body {
   <!-- SECTION 4: SETTINGS (Preferences, Categories, Backup & Info) -->
   <div id="section-settings" class="dl-section">
     <section class="form-box" id="appLockSettingsBox">
-  <h2>App Lock (Password / Code)</h2>
-  <p id="appLockStatusText" style="font-size:13px; color:var(--muted); margin-bottom:10px;">Status: Unlocked (No passcode set)</p>
-  <div class="form-grid">
+  <h2 style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <span>🔒 App Lock (Password / Code)</span>
+    <span style="font-size:10px; background:rgba(245,158,11,0.2); color:#fbbf24; padding:2px 8px; border-radius:999px; border:1px dashed rgba(245,158,11,0.5);">PRO</span>
+  </h2>
+  <p id="appLockStatusText" style="font-size:13px; color:var(--muted); margin-bottom:10px;">Status: Locked for Pro (Available in upcoming Premium version)</p>
+  <div class="form-grid" style="opacity:0.82;">
     <div style="grid-column: span 2;">
       <label for="appLockPasscodeInput">Password Code (4+ digits/characters)</label>
-      <input type="password" id="appLockPasscodeInput" placeholder="Enter PIN or password" autocomplete="new-password" />
+      <input type="password" id="appLockPasscodeInput" placeholder="Pro feature — locked" autocomplete="new-password" disabled />
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button type="button" class="btn-primary" id="saveAppLockBtn" onclick="saveAppLockCode()">Save Lock</button>
-      <button type="button" class="btn-secondary" id="changeAppLockBtn" onclick="changeAppLockCode()" style="display:none;">Change Password</button>
-      <button type="button" class="btn-danger" id="disableAppLockBtn" onclick="disableAppLockCode()" style="display:none;">Delete Password</button>
+      <button type="button" class="btn-secondary" id="saveAppLockBtn" onclick="saveAppLockCode()" style="border-style:dashed;">🔒 Save Lock <span style="font-size:10px; background:rgba(245,158,11,0.2); color:#fbbf24; padding:1px 6px; border-radius:999px; margin-left:4px;">PRO</span></button>
+      <button type="button" class="btn-secondary" id="changeAppLockBtn" onclick="changeAppLockCode()" style="border-style:dashed;">🔒 Change Password <span style="font-size:10px; background:rgba(245,158,11,0.2); color:#fbbf24; padding:1px 6px; border-radius:999px; margin-left:4px;">PRO</span></button>
+      <button type="button" class="btn-secondary" id="disableAppLockBtn" onclick="disableAppLockCode()" style="border-style:dashed;">🔒 Delete Password <span style="font-size:10px; background:rgba(245,158,11,0.2); color:#fbbf24; padding:1px 6px; border-radius:999px; margin-left:4px;">PRO</span></button>
     </div>
   </div>
 </section>
@@ -4746,6 +4749,11 @@ window.shareSplitReportPdf = async function () {
 
 <script>
 const APP_LOCK_STORAGE_KEY = "dhanlekha_app_lock_v1";
+const DHANLEKHA_APP_LOCK_PREMIUM_UNLOCKED = false;
+
+function showAppLockProAlert() {
+  alert("App Lock (Save / Change / Delete Password) is a DhanLekha Pro feature and is currently locked. It will be available in the upcoming Premium version.");
+}
 
 function hashLockCode(code) {
   let hash = 2166136261;
@@ -4757,6 +4765,9 @@ function hashLockCode(code) {
 }
 
 function getAppLockConfig() {
+  if (!DHANLEKHA_APP_LOCK_PREMIUM_UNLOCKED) {
+    return { enabled: false, hash: "" };
+  }
   try {
     const raw = localStorage.getItem(APP_LOCK_STORAGE_KEY);
     if (!raw) return { enabled: false, hash: "" };
@@ -4769,11 +4780,27 @@ function getAppLockConfig() {
 
 function updateAppLockSettingsUI() {
   const statusEl = document.getElementById("appLockStatusText");
+  const inputEl = document.getElementById("appLockPasscodeInput");
   const saveBtn = document.getElementById("saveAppLockBtn");
   const changeBtn = document.getElementById("changeAppLockBtn");
   const deleteBtn = document.getElementById("disableAppLockBtn");
-  const cfg = getAppLockConfig();
 
+  if (!DHANLEKHA_APP_LOCK_PREMIUM_UNLOCKED) {
+    if (statusEl) {
+      statusEl.textContent = "Status: Locked for Pro (Available in upcoming Premium version)";
+    }
+    if (inputEl) {
+      inputEl.disabled = true;
+      inputEl.value = "";
+    }
+    if (saveBtn) saveBtn.style.display = "inline-flex";
+    if (changeBtn) changeBtn.style.display = "inline-flex";
+    if (deleteBtn) deleteBtn.style.display = "inline-flex";
+    return;
+  }
+
+  if (inputEl) inputEl.disabled = false;
+  const cfg = getAppLockConfig();
   if (statusEl) {
     statusEl.textContent = cfg.enabled
       ? "Status: Lock Enabled (Password required when opening app)"
@@ -4785,6 +4812,10 @@ function updateAppLockSettingsUI() {
 }
 
 function saveAppLockCode() {
+  if (!DHANLEKHA_APP_LOCK_PREMIUM_UNLOCKED) {
+    showAppLockProAlert();
+    return;
+  }
   const input = document.getElementById("appLockPasscodeInput");
   const code = (input?.value || "").trim();
   if (code.length < 4) {
@@ -4801,6 +4832,10 @@ function saveAppLockCode() {
 }
 
 function changeAppLockCode() {
+  if (!DHANLEKHA_APP_LOCK_PREMIUM_UNLOCKED) {
+    showAppLockProAlert();
+    return;
+  }
   const cfg = getAppLockConfig();
   if (!cfg.enabled) {
     saveAppLockCode();
@@ -4835,6 +4870,10 @@ function changeAppLockCode() {
 }
 
 function disableAppLockCode() {
+  if (!DHANLEKHA_APP_LOCK_PREMIUM_UNLOCKED) {
+    showAppLockProAlert();
+    return;
+  }
   const cfg = getAppLockConfig();
   if (!cfg.enabled) return;
   const currentCode = window.prompt("Enter your current password code to delete App Lock:");
@@ -4852,8 +4891,15 @@ function disableAppLockCode() {
 
 function enforceAppLockOnStartup() {
   updateAppLockSettingsUI();
-  const cfg = getAppLockConfig();
   const lockEl = document.getElementById("appLockScreen");
+  if (!DHANLEKHA_APP_LOCK_PREMIUM_UNLOCKED) {
+    if (lockEl) {
+      lockEl.classList.remove("open");
+      lockEl.style.display = "none";
+    }
+    return;
+  }
+  const cfg = getAppLockConfig();
   if (!lockEl) return;
   if (cfg.enabled) {
     lockEl.classList.add("open");
