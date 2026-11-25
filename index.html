@@ -3622,8 +3622,8 @@ function renderYearlyTable(container, year) {
     const setBudget = getMonthBudgetValue(prefix);
     const budgetCell = setBudget !== null ? formatINR(setBudget) : "-------";
     const net = (setBudget !== null ? setBudget : 0) + inc - exp;
-    return `
-      <tr>
+    return 
+    <tr>
         <td><strong>${name} ${escapeHTML(year)}</strong></td>
         <td>${mEntries.length} entries</td>
         <td>${budgetCell}</td>
