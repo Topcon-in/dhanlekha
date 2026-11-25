@@ -3608,29 +3608,32 @@ function renderYearlyTable(container, year) {
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
+
   const rows = monthNames.map((name, idx) => {
     const mNum = String(idx + 1).padStart(2, "0");
     const prefix = `${year}-${mNum}`;
     const mEntries = appState.entries.filter((e) => e.date && e.date.startsWith(prefix));
     let inc = 0;
     let exp = 0;
+
     mEntries.forEach((e) => {
       const amt = toSafeNumber(e.amount, 0);
       if (e.type === "income") inc += amt;
       else exp += amt;
     });
+
     const setBudget = getMonthBudgetValue(prefix);
     const budgetCell = setBudget !== null ? formatINR(setBudget) : "-------";
     const net = (setBudget !== null ? setBudget : 0) + inc - exp;
+
     return `<tr>
-        <td><strong>${name} ${escapeHTML(year)}</strong></td>
-        <td>${mEntries.length} entries</td>
-        <td>${budgetCell}</td>
-        <td style="color:#34d399; font-weight:600;">${formatINR(inc)}</td>
-        <td style="color:#f87171; font-weight:600;">${formatINR(exp)}</td>
-        <td style="color:#fbbf24; font-weight:700;">${formatINR(net)}</td>
-      </tr>
-    `;
+      <td><strong>${name} ${escapeHTML(year)}</strong></td>
+      <td>${mEntries.length} entries</td>
+      <td>${budgetCell}</td>
+      <td style="color:#34d399; font-weight:600;">${formatINR(inc)}</td>
+      <td style="color:#f87171; font-weight:600;">${formatINR(exp)}</td>
+      <td style="color:#fbbf24; font-weight:700;">${formatINR(net)}</td>
+    </tr>`;
   }).join("");
 
   container.innerHTML = `
