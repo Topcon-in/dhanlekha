@@ -1087,7 +1087,7 @@ body {
     <span>App Lock (Password / Code)</span>
     <span style="font-size:10px; background:rgba(245,158,11,0.2); color:#fbbf24; padding:2px 8px; border-radius:999px; border:1px dashed rgba(245,158,11,0.5);">PRO</span>
   </h2>
-  <p id="appLockStatusText" style="font-size:13px; color:var(--muted); margin-bottom:10px;">Status: Locked for Pro (Available in upcoming Premium version)</p>
+  <p id="appLockStatusText" style="font-size:13px; color:var(--muted); margin-bottom:10px;">Status: Pro Feature</p>
   <div class="form-grid" style="opacity:0.82;">
     <div style="grid-column: span 2;">
       <label for="appLockPasscodeInput">Password Code (4+ digits/characters)</label>
@@ -4797,7 +4797,7 @@ function updateAppLockSettingsUI() {
 
   if (!DHANLEKHA_APP_LOCK_PREMIUM_UNLOCKED) {
     if (statusEl) {
-      statusEl.textContent = "Status: Locked for Pro (Available in upcoming Premium version)";
+      statusEl.textContent = "Status: Pro Feature";
     }
     if (inputEl) {
       inputEl.disabled = true;
@@ -4808,6 +4808,18 @@ function updateAppLockSettingsUI() {
     if (deleteBtn) deleteBtn.style.display = "inline-flex";
     return;
   }
+
+  if (inputEl) inputEl.disabled = false;
+  const cfg = getAppLockConfig();
+  if (statusEl) {
+    statusEl.textContent = cfg.enabled
+      ? "Status: Lock Enabled (Password required when opening app)"
+      : "Status: Unlocked (No passcode set)";
+  }
+  if (saveBtn) saveBtn.style.display = cfg.enabled ? "none" : "inline-flex";
+  if (changeBtn) changeBtn.style.display = cfg.enabled ? "inline-flex" : "none";
+  if (deleteBtn) deleteBtn.style.display = cfg.enabled ? "inline-flex" : "none";
+}
 
   if (inputEl) inputEl.disabled = false;
   const cfg = getAppLockConfig();
