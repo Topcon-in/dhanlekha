@@ -1082,12 +1082,13 @@ body {
   <p id="appLockStatusText" style="font-size:13px; color:var(--muted); margin-bottom:10px;">Status: Unlocked (No passcode set)</p>
   <div class="form-grid">
     <div style="grid-column: span 2;">
-      <label for="appLockPasscodeInput">Set / Change Password Code</label>
-      <input type="password" id="appLockPasscodeInput" placeholder="Enter 4+ digit PIN or password" autocomplete="new-password" />
+      <label for="appLockPasscodeInput">Password Code (4+ digits/characters)</label>
+      <input type="password" id="appLockPasscodeInput" placeholder="Enter PIN or password" autocomplete="new-password" />
     </div>
     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-      <button type="button" class="btn-primary" onclick="saveAppLockCode()">Save Lock</button>
-      <button type="button" class="btn-secondary" id="disableAppLockBtn" onclick="disableAppLockCode()">Remove Lock</button>
+      <button type="button" class="btn-primary" id="saveAppLockBtn" onclick="saveAppLockCode()">Save Lock</button>
+      <button type="button" class="btn-secondary" id="changeAppLockBtn" onclick="changeAppLockCode()" style="display:none;">Change Password</button>
+      <button type="button" class="btn-danger" id="disableAppLockBtn" onclick="disableAppLockCode()" style="display:none;">Delete Password</button>
     </div>
   </div>
 </section>
@@ -4768,16 +4769,19 @@ function getAppLockConfig() {
 
 function updateAppLockSettingsUI() {
   const statusEl = document.getElementById("appLockStatusText");
-  const removeBtn = document.getElementById("disableAppLockBtn");
+  const saveBtn = document.getElementById("saveAppLockBtn");
+  const changeBtn = document.getElementById("changeAppLockBtn");
+  const deleteBtn = document.getElementById("disableAppLockBtn");
   const cfg = getAppLockConfig();
+
   if (statusEl) {
     statusEl.textContent = cfg.enabled
       ? "Status: Lock Enabled (Password required when opening app)"
       : "Status: Unlocked (No passcode set)";
   }
-  if (removeBtn) {
-    removeBtn.style.display = cfg.enabled ? "inline-flex" : "none";
-  }
+  if (saveBtn) saveBtn.style.display = cfg.enabled ? "none" : "inline-flex";
+  if (changeBtn) changeBtn.style.display = cfg.enabled ? "inline-flex" : "none";
+  if (deleteBtn) deleteBtn.style.display = cfg.enabled ? "inline-flex" : "none";
 }
 
 function saveAppLockCode() {
@@ -4793,21 +4797,57 @@ function saveAppLockCode() {
   }));
   if (input) input.value = "";
   updateAppLockSettingsUI();
-  alert("App Lock saved successfully.");
+  alert("App Lock password saved successfully.");
+}
+
+function changeAppLockCode() {
+  const cfg = getAppLockConfig();
+  if (!cfg.enabled) {
+    saveAppLockCode();
+    return;
+  }
+  const oldCode = window.prompt("Enter your CURRENT password code to change it:");
+  if (oldCode === null) return;
+  if (hashLockCode(oldCode.trim()) !== cfg.hash) {
+    alert("Current password code is incorrect.");
+    return;
+  }
+
+  const input = document.getElementById("appLockPasscodeInput");
+  let newCode = (input?.value || "").trim();
+  if (newCode.length < 4) {
+    const promptedNew = window.prompt("Enter your NEW password code (at least 4 characters):");
+    if (promptedNew === null) return;
+    newCode = promptedNew.trim();
+  }
+  if (newCode.length < 4) {
+    alert("New password must be at least 4 characters.");
+    return;
+  }
+
+  localStorage.setItem(APP_LOCK_STORAGE_KEY, JSON.stringify({
+    enabled: true,
+    hash: hashLockCode(newCode)
+  }));
+  if (input) input.value = "";
+  updateAppLockSettingsUI();
+  alert("Password changed successfully.");
 }
 
 function disableAppLockCode() {
   const cfg = getAppLockConfig();
   if (!cfg.enabled) return;
-  const currentCode = window.prompt("Enter your current password code to remove App Lock:");
+  const currentCode = window.prompt("Enter your current password code to delete App Lock:");
   if (currentCode === null) return;
   if (hashLockCode(currentCode.trim()) !== cfg.hash) {
     alert("Incorrect password code.");
     return;
   }
   localStorage.removeItem(APP_LOCK_STORAGE_KEY);
+  const input = document.getElementById("appLockPasscodeInput");
+  if (input) input.value = "";
   updateAppLockSettingsUI();
-  alert("App Lock removed.");
+  alert("Password deleted and App Lock removed.");
 }
 
 function enforceAppLockOnStartup() {
