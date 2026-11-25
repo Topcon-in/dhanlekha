@@ -2203,14 +2203,13 @@ function renderHisaabCategoryHub() {
   }).join("");
 }
 
-  let tenCategoriesOpen = false;
-
+let tenCategoriesOpen = false;
 function toggleTenCategoriesDrawer() {
   tenCategoriesOpen = !tenCategoriesOpen;
   const drawer = document.getElementById("tenCategoriesDrawer");
   const btn = document.getElementById("toggleTenCategoriesBtn");
   if (drawer) drawer.style.display = tenCategoriesOpen ? "block" : "none";
-  if (btn) btn.textContent = tenCategoriesOpen ? "✖ Close 10 Categories" : "🏷️ 10 Categories";
+  if (btn) btn.textContent = "Categories";
   if (tenCategoriesOpen) renderHisaabCategoryHub();
 }
 
