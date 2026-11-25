@@ -1578,22 +1578,21 @@ function addEntry(e) {
   const amount = Number(document.getElementById("entryAmount")?.value);
   const date = (document.getElementById("entryDate")?.value || "").trim();
   const paymentMode = (document.getElementById("entryPaymentMode")?.value || "").trim();
-
   if (!date || !paymentMode || !Number.isFinite(amount) || amount <= 0) {
     alert("Please enter valid Date, Payment Mode, and Amount.");
     return;
   }
 
-  const activeCat = (activeHisaabCategory && activeHisaabCategory !== "all") ? activeHisaabCategory : null;
-  const category = activeCat || (document.getElementById("entryCategory")?.value || "General");
+  const activeWorkspace = (activeHisaabCategory && activeHisaabCategory !== "all") ? activeHisaabCategory : null;
+  const selectedCategory = (document.getElementById("entryCategory")?.value || "General").trim() || "General";
+
   const rawSource = (document.getElementById("entrySource")?.value || "").trim();
   const rawNote = (document.getElementById("entryNote")?.value || "").trim();
   const f1Val = (document.getElementById("catExtraField1")?.value || "").trim();
   const f2Val = (document.getElementById("catExtraField2")?.value || "").trim();
-
-  const cfg = HISAAB_CATEGORY_CONFIG?.[category] || {
-    f1Label: `${category} Detail 1`,
-    f2Label: `${category} Detail 2`
+  const cfg = HISAAB_CATEGORY_CONFIG?.[activeWorkspace || selectedCategory] || {
+    f1Label: `${activeWorkspace || selectedCategory} Detail 1`,
+    f2Label: `${activeWorkspace || selectedCategory} Detail 2`
   };
 
   const type = rawType === "income" ? "income" : "expense";
@@ -1608,7 +1607,8 @@ function addEntry(e) {
     type,
     amount,
     source,
-    category,
+    category: selectedCategory,
+    workspaceCategory: activeWorkspace || "Daily",
     paymentMode,
     date,
     time: currentTime,
@@ -1620,12 +1620,12 @@ function addEntry(e) {
   };
 
   ensureCategoryBucketsStore();
-  if (activeCat) {
-    const bucketKey = getCategoryBucketKey(activeCat);
+  if (activeWorkspace) {
+    const bucketKey = getCategoryBucketKey(activeWorkspace);
     appState.categoryBuckets[bucketKey].unshift(newRecord);
   } else {
     appState.entries.unshift(newRecord);
-    const bucketKey = getCategoryBucketKey(category);
+    const bucketKey = getCategoryBucketKey(selectedCategory);
     appState.categoryBuckets[bucketKey].unshift({ ...newRecord });
   }
 
@@ -2062,9 +2062,6 @@ function syncCategorySpecificFormUI(cat) {
     return;
   }
 
-  if (catSel && Array.from(catSel.options).some((o) => o.value === cat)) {
-    catSel.value = cat;
-  }
 
   const cfg = HISAAB_CATEGORY_CONFIG[cat] || {
     f1Label: `${cat} Detail 1`,
