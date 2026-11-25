@@ -2844,20 +2844,111 @@ function updateBudgetAlert(budget, expense) {
   }
 }
 
+function getCategoryScopedRecords(baseEntries = []) {
+  const activeCat = (activeHisaabCategory && activeHisaabCategory !== "all") ? String(activeHisaabCategory) : null;
+  if (!activeCat) {
+    return Array.isArray(baseEntries) ? baseEntries : [];
+  }
+
+  ensureCategoryBucketsStore();
+  const bucketKey = getCategoryBucketKey(activeCat);
+  const bucketItems = Array.isArray(appState.categoryBuckets?.[bucketKey]) ? appState.categoryBuckets[bucketKey] : [];
+  const mainMatches = (Array.isArray(appState.entries) ? appState.entries : []).filter(
+    (item) => (item.workspaceCategory === activeCat) || ((item.category || "General") === activeCat)
+  );
+
+  const seen = new Set();
+  const combined = [];
+  [...bucketItems, ...mainMatches].forEach((item, idx) => {
+    const uid = String(item?.id ?? `${activeCat}_${idx}_${item?.date || ""}_${item?.amount || 0}`);
+    if (!seen.has(uid)) {
+      seen.add(uid);
+      combined.push(item);
+    }
+  });
+  return combined;
+}
+
+function openCategoryDistributionPopup(categoryName) {
+  const activeCat = (activeHisaabCategory && activeHisaabCategory !== "all") ? String(activeHisaabCategory) : "All";
+  const scopedRecords = getCategoryScopedRecords(appState.entries || []);
+  const matchingRecords = scopedRecords.filter(
+    (item) => item.type === "expense" && (item.category || "General") === categoryName
+  );
+
+  const titleEl = document.getElementById("infoModalTitle");
+  const bodyEl = document.getElementById("infoModalBody");
+  if (!titleEl || !bodyEl) return;
+
+  const totalAmt = matchingRecords.reduce((sum, r) => sum + toSafeNumber(r.amount, 0), 0);
+  titleEl.textContent = `${activeCat} — ${categoryName} Records (${matchingRecords.length})`;
+
+  if (!matchingRecords.length) {
+    bodyEl.innerHTML = `<p>No saved expense records found for <strong>${escapeHTML(categoryName)}</strong> in <strong>${escapeHTML(activeCat)}</strong>.</p>`;
+  } else {
+    const rowsHtml = matchingRecords.map((rec) => {
+      const f1Text = rec.extra1 && String(rec.extra1).trim() !== "--------"
+        ? `<div><strong>${escapeHTML(rec.extra1Label || "Detail 1")}:</strong> ${escapeHTML(rec.extra1)}</div>`
+        : "";
+      const f2Text = rec.extra2 && String(rec.extra2).trim() !== "--------"
+        ? `<div><strong>${escapeHTML(rec.extra2Label || "Detail 2")}:</strong> ${escapeHTML(rec.extra2)}</div>`
+        : "";
+      const noteText = rec.note && String(rec.note).trim() !== "--------"
+        ? `<div><strong>Note:</strong> ${escapeHTML(rec.note)}</div>`
+        : "";
+      const srcText = rec.source && String(rec.source).trim() !== "--------"
+        ? `<div><strong>Source:</strong> ${escapeHTML(rec.source)}</div>`
+        : "";
+
+      return `
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:4px;">
+            <strong>${escapeHTML(rec.date || "")} ${rec.time ? "• " + escapeHTML(rec.time) : ""}</strong>
+            <span style="color:#f87171; font-weight:700;">-${formatINR(rec.amount)}</span>
+          </div>
+          <div style="font-size:12.5px; color:var(--muted); margin-bottom:4px;">Mode: ${escapeHTML(rec.paymentMode || "Cash")}</div>
+          ${srcText}
+          ${f1Text}
+          ${f2Text}
+          ${noteText}
+        </div>
+      `;
+    }).join("");
+
+    bodyEl.innerHTML = `
+      <p style="margin-bottom:10px;">Total <strong>${escapeHTML(categoryName)}</strong> Expense in <strong>${escapeHTML(activeCat)}</strong>: <strong style="color:#f87171;">${formatINR(totalAmt)}</strong></p>
+      <div style="max-height:55vh; overflow-y:auto;">${rowsHtml}</div>
+    `;
+  }
+
+  const modalEl = document.getElementById("infoModal");
+  if (modalEl) modalEl.classList.add("open");
+}
+
 function renderCategoryBreakdown(entries) {
   const box = document.getElementById("categoryBreakdownBox");
   const listEl = document.getElementById("categoryBreakdownList");
   if (!box || !listEl) return;
 
-  const expenses = entries.filter((item) => item.type === "expense");
-  if (expenses.length === 0 || currentView === "yearly") {
+  const activeCat = (activeHisaabCategory && activeHisaabCategory !== "all") ? String(activeHisaabCategory) : null;
+  if (!activeCat || currentView === "yearly") {
     box.style.display = "none";
+    listEl.innerHTML = "";
+    return;
+  }
+
+  const scopedEntries = getCategoryScopedRecords(entries);
+  const expenses = scopedEntries.filter((item) => item.type === "expense");
+  if (expenses.length === 0) {
+    box.style.display = "none";
+    listEl.innerHTML = "";
     return;
   }
 
   const totalExp = expenses.reduce((sum, item) => sum + toSafeNumber(item.amount, 0), 0);
   if (totalExp <= 0) {
     box.style.display = "none";
+    listEl.innerHTML = "";
     return;
   }
 
@@ -2870,8 +2961,9 @@ function renderCategoryBreakdown(entries) {
   const sortedCats = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
   listEl.innerHTML = sortedCats.map(([cat, amt]) => {
     const pct = ((amt / totalExp) * 100).toFixed(1);
+    const safeCat = encodeURIComponent(cat);
     return `
-      <div style="background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 12px;">
+      <div onclick="openCategoryDistributionPopup(decodeURIComponent('${safeCat}'))" style="cursor:pointer; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 12px;">
         <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:5px;">
           <strong>${escapeHTML(cat)}</strong>
           <span style="color:#f87171; font-weight:700;">${formatINR(amt)} (${pct}%)</span>
@@ -2882,7 +2974,6 @@ function renderCategoryBreakdown(entries) {
       </div>
     `;
   }).join("");
-
   box.style.display = "block";
 }
   function renderApp() {
