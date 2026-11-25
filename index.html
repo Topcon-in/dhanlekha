@@ -3381,6 +3381,105 @@ if (statusEl) {
   });
 }
 
+  function getCategoryPeriodFilteredEntries(catName) {
+  const today = getTodayISO();
+  const selectedMonth = document.getElementById("monthPicker")?.value || today.slice(0, 7);
+  const selectedYear = document.getElementById("yearPicker")?.value || today.slice(0, 4);
+
+  ensureCategoryBucketsStore();
+  const bucketKey = getCategoryBucketKey(catName);
+  const bucketItems = Array.isArray(appState.categoryBuckets?.[bucketKey]) ? appState.categoryBuckets[bucketKey] : [];
+  const mainMatches = (Array.isArray(appState.entries) ? appState.entries : []).filter(
+    (e) => (e.category || "General") === catName
+  );
+
+  const seen = new Set();
+  const combined = [...bucketItems, ...mainMatches].filter((item) => {
+    const key = item.id || `${item.date}|${item.amount}|${item.type || ""}|${item.note || ""}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  if (currentView === "today") {
+    return {
+      entries: combined.filter((e) => e.date === today),
+      periodLabel: `Today (${today})`
+    };
+  }
+  if (currentView === "yearly") {
+    return {
+      entries: combined.filter((e) => e.date && e.date.startsWith(selectedYear)),
+      periodLabel: `Yearly (${selectedYear})`
+    };
+  }
+  return {
+    entries: combined.filter((e) => e.date && e.date.startsWith(selectedMonth)),
+    periodLabel: `Monthly (${selectedMonth})`
+  };
+}
+
+function downloadCategoryReportPdf() {
+  const catName = (activeHisaabCategory && activeHisaabCategory !== "all") ? activeHisaabCategory : "All Categories";
+  const { entries, periodLabel } = getCategoryPeriodFilteredEntries(catName);
+
+  let incomeTotal = 0;
+  let expenseTotal = 0;
+  entries.forEach((item) => {
+    const amt = toSafeNumber(item.amount, 0);
+    if (item.type === "income") incomeTotal += amt;
+    else expenseTotal += amt;
+  });
+  const netTotal = incomeTotal - expenseTotal;
+
+  let printArea = document.getElementById("pdfPrintArea");
+  if (!printArea) {
+    printArea = document.createElement("div");
+    printArea.id = "pdfPrintArea";
+    document.body.appendChild(printArea);
+  }
+
+  const rowsHtml = entries.length
+    ? entries.map((item) => {
+        const isInc = item.type === "income";
+        return `
+          <tr>
+            <td>${escapeHTML(item.date || "--------")}</td>
+            <td>${isInc ? "Income" : "Expense"}</td>
+            <td>${escapeHTML((item.source && item.source !== "--------" ? item.source : item.note) || "--------")}</td>
+            <td>${escapeHTML(item.paymentMode || "--------")}</td>
+            <td>${isInc ? "+" : "-"}${formatINR(item.amount)}</td>
+          </tr>
+        `;
+      }).join("")
+    : `<tr><td colspan="5" style="text-align:center; padding:16px;">No records found for ${escapeHTML(catName)} (${escapeHTML(periodLabel)}).</td></tr>`;
+
+  printArea.innerHTML = `
+    <div style="padding:16px; font-family:system-ui,sans-serif; color:#000; background:#fff;">
+      <h2 style="margin-bottom:4px;">DhanLekha — ${escapeHTML(catName)} Report</h2>
+      <p style="margin-bottom:12px; font-size:13px;">Period: <strong>${escapeHTML(periodLabel)}</strong> | Records: <strong>${entries.length}</strong></p>
+      <p style="margin-bottom:14px; font-size:13px;">
+        Income: <strong>${formatINR(incomeTotal)}</strong> &nbsp;|&nbsp;
+        Expense: <strong>${formatINR(expenseTotal)}</strong> &nbsp;|&nbsp;
+        Net: <strong>${formatINR(netTotal)}</strong>
+      </p>
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="border:1px solid #ccc; padding:8px; text-align:left;">Date</th>
+            <th style="border:1px solid #ccc; padding:8px; text-align:left;">Type</th>
+            <th style="border:1px solid #ccc; padding:8px; text-align:left;">Details</th>
+            <th style="border:1px solid #ccc; padding:8px; text-align:left;">Mode</th>
+            <th style="border:1px solid #ccc; padding:8px; text-align:left;">Amount</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>
+  `;
+
+  window.print();
+}
 function downloadCategoryReportPdf() {
   const catName = activeHisaabCategory && activeHisaabCategory !== "all" ? activeHisaabCategory : "All Categories";
   const records = getActiveCategoryFilteredRecords();
