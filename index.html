@@ -1398,8 +1398,22 @@ function loadState() {
   }
 }
 
+function isSafePlainRecord(item) {
+  return Boolean(item && typeof item === "object" && !Array.isArray(item));
+}
+
+function sanitizeStateBeforeSave(rawState) {
+  const safeObj = isSafePlainRecord(rawState) ? { ...rawState } : {};
+  if (!Array.isArray(safeObj.entries)) safeObj.entries = [];
+  if (!Array.isArray(safeObj.splits)) safeObj.splits = [];
+  if (!isSafePlainRecord(safeObj.categoryBuckets)) safeObj.categoryBuckets = {};
+  if (!isSafePlainRecord(safeObj.monthlyBudgets)) safeObj.monthlyBudgets = {};
+  return safeObj;
+}
+
 function saveState() {
   try {
+    appState = sanitizeStateBeforeSave(appState);
     const serialized = JSON.stringify(appState);
     localStorage.setItem(STORAGE_KEY, serialized);
     if (hasAnySavedRecords(appState)) {
@@ -1409,7 +1423,6 @@ function saveState() {
     console.error("Storage write error:", e);
   }
 }
-
 function getTodayISO() {
   const now = new Date();
   const offset = now.getTimezoneOffset() * 60000;
