@@ -2629,18 +2629,68 @@ function deleteSplitEntry(id) {
     btn.classList.toggle("active", !isOpen);
   }
 }
+
+function resetActiveCategoryRecords(catName) {
+  const targetCat = String(catName || "").trim();
+  if (!targetCat) return;
+
+  ensureCategoryBucketsStore();
+  const bucketKey = getCategoryBucketKey(targetCat);
+  if (appState.categoryBuckets && Object.prototype.hasOwnProperty.call(appState.categoryBuckets, bucketKey)) {
+    appState.categoryBuckets[bucketKey] = [];
+  }
+
+  if (Array.isArray(appState.entries)) {
+    appState.entries = appState.entries.filter((entry) => {
+      if (!entry || typeof entry !== "object") return true;
+      const matchesWorkspace = entry.workspaceCategory === targetCat;
+      const matchesCategory = (entry.category || "General") === targetCat && (!entry.workspaceCategory || entry.workspaceCategory === targetCat);
+      return !(matchesWorkspace || matchesCategory);
+    });
+  }
+
+  if (appState.categoryBudgets && typeof appState.categoryBudgets === "object" && Object.prototype.hasOwnProperty.call(appState.categoryBudgets, targetCat)) {
+    delete appState.categoryBudgets[targetCat];
+  }
+
+  saveState();
+  populateYears();
+  renderApp();
+  renderHisaabCategoryHub();
+}
+
 function resetAccountsFilters() {
+  const activeCat = (activeHisaabCategory && activeHisaabCategory !== "all") ? String(activeHisaabCategory) : null;
+
+  if (activeCat) {
+    const confirmed = window.confirm(
+      `Are you sure you want to reset and delete all saved records in "${activeCat}"?\n\nOnly "${activeCat}" records will be deleted. Other categories will remain safe.`
+    );
+    if (!confirmed) return;
+
+    const searchEl = document.getElementById("searchEntryInput");
+    const typeEl = document.getElementById("typeFilterSelect");
+    const catEl = document.getElementById("categoryFilterSelect");
+    const monthEl = document.getElementById("monthPicker");
+    if (searchEl) searchEl.value = "";
+    if (typeEl) typeEl.value = "all";
+    if (catEl) catEl.value = activeCat;
+    if (monthEl) monthEl.value = getTodayISO().slice(0, 7);
+
+    resetActiveCategoryRecords(activeCat);
+    return;
+  }
+
   const searchEl = document.getElementById("searchEntryInput");
   const typeEl = document.getElementById("typeFilterSelect");
   const catEl = document.getElementById("categoryFilterSelect");
   const monthEl = document.getElementById("monthPicker");
   if (searchEl) searchEl.value = "";
   if (typeEl) typeEl.value = "all";
-  if (catEl) catEl.value = activeHisaabCategory || "all";
+  if (catEl) catEl.value = "all";
   if (monthEl) monthEl.value = getTodayISO().slice(0, 7);
   switchView("today");
 }
-
 function resetSplitFilters() {
   const searchEl = document.getElementById("splitSearchInput");
   const statusEl = document.getElementById("splitStatusFilter");
