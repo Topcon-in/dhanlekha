@@ -1548,6 +1548,28 @@ function initApp() {
 }
 
 function completeFirstSetup() {
+  if (_pendingCategoryBudgetName) {
+  const inputEl = document.getElementById("initialBudgetInput");
+  const rawInput = (inputEl ? inputEl.value : "").trim();
+  const parsedAmt = Number(rawInput);
+  if (!rawInput || !Number.isFinite(parsedAmt) || parsedAmt <= 0) {
+    window.alert("Pehle monthly budget amount daalo, uske baad category ke andar jaao.");
+    if (inputEl) inputEl.focus();
+    return;
+  }
+  const targetCat = _pendingCategoryBudgetName;
+  _pendingCategoryBudgetName = null;
+  appState.categoryBudgets[targetCat] = parsedAmt;
+  saveState();
+  const setupModalEl = document.getElementById("setupModal");
+  if (setupModalEl) {
+    setupModalEl.classList.remove("open", "active", "show");
+    setupModalEl.style.display = "none";
+  }
+  if (typeof renderApp === "function") renderApp();
+  if (typeof updateBudgetAlert === "function") updateBudgetAlert();
+  return;
+}
   const inputEl = document.getElementById("initialBudgetInput");
   const activeYM =
     (document.getElementById("monthPicker") && document.getElementById("monthPicker").value) ||
@@ -2121,10 +2143,26 @@ const TEN_CATEGORY_BOXES = [
   "Investments"
 ];
 
+let _pendingCategoryBudgetName = null;
+
+function exitCategoryOnBudgetCancel() {
+  _pendingCategoryBudgetName = null;
+  activeHisaabCategory = null;
+  const setupModalEl = document.getElementById("setupModal");
+  if (setupModalEl) {
+    setupModalEl.classList.remove("open", "active", "show");
+    setupModalEl.style.display = "none";
+  }
+  syncActiveCategoryHeaderLabel();
+  syncCategorySpecificFormUI(null);
+  resetCategoryIsolationState();
+  renderHisaabCategoryHub();
+}
+
 function ensureCategoryMonthlyBudgetFlow(catName) {
-  if (!catName) return;
-  if (!appState.categoryMonthlyBudgets || typeof appState.categoryMonthlyBudgets !== "object") {
-    appState.categoryMonthlyBudgets = {};
+  if (!catName) return false;
+  if (!appState.categoryBudgets || typeof appState.categoryBudgets !== "object") {
+    appState.categoryBudgets = {};
   }
 
   const alertEl = document.getElementById("budgetAlertBox");
@@ -2133,26 +2171,50 @@ function ensureCategoryMonthlyBudgetFlow(catName) {
     alertEl.textContent = "";
   }
 
-  const existingBudget = appState.categoryMonthlyBudgets[catName];
-  if (typeof existingBudget !== "number" || Number.isNaN(existingBudget) || existingBudget <= 0) {
-    if (typeof openCategoryBudgetSetupModal === "function") {
-      openCategoryBudgetSetupModal(catName);
-    } else if (typeof openBudgetModal === "function") {
-      openBudgetModal(catName);
-    } else {
-      const inputVal = prompt(
-        `${catName} — Monthly Budget & Terms/Guide Safety:\n` +
-        `1) Apna data aapke device/backup mein safe rakhein.\n` +
-        `2) Is category ka monthly budget (INR) enter karein:`,
+  const hasCatBudget =
+    Object.prototype.hasOwnProperty.call(appState.categoryBudgets, catName) &&
+    typeof appState.categoryBudgets[catName] === "number" &&
+    Number.isFinite(appState.categoryBudgets[catName]) &&
+    appState.categoryBudgets[catName] > 0;
+
+  if (hasCatBudget) return true;
+
+  _pendingCategoryBudgetName = catName;
+  const modal = document.getElementById("setupModal");
+  const input = document.getElementById("initialBudgetInput");
+
+  if (input) {
+    input.value = "";
+    input.placeholder = `Enter monthly budget for ${catName}`;
+  }
+
+  if (modal) {
+    modal.classList.remove("open");
+    modal.style.display = "";
+    void modal.offsetWidth;
+    modal.classList.add("open");
+    modal.style.display = "flex";
+  } else {
+    while (true) {
+      const rawVal = window.prompt(
+        `Please enter monthly budget for "${catName}" first (Terms & Safety Guide: keep your backup file safe):`,
         ""
       );
-      const parsed = Number(inputVal);
-      if (parsed > 0) {
-        appState.categoryMonthlyBudgets[catName] = parsed;
-        saveState();
+      if (rawVal === null) {
+        exitCategoryOnBudgetCancel();
+        return false;
       }
+      const num = Number(rawVal.trim());
+      if (Number.isFinite(num) && num > 0) {
+        appState.categoryBudgets[catName] = num;
+        _pendingCategoryBudgetName = null;
+        saveState();
+        return true;
+      }
+      window.alert("Pehle valid monthly budget amount daalo (0 se zyada), uske baad category ke andar jaao.");
     }
   }
+  return false;
 }
 function syncHisaabModeVisibility() {
   const hubBox = document.getElementById("hisaabCategoryHubBox");
@@ -2435,12 +2497,12 @@ function selectHisaabCategory(encodedCat) {
   }
 
   const cat = decodeURIComponent(encodedCat);
-  activeHisaabCategory = cat;
-  ensureCategoryMonthlyBudgetFlow(cat);
+ activeHisaabCategory = cat;
+const ready = ensureCategoryMonthlyBudgetFlow(cat);
+if (!ready) return;
 if (typeof updateBudgetAlert === "function") {
   updateBudgetAlert();
 }
-
   // Ensure filters do not hide records saved in this category
   const catFilterEl = document.getElementById("categoryFilterSelect");
   if (catFilterEl) catFilterEl.value = "all";
